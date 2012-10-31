@@ -32,7 +32,7 @@ public class GameSettings {
     }
 
     public static final int MAX_CREATE_WAIT = 0;
-    public static final int MAX_BANKS = 0;
+    public static final int MAX_BANKS = 50;
     public static final int MAX_GENERATION = 0;
     public static final int BOARD_SIZE = 0;
     public static final int MAX_AGE = 0;

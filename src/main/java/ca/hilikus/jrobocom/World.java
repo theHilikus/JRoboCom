@@ -17,7 +17,7 @@ import com.google.common.collect.HashBiMap;
  * @author hilikus
  * 
  */
-public final class World {
+public class World {
 
     private BiMap<Robot, Point> robotsPosition = HashBiMap.create();
 
@@ -44,6 +44,11 @@ public final class World {
 	clock.addListener(child);
     }
 
+    /**
+     * Adds the first robot to the world
+     * 
+     * @param eve the first robot of the player
+     */
     public void addFirst(Robot eve) {
 	Random generator = new Random();
 
@@ -149,16 +154,18 @@ public final class World {
     public ScanResult scan(Robot robot, int dist) {
 	Point space = getReferenceField(robot, dist);
 	Robot inPosition = robotsPosition.inverse().get(space);
+	ScanResult ret = null;
 	if (inPosition == null) {
-	    return new ScanResult(Found.EMPTY, dist);
+	    ret = new ScanResult(Found.EMPTY, dist);
 	} else {
 	    if (robot.getTeamId() == inPosition.getTeamId()) {
-		return new ScanResult(Found.FRIEND, dist);
+		ret = new ScanResult(Found.FRIEND, dist);
 	    } else {
-		return new ScanResult(Found.ENEMY, dist);
+		ret = new ScanResult(Found.ENEMY, dist);
 	    }
 	}
 
+	return ret;
     }
 
     /**

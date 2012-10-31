@@ -64,7 +64,6 @@ public class RobotTest {
 
 	// check generation and serial #?
 	verify(mockWorld).validateTeamId(anyInt());
-	verify(mockWorld).addFirst(TU);
 
 	assertTrue(TU.isMobile(), "First robot should be mobile");
 	assertEquals(TU.getBanksCount(), GameSettings.MAX_BANKS,
