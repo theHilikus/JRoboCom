@@ -22,14 +22,13 @@ public final class Robot {
 
     private int activeState = 0;
 
-    private TurnManager turns;
+    private TurnManager turnsControl;
 
     private InstructionSet set;
 
     private Direction facing;
 
     private Bank[] banks;
-
 
     private long creationTimestamp = System.currentTimeMillis();
 
@@ -105,7 +104,7 @@ public final class Robot {
 	 * 
 	 */
 	public void changeBank(int newBank) {
-	    turns.waitTurns(Timing.BANK_CHANGE);
+	    turnsControl.waitTurns(Timing.BANK_CHANGE);
 
 	    Robot.this.changeBank(newBank);
 
@@ -132,7 +131,7 @@ public final class Robot {
 	    }
 
 	    int totalWait = Math.min(turnsForBanks + turnsForSet, GameSettings.MAX_CREATE_WAIT);
-	    turns.waitTurns(totalWait);
+	    turnsControl.waitTurns(totalWait);
 
 	    if (set != InstructionSet.SUPER) {
 		Robot.this.die("Robot cannot create other robots");
@@ -183,10 +182,10 @@ public final class Robot {
 	 */
 	public int getActiveState(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 		return Robot.this.getActiveState();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().getActiveState();
@@ -221,10 +220,10 @@ public final class Robot {
 	public int getBanksCount(boolean local) {
 	    if (local) {
 
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 		return Robot.this.getBanksCount();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().getBanksCount();
@@ -241,11 +240,11 @@ public final class Robot {
 
 	public InstructionSet getInstructionSet(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 
 		return Robot.this.getInstructionSet();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().getInstructionSet();
@@ -261,10 +260,10 @@ public final class Robot {
 
 	public int getTeamId(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 		return Robot.this.getTeamId();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().getTeamId();
@@ -280,10 +279,10 @@ public final class Robot {
 
 	public boolean isEnabled(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 		return activeState > 0;
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().isEnabled();
@@ -299,11 +298,11 @@ public final class Robot {
 
 	public boolean isMobile(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 
 		return Robot.this.isMobile();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().isMobile();
@@ -319,11 +318,11 @@ public final class Robot {
 
 	public int getAge(boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_READ);
+		turnsControl.waitTurns(Timing.LOCAL_READ);
 
 		return Robot.this.getAge();
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    return neighbour.getControl().getAge();
@@ -332,22 +331,22 @@ public final class Robot {
 		}
 	    }
 	}
-	
+
 	public int getMyBotsCount() {
-	    turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    
+	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+
 	    return world.getBotsCount(Robot.this.getTeamId(), false);
 	}
-	
+
 	public int getOtherBotsCount() {
-	    turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    
+	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+
 	    return world.getBotsCount(Robot.this.getTeamId(), true);
 	}
-	
+
 	public int getWorldAge() {
-	    turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    
+	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+
 	    return world.getAge();
 	}
 
@@ -355,12 +354,12 @@ public final class Robot {
 	 * @return the number of ancestors
 	 */
 	public int getGeneration() {
-	    turns.waitTurns(Timing.LOCAL_READ);
+	    turnsControl.waitTurns(Timing.LOCAL_READ);
 	    return Robot.this.getGeneration();
 	}
 
 	public void move() {
-	    turns.waitTurns(Timing.MOVE);
+	    turnsControl.waitTurns(Timing.MOVE);
 	    if (!isMobile()) {
 		die();
 	    }
@@ -370,14 +369,14 @@ public final class Robot {
 	}
 
 	public void reverseTransfer(int localBankIndex, int remoteBankIndex) {
-	    turns.waitTurns(Timing.TRANSFER_BASE);
+	    turnsControl.waitTurns(Timing.TRANSFER_BASE);
 	    if (set.isLessThan(InstructionSet.ADVANCED)) {
 		die();
 	    }
 	    Robot neighbour = world.getNeighbour(Robot.this);
 	    if (neighbour != null) {
 		Bank remoteBank = neighbour.getControl().getBank(remoteBankIndex);
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_SINGLE
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_SINGLE
 			* remoteBank.getCost());
 		setBank(remoteBank, localBankIndex);
 	    }
@@ -388,7 +387,7 @@ public final class Robot {
 	}
 
 	public ScanResult scan(int maxDist) {
-	    turns.waitTurns(Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1));
+	    turnsControl.waitTurns(Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1));
 	    if (maxDist < 1) {
 		throw new IllegalArgumentException("Scan argument has to be positive");
 	    }
@@ -422,10 +421,10 @@ public final class Robot {
 
 	public void setEnabled(int pActiveState, boolean local) {
 	    if (local) {
-		turns.waitTurns(Timing.LOCAL_WRITE);
+		turnsControl.waitTurns(Timing.LOCAL_WRITE);
 		activeState = pActiveState;
 	    } else {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		Robot neighbour = world.getNeighbour(Robot.this);
 		if (neighbour != null) {
 		    neighbour.getControl().setEnabled(pActiveState);
@@ -435,21 +434,21 @@ public final class Robot {
 
 	public void transfer(int localBankIndex, int remoteBankIndex) {
 
-	    turns.waitTurns(Timing.TRANSFER_BASE + Timing.TRANSFER_SINGLE
+	    turnsControl.waitTurns(Timing.TRANSFER_BASE + Timing.TRANSFER_SINGLE
 		    * banks[localBankIndex].getCost());
 	    if (set.isLessThan(InstructionSet.ADVANCED)) {
 		die();
 	    }
 	    Robot neighbour = world.getNeighbour(Robot.this);
 	    if (neighbour != null) {
-		turns.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+		turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 		neighbour.getControl().setBank(banks[localBankIndex], remoteBankIndex);
 
 	    }
 	}
 
 	public void turn(boolean right) {
-	    turns.waitTurns(Timing.TURN);
+	    turnsControl.waitTurns(Timing.TURN);
 	    if (right) {
 		facing = facing.right();
 	    } else {
@@ -484,7 +483,7 @@ public final class Robot {
 
 	world = parent.world;
 	teamId = parent.teamId;
-	turns = parent.turns;
+	turnsControl = parent.turnsControl;
 	generation = parent.generation + 1; // TODO: check what to do if max generation reached
 	serialNumber = Robot.getNextSerialNumber();
     }
@@ -503,24 +502,24 @@ public final class Robot {
 	if (theWorld == null || allBanks == null) {
 	    throw new IllegalArgumentException("Arguments can't be null");
 	}
-	
+
 	world = theWorld;
 	set = InstructionSet.SUPER;
 	generation = 0;
 	serialNumber = 0;
+	mobile = true;
 
 	Random generator = new Random();
 	do {
 	    teamId = generator.nextInt();
 	} while (!world.validateTeamId(teamId));
-	
+
 	banks = new Bank[GameSettings.MAX_BANKS];
-	
-	for (int pos = 0; pos < allBanks.length; ) {
+
+	for (int pos = 0; pos < allBanks.length; pos++) {
 	    banks[pos] = allBanks[pos];
 	}
-	
-	banks = allBanks;
+
     }
 
     /**
@@ -587,7 +586,7 @@ public final class Robot {
     }
 
     private TurnManager getTurns() {
-	return turns;
+	return turnsControl;
     }
 
     private World getWorld() {
@@ -597,27 +596,27 @@ public final class Robot {
     public boolean isMobile() {
 	return mobile;
     }
-    
+
     public int getAge() {
-	return (int) Math.round(turns.getTurnsCount() / 1000.0);
+	return (int) Math.round(turnsControl.getTurnsCount() / 1000.0);
     }
-    
+
     public int getSerialNumber() {
 	return serialNumber;
     }
-    
+
     public int getGeneration() {
 	return generation;
     }
-    
+
     public InstructionSet getInstructionSet() {
 	return set;
     }
-    
+
     public int getActiveState() {
 	return activeState;
     }
-    
+
     public int getBanksCount() {
 	if (banks == null) {
 	    return 0;
