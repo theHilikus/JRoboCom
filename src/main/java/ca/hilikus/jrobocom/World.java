@@ -7,6 +7,7 @@ import java.util.Set;
 
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
+import ca.hilikus.jrobocom.timing.MasterClock;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -41,7 +42,7 @@ public class World {
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
 	robotsPosition.put(child, newPosition);
-	clock.addListener(child);
+	clock.addListener(child.getSerialNumber());
     }
 
     /**
@@ -64,7 +65,7 @@ public class World {
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
 	robotsPosition.put(eve, newPosition);
-	clock.addListener(eve);
+	clock.addListener(eve.getSerialNumber());
     }
 
     /**
@@ -76,7 +77,9 @@ public class World {
 	}
 
 	robotsPosition.remove(robot);
-	clock.removeListener(robot);
+	clock.removeListener(robot.getSerialNumber());
+
+	// TODO: check if winner
     }
 
     /**
@@ -183,6 +186,13 @@ public class World {
 	}
     }
 
+    /**
+     * Get the total number of living robots from or not from a team
+     * 
+     * @param teamId the team to search for
+     * @param invert if true, find robots NOT in teamId
+     * @return number of robots in the specified group
+     */
     public int getBotsCount(int teamId, boolean invert) {
 	int total = 0;
 	for (Robot bot : robotsPosition.keySet()) {
@@ -204,8 +214,14 @@ public class World {
      * @return the age of the world in cycles / 1000
      */
     public int getAge() {
-	// TODO Auto-generated method stub
-	return 0;
+	return (int) (clock.getCycles() / 1000);
+    }
+
+    /**
+     * @return the master clock
+     */
+    public MasterClock getClock() {
+	return clock;
     }
 
 }
