@@ -1,6 +1,8 @@
 package ca.hilikus.jrobocom.player;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.ScanResult;
@@ -8,7 +10,7 @@ import ca.hilikus.jrobocom.player.ScanResult;
 
 public class PlayerOperationsTests extends Bank {
 
-	private Logger log = Logger.getLogger(PlayerOperationsTests.class);
+	private Logger log = LoggerFactory.getLogger(PlayerOperationsTests.class);
 	
 	@Override
 	public void run() {

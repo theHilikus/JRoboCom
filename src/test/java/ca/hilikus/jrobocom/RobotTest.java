@@ -1,12 +1,19 @@
 package ca.hilikus.jrobocom;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import org.testng.annotations.BeforeSuite;
+import java.lang.reflect.Method;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.Robot.InstructionSet;
@@ -20,8 +27,17 @@ import ca.hilikus.jrobocom.player.Bank;
  */
 public class RobotTest {
 
-    @BeforeSuite
-    public void setupAll() {
+    private static final Logger log = LoggerFactory.getLogger(RobotTest.class);
+    
+        
+    /**
+     * Initializes each test
+     * 
+     * @param met test about to be called
+     */
+    @BeforeMethod
+    public void setUp(Method met) {
+	log.info("\n====== Starting " + met.getName() + " ======");
 
     }
 
@@ -90,8 +106,8 @@ public class RobotTest {
     public void testReboot() {
 	World mockWorld = mock(World.class);
 	Bank[] dummyBanks = new Bank[3];
-	
-	//TODO: complete, but possible??
+
+	// TODO: complete, but possible??
     }
 
     /**

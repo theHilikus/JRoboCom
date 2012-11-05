@@ -2,11 +2,13 @@ package ca.hilikus.jrobocom;
 
 import java.util.Random;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.GameSettings.Timing;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.ScanResult;
+import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
  * Keeps the state of each robot in the board
@@ -14,7 +16,7 @@ import ca.hilikus.jrobocom.player.ScanResult;
  * @author hilikus
  * 
  */
-public final class Robot {
+public final class Robot implements Comparable<Robot> {
 
     private static int lastSerial = 0;
 
@@ -44,7 +46,7 @@ public final class Robot {
 
     private final RobotControl control = new RobotControl();
 
-    private Logger log = Logger.getLogger(Robot.class);
+    private Logger log = LoggerFactory.getLogger(Robot.class);
 
     /**
      * The four directions in a squared grid
@@ -79,7 +81,20 @@ public final class Robot {
      * 
      */
     public enum InstructionSet {
-	BASIC, ADVANCED, SUPER;
+	/**
+	 * The first level of instructions:<br>
+	 * {@link RobotControl#changeBank(int)}, {@link RobotControl#die(String)},
+	 * {@link RobotControl#move()}, {@link RobotControl#turn(boolean)}
+	 */
+	BASIC, /**
+	 * The first + second level of instructions:<br>
+	 * BASIC + {@link RobotControl#scan(int)}, {@link RobotControl#reverseTransfer(int, int)}
+	 */
+	ADVANCED, /**
+	 * The complete set of instructions:<br>
+	 * BASIC + ADVANCED + {@link RobotControl#createRobot(InstructionSet, int, boolean)}
+	 */
+	SUPER;
 
 	/**
 	 * @param other the Set to compare this with
@@ -174,6 +189,7 @@ public final class Robot {
 	    return getActiveState(true);
 	}
 
+	// TODO: move all gets to an "information" class since they don't control
 	/**
 	 * Gets the activation state of the current or adjacent robot
 	 * 
@@ -483,7 +499,8 @@ public final class Robot {
 
 	world = parent.world;
 	teamId = parent.teamId;
-	turnsControl = parent.turnsControl;
+	turnsControl = new TurnManager(world.getClock());
+
 	generation = parent.generation + 1; // TODO: check what to do if max generation reached
 	serialNumber = Robot.getNextSerialNumber();
     }
@@ -508,6 +525,7 @@ public final class Robot {
 	generation = 0;
 	serialNumber = 0;
 	mobile = true;
+	turnsControl = new TurnManager(world.getClock());
 
 	Random generator = new Random();
 	do {
@@ -635,5 +653,52 @@ public final class Robot {
         private void setWorld(World world) {
     	this.world = world;
         }*/
+
+    /**
+     * Controls waiting of I/O
+     * 
+     * @author hilikus
+     * 
+     */
+    public class TurnManager {
+
+	private int turnsCounter = 0;
+
+	private MasterClock clock;
+
+	/**
+	 * @param pClock master clock used to schedule tasks
+	 */
+	public TurnManager(MasterClock pClock) {
+	    clock = pClock;
+	}
+
+	/**
+	 * Blocks the robot
+	 * 
+	 * @param turns the number of turns to block
+	 */
+	public void waitTurns(int turns) {
+	    if (turnsCounter > GameSettings.MAX_AGE) {
+		die("Old Age");
+	    } else {
+		clock.waitFor(Robot.this.getSerialNumber(), turns);
+		turnsCounter += turns;
+	    }
+	}
+
+	/**
+	 * @return the number of turns so far
+	 */
+	public int getTurnsCount() {
+	    return turnsCounter;
+	}
+    }
+
+    @Override
+    public int compareTo(Robot o) {
+	// TODO Auto-generated method stub
+	return 0;
+    }
 
 }
