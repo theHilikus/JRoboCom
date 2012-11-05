@@ -6,7 +6,6 @@ import static org.testng.Assert.assertTrue;
 import java.lang.Thread.State;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
