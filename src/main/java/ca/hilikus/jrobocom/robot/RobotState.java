@@ -1,9 +1,9 @@
-package ca.hilikus.jrobocom.robots;
+package ca.hilikus.jrobocom.robot;
 
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.robots.Robot.TurnManager;
-import ca.hilikus.jrobocom.robots.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.robot.Robot.TurnManager;
+import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 
 /**
  * The robot's current data

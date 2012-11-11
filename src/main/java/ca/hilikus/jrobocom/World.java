@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
-import ca.hilikus.jrobocom.robots.Robot;
+import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 import com.google.common.collect.BiMap;
@@ -58,7 +58,7 @@ public class World {
     }
 
     /**
-     * Adds the first robot to the world
+     * Adds the first robot of a team
      * 
      * @param eve the first robot of the player
      */
@@ -73,7 +73,7 @@ public class World {
 	} while (isOccupied(newPosition));
 
 	if (robotsPosition.containsKey(eve)) {
-	    // child already exists
+	    // robot already exists
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
 	robotsPosition.put(eve, newPosition);

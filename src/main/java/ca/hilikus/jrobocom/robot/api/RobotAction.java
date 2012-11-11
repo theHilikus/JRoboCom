@@ -1,8 +1,8 @@
-package ca.hilikus.jrobocom.robots.api;
+package ca.hilikus.jrobocom.robot.api;
 
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
-import ca.hilikus.jrobocom.robots.Robot;
+import ca.hilikus.jrobocom.robot.Robot;
 
 /**
  * Interface for controlling active actions in a robot

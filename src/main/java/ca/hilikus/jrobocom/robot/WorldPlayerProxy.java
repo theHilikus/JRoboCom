@@ -1,9 +1,9 @@
-package ca.hilikus.jrobocom.robots;
+package ca.hilikus.jrobocom.robot;
 
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.GameSettings.Timing;
-import ca.hilikus.jrobocom.robots.Robot.TurnManager;
+import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 
 /**
  * Interface used from Banks. Maps one-to-one with robots on one end; on the other end it can change

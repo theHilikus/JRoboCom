@@ -1,6 +1,6 @@
 package ca.hilikus.jrobocom.player;
 
-import ca.hilikus.jrobocom.robots.api.RobotAction;
+import ca.hilikus.jrobocom.robot.api.RobotAction;
 
 /**
  * The maximum group of operations supported by robots. Every set contains all the previous sets

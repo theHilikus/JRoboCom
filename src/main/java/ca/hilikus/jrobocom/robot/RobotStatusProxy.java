@@ -1,11 +1,11 @@
-package ca.hilikus.jrobocom.robots;
+package ca.hilikus.jrobocom.robot;
 
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.GameSettings.Timing;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.robots.Robot.TurnManager;
-import ca.hilikus.jrobocom.robots.api.RobotStatus;
+import ca.hilikus.jrobocom.robot.Robot.TurnManager;
+import ca.hilikus.jrobocom.robot.api.RobotStatus;
 
 /**
  * Interface used from Banks. Maps one-to-one with robots on one end; on the other end it can change banks

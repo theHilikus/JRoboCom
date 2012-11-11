@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom;
+package ca.hilikus.jrobocom.robot;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.atLeast;
@@ -20,10 +20,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.robots.Robot;
-import ca.hilikus.jrobocom.robots.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.robot.Robot;
+import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.MasterClock;
 import ch.qos.logback.classic.Level;
 

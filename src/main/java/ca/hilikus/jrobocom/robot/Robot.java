@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.robots;
+package ca.hilikus.jrobocom.robot;
 
 import java.util.Random;
 
@@ -11,9 +11,9 @@ import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
-import ca.hilikus.jrobocom.robots.api.RobotAction;
-import ca.hilikus.jrobocom.robots.api.RobotStatus;
-import ca.hilikus.jrobocom.robots.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.robot.api.RobotAction;
+import ca.hilikus.jrobocom.robot.api.RobotStatus;
+import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**

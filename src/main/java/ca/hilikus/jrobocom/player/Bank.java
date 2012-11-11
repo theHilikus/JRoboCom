@@ -1,8 +1,8 @@
 package ca.hilikus.jrobocom.player;
 
 import ca.hilikus.jrobocom.WorldInfo;
-import ca.hilikus.jrobocom.robots.api.RobotAction;
-import ca.hilikus.jrobocom.robots.api.RobotStatus;
+import ca.hilikus.jrobocom.robot.api.RobotAction;
+import ca.hilikus.jrobocom.robot.api.RobotStatus;
 
 /**
  * The class that each player needs to extend to control their robots
