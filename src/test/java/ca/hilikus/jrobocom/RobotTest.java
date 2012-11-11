@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.robots.Robot;
+import ca.hilikus.jrobocom.robots.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.MasterClock;
 import ch.qos.logback.classic.Level;
 
@@ -117,7 +118,9 @@ public class RobotTest {
     @Test(expectedExceptions = IllegalArgumentException.class, dependsOnGroups = { "init.*" })
     public void testInvalidCreation() {
 	Robot mockParent = mock(Robot.class);
-	when(mockParent.getState().getInstructionSet()).thenReturn(InstructionSet.ADVANCED);
+	RobotStatusLocal mockStatus = mock(RobotStatusLocal.class);
+	when(mockStatus.getInstructionSet()).thenReturn(InstructionSet.ADVANCED);
+	when(mockParent.getState()).thenReturn(mockStatus);
 
 	@SuppressWarnings("unused")
 	Robot TU = new Robot(InstructionSet.BASIC, 3, true, mockParent);
