@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author hilikus
  * 
  */
-public final class MasterClock {
+public class MasterClock {
 
     private long cycles;
 

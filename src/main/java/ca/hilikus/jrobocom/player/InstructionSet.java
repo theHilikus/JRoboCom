@@ -1,6 +1,6 @@
 package ca.hilikus.jrobocom.player;
 
-import ca.hilikus.jrobocom.Robot.RobotControl;
+import ca.hilikus.jrobocom.robots.api.RobotAction;
 
 /**
  * The maximum group of operations supported by robots. Every set contains all the previous sets
@@ -9,16 +9,16 @@ import ca.hilikus.jrobocom.Robot.RobotControl;
 public enum InstructionSet {
     /**
      * The first level of instructions:<br>
-     * {@link RobotControl#changeBank(int)}, {@link RobotControl#die(String)},
-     * {@link RobotControl#move()}, {@link RobotControl#turn(boolean)}
+     * {@link RobotAction#changeBank(int)}, {@link RobotAction#die(String)},
+     * {@link RobotAction#move()}, {@link RobotAction#turn(boolean)}
      */
     BASIC, /**
      * The first + second level of instructions:<br>
-     * BASIC + {@link RobotControl#scan(int)}, {@link RobotControl#reverseTransfer(int, int)}
+     * BASIC + {@link RobotAction#scan(int)}, {@link RobotAction#reverseTransfer(int, int)}
      */
     ADVANCED, /**
      * The complete set of instructions:<br>
-     * BASIC + ADVANCED + {@link RobotControl#createRobot(InstructionSet, int, boolean)}
+     * BASIC + ADVANCED + {@link RobotAction#createRobot(InstructionSet, int, boolean)}
      */
     SUPER;
 
@@ -27,7 +27,7 @@ public enum InstructionSet {
      * @return true if this is simpler than other
      */
     public boolean isLessThan(InstructionSet other) {
-        return ordinal() < other.ordinal();
+	return ordinal() < other.ordinal();
 
     }
 }

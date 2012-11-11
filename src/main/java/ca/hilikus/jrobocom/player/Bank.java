@@ -16,7 +16,7 @@ public abstract class Bank {
     protected RobotAction control;
 
     /**
-     * interface to information about the state of the robot
+     * interface for information about the state of the robot
      */
     protected RobotStatus info;
 
