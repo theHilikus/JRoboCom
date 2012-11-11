@@ -42,6 +42,11 @@
 			<artifactId>mockito-all</artifactId>
 			<version>1.9.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>4.1</version>
+		</dependency>
 	</dependencies>
 	<description>A Java reimplementation of the programming game RoboCom http://robocom.rrobek.de/</description>
 </project>
