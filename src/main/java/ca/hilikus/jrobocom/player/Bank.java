@@ -1,6 +1,8 @@
 package ca.hilikus.jrobocom.player;
 
-import ca.hilikus.jrobocom.Robot.RobotControl;
+import ca.hilikus.jrobocom.WorldInfo;
+import ca.hilikus.jrobocom.robots.api.RobotAction;
+import ca.hilikus.jrobocom.robots.api.RobotStatus;
 
 /**
  * The class that each player needs to extend to control their robots
@@ -8,12 +10,23 @@ import ca.hilikus.jrobocom.Robot.RobotControl;
  */
 public abstract class Bank {
     /**
-     * the interface to control the robot to execute external instructions
+     * interface to control the robot to execute external instructions. Changes as the bank changes
+     * robots
      */
-    protected RobotControl control;
-    
+    protected RobotAction control;
+
+    /**
+     * interface to information about the state of the robot
+     */
+    protected RobotStatus info;
+
+    /**
+     * interface to query about the world's state
+     */
+    protected WorldInfo world;
+
     private String name;
-    
+
     /**
      * read-only settings
      */
@@ -30,7 +43,7 @@ public abstract class Bank {
      */
     final public int getCost() {
 	// TODO Auto-generated method stub
-	return 0;
+	return 1;
     }
 
     /**
@@ -53,8 +66,25 @@ public abstract class Bank {
      * @return true if the bank doesn't run any external instructions
      */
     final public boolean isEmpty() {
-	// TODO Auto-generated method stub
-	return false;
+	return getCost() == 0;
+    }
+
+    /**
+     * Attaches a control to a bank
+     * 
+     * @param newControl control to attach
+     * @param newStatus status provider to attach
+     * @param newWorld world info provider to attach
+     */
+    final public void plugInterfaces(RobotAction newControl, RobotStatus newStatus, WorldInfo newWorld) {
+	control = newControl;
+	info = newStatus;
+	world = newWorld;
+
+    }
+
+    private void verify() {
+	// TODO: implement
     }
 
 }

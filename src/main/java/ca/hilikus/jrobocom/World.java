@@ -5,8 +5,12 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
+import ca.hilikus.jrobocom.robots.Robot;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 import com.google.common.collect.BiMap;
@@ -25,6 +29,9 @@ public class World {
     private Set<Integer> teamIds = new HashSet<>();
 
     private MasterClock clock = new MasterClock();
+    
+    private static final Logger log = LoggerFactory.getLogger(World.class);
+    
 
     /**
      * Adds a new robot to the world in the reference field of the parent
@@ -41,8 +48,13 @@ public class World {
 	    // child already exists
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
+	if (child.isAlive()) {
 	robotsPosition.put(child, newPosition);
 	clock.addListener(child.getSerialNumber());
+	} else {
+	    log.debug("[add] Trying to add dead robot");
+	    
+	}
     }
 
     /**
@@ -91,7 +103,7 @@ public class World {
 	if (!robotsPosition.containsKey(robot)) {
 	    throw new IllegalArgumentException("Robot doesn't exist");
 	}
-	if (!robot.isMobile()) {
+	if (!robot.getState().isMobile()) {
 	    throw new IllegalArgumentException("Robot can't move");
 	}
 
@@ -114,7 +126,7 @@ public class World {
 	int y = robotsPosition.get(robot).y;
 	int size = GameSettings.BOARD_SIZE;
 
-	switch (robot.getFacing()) {
+	switch (robot.getState().getFacing()) {
 	    case NORTH:
 		y = (y - dist) % size;
 		break;
@@ -161,7 +173,7 @@ public class World {
 	if (inPosition == null) {
 	    ret = new ScanResult(Found.EMPTY, dist);
 	} else {
-	    if (robot.getTeamId() == inPosition.getTeamId()) {
+	    if (robot.getState().getTeamId() == inPosition.getState().getTeamId()) {
 		ret = new ScanResult(Found.FRIEND, dist);
 	    } else {
 		ret = new ScanResult(Found.ENEMY, dist);
@@ -196,7 +208,7 @@ public class World {
     public int getBotsCount(int teamId, boolean invert) {
 	int total = 0;
 	for (Robot bot : robotsPosition.keySet()) {
-	    if (bot.getTeamId() == teamId) {
+	    if (bot.getState().getTeamId() == teamId) {
 		if (!invert) {
 		    total++;
 		}
