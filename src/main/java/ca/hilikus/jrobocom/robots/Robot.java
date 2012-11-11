@@ -28,27 +28,65 @@ public class Robot implements RobotAction {
 
     private final TurnManager turnsControl;
 
-    private World world;
+    private final World world;
 
     private Logger log = LoggerFactory.getLogger(Robot.class);
 
-    private final RobotState data;
+    private RobotState data;
 
     private boolean alive;
-    
+
     private boolean pendingBankChange;
 
     private final Bank[] banks;
-    
+
     private int runningBank;
 
     private int serialNumber;
 
-    private final RobotAction control = new RobotControlProxy(this);
+    private final RobotAction control;
 
-    private final RobotStatus status = new RobotStatusProxy(this, world);
+    private final RobotStatus status;
 
     private final WorldInfo worldProxy;
+
+    private Robot(World theWorld, int banksCount) {
+	if (theWorld == null) {
+	    throw new IllegalArgumentException("World cannot be null");
+	}
+	serialNumber = Robot.getNextSerialNumber();
+	
+	world = theWorld;
+	turnsControl = new TurnManager(world.getClock());
+	worldProxy = new WorldPlayerProxy(turnsControl, world);
+	control = new RobotControlProxy(this);
+	status = new RobotStatusProxy(this, world);
+	banks = new Bank[banksCount];
+    }
+    
+    /**
+     * Creates first robot in the world
+     * 
+     * @param theWorld the environment of the robot
+     * @param allBanks All the player's banks
+     */
+    public Robot(World theWorld, Bank[] allBanks) {
+	this(theWorld, allBanks.length);
+	
+	Random generator = new Random();
+	int potentialTeamId;
+	do {
+	    potentialTeamId = generator.nextInt(1000);
+	} while (!world.validateTeamId(potentialTeamId));
+
+	data = new RobotState(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
+
+	for (int pos = 0; pos < allBanks.length; pos++) {
+	    setBank(allBanks[pos], pos);
+	}
+
+	postInit();
+    }
 
     /**
      * Creates a child robot
@@ -59,24 +97,22 @@ public class Robot implements RobotAction {
      * @param parent creator of this robot
      */
     public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent) {
-	if (parent == null) {
-	    throw new IllegalArgumentException("Parent cannot be null");
-	}
+	this(parent.world, banksCount);
+	
 	if (banksCount > GameSettings.MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
 	}
 	if (parent.data.getInstructionSet().isLessThan(InstructionSet.SUPER)) {
 	    throw new IllegalArgumentException("Parent could not have created child");
 	}
-	turnsControl = new TurnManager(world.getClock());
-	banks = new Bank[banksCount];
-	world = parent.world;
-	serialNumber = Robot.getNextSerialNumber();
+
+	data = new RobotState(turnsControl, pSet, pMobile, parent.data.getTeamId(),
+		parent.data.getGeneration() + 1, banksCount);
 	
-	data = new RobotState(turnsControl, pSet, pMobile, parent.data.getTeamId(), parent.data.getGeneration() + 1, banksCount);
+	postInit();
+    }
 
-	worldProxy = new WorldPlayerProxy(turnsControl, world);
-
+    private void postInit() {
 	alive = data.getGeneration() < GameSettings.MAX_GENERATION;
     }
 
@@ -113,39 +149,6 @@ public class Robot implements RobotAction {
 
     private static int getNextSerialNumber() {
 	return lastSerial++;
-    }
-
-    /**
-     * Creates first robot in the world
-     * 
-     * @param theWorld the environment of the robot
-     * @param allBanks All the player's banks
-     */
-    public Robot(World theWorld, Bank[] allBanks) {
-	if (theWorld == null || allBanks == null) {
-	    throw new IllegalArgumentException("Arguments can't be null");
-	}
-
-	world = theWorld;
-	serialNumber = Robot.getNextSerialNumber();
-	turnsControl = new TurnManager(world.getClock());
-	worldProxy = new WorldPlayerProxy(turnsControl, world);
-
-	Random generator = new Random();
-	int potentialTeamId;
-	do {
-	    potentialTeamId = generator.nextInt(1000);
-	} while (!world.validateTeamId(potentialTeamId));
-
-	data = new RobotState(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
-
-	banks = new Bank[allBanks.length];
-
-	for (int pos = 0; pos < allBanks.length; pos++) {
-	    setBank(allBanks[pos], pos);
-	}
-
-	alive = true;
     }
 
     /**
