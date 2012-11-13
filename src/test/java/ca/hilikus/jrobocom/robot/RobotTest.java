@@ -12,21 +12,14 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.lang.reflect.Method;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import ca.hilikus.jrobocom.AbstractTest;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.MasterClock;
-import ch.qos.logback.classic.Level;
 
 /**
  * Tests the robots, but not the control class
@@ -35,30 +28,15 @@ import ch.qos.logback.classic.Level;
  * 
  */
 @Test
-public class RobotTest {
-
-    private static final Logger log = LoggerFactory.getLogger(RobotTest.class);
+public class RobotTest extends AbstractTest {
 
     /**
-     * Changes TU debug level to trace
-     */
-    @BeforeClass
-    public void setUpOnce() {
-	ch.qos.logback.classic.Logger TULog = (ch.qos.logback.classic.Logger) LoggerFactory
-		.getLogger(Robot.class);
-	TULog.setLevel(Level.TRACE);
-    }
-
-    /**
-     * Initializes each test
      * 
-     * @param met test about to be called
      */
-    @BeforeMethod
-    public void setUp(Method met) {
-	log.info("\n====== Starting " + met.getName() + " ======");
-
+    public RobotTest() {
+	super(Robot.class);
     }
+
 
     /**
      * Tests creation of subsequent robots
