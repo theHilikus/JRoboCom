@@ -4,18 +4,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.lang.Thread.State;
-import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ch.qos.logback.classic.Level;
+import ca.hilikus.jrobocom.AbstractTest;
 
 /**
  * Tests for {@link Delayer}
@@ -24,29 +22,25 @@ import ch.qos.logback.classic.Level;
  * 
  */
 @Test
-public class DelayerTest {
+public class DelayerTest extends AbstractTest {
+    /**
+     * 
+     */
+    public DelayerTest() {
+	super(Delayer.class);
+    }
+
     private Delayer TU;
 
     private Logger log = LoggerFactory.getLogger(MasterClock.class);
 
-    /**
-     * Configures TU log level
-     */
-    @BeforeClass
-    public void setUpOnce() {
-	ch.qos.logback.classic.Logger TULog = (ch.qos.logback.classic.Logger) LoggerFactory
-		.getLogger(MasterClock.class);
-	TULog.setLevel(Level.TRACE);
-    }
 
     /**
      * Configures each test
      * 
-     * @param met the upcoming test
      */
     @BeforeMethod
-    public void setUp(Method met) {
-	log.info("\n====== Starting " + met.getName() + " ======");
+    public void setUpTU() {
 	TU = new Delayer();
 
     }

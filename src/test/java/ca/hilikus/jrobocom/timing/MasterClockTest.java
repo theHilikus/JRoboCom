@@ -5,7 +5,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -13,11 +12,10 @@ import java.util.concurrent.FutureTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ch.qos.logback.classic.Level;
+import ca.hilikus.jrobocom.AbstractTest;
 
 /**
  * tests for {@link MasterClock}
@@ -26,22 +24,20 @@ import ch.qos.logback.classic.Level;
  * @see DelayerTest
  */
 @Test
-public class MasterClockTest {
+public class MasterClockTest extends AbstractTest {
     // TODO: make multithreaded
+
+    /**
+     * 
+     */
+    public MasterClockTest() {
+	super(MasterClock.class);
+    }
 
     private MasterClock TU;
 
     private Logger log = LoggerFactory.getLogger(MasterClock.class);
 
-    /**
-     * Changes TU debug level to trace
-     */
-    @BeforeClass
-    public void setUpOnce() {
-	ch.qos.logback.classic.Logger TULog = (ch.qos.logback.classic.Logger) LoggerFactory
-		.getLogger(MasterClock.class);
-	TULog.setLevel(Level.TRACE);
-    }
 
     /**
      * Initializes each test
@@ -49,8 +45,7 @@ public class MasterClockTest {
      * @param met test about to be called
      */
     @BeforeMethod
-    public void setUp(Method met) {
-	log.info("\n====== Starting " + met.getName() + " ======");
+    public void setUpTU() {
 	TU = new MasterClock();
 	TU.setPeriod(200);
 
