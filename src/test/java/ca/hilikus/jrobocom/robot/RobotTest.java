@@ -53,16 +53,16 @@ public class RobotTest extends AbstractTest {
 
 	InstructionSet set = InstructionSet.ADVANCED;
 	Robot TU = new Robot(set, banks, false, eve);
-	assertFalse(TU.getState().isMobile());
+	assertFalse(TU.getData().isMobile());
 	assertEquals(TU.getBanksCount(), banks);
-	assertEquals(TU.getState().getAge(), 0);
-	assertEquals(TU.getState().getInstructionSet(), set);
+	assertEquals(TU.getData().getAge(), 0);
+	assertEquals(TU.getData().getInstructionSet(), set);
 	assertEquals(TU.getSerialNumber(), eve.getSerialNumber() + 1, "Serial number increases every time");
-	assertEquals(TU.getState().getGeneration(), eve.getState().getGeneration() + 1);
+	assertEquals(TU.getData().getGeneration(), eve.getData().getGeneration() + 1);
 	assertTrue(TU.isAlive());
 
 	Robot TU2 = new Robot(set, 8, true, eve);
-	assertEquals(TU2.getState().getGeneration(), eve.getState().getGeneration() + 1);
+	assertEquals(TU2.getData().getGeneration(), eve.getData().getGeneration() + 1);
 	assertEquals(TU2.getSerialNumber(), TU.getSerialNumber() + 1);
 
     }
@@ -82,10 +82,10 @@ public class RobotTest extends AbstractTest {
 	// check generation and serial #?
 	verify(mockWorld, atLeast(2)).validateTeamId(anyInt());
 
-	assertFalse(TU.getState().isMobile(), "First robot should not be mobile");
+	assertFalse(TU.getData().isMobile(), "First robot should not be mobile");
 	assertEquals(TU.getBanksCount(), BANK_COUNT, "First robot has all banks provided");
-	assertEquals(TU.getState().getAge(), 0, "Age at construction is 0");
-	assertEquals(TU.getState().getInstructionSet(), InstructionSet.SUPER,
+	assertEquals(TU.getData().getAge(), 0, "Age at construction is 0");
+	assertEquals(TU.getData().getInstructionSet(), InstructionSet.SUPER,
 		"First robot should have all instruction sets");
 	assertEquals(TU.getSerialNumber(), 0, "Serial number of first robot should be 0");
 	assertTrue(TU.isAlive(), "New robot is alive");
@@ -99,7 +99,7 @@ public class RobotTest extends AbstractTest {
 	Robot mockParent = mock(Robot.class);
 	RobotStatusLocal mockStatus = mock(RobotStatusLocal.class);
 	when(mockStatus.getInstructionSet()).thenReturn(InstructionSet.ADVANCED);
-	when(mockParent.getState()).thenReturn(mockStatus);
+	when(mockParent.getData()).thenReturn(mockStatus);
 
 	@SuppressWarnings("unused")
 	Robot TU = new Robot(InstructionSet.BASIC, 3, true, mockParent);

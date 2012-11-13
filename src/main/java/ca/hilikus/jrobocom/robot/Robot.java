@@ -390,7 +390,7 @@ public class Robot implements RobotAction {
     /**
      * @return an object with the state information
      */
-    public RobotStatusLocal getState() {
+    public RobotStatusLocal getData() {
 	return data;
     }
 
@@ -413,12 +413,10 @@ public class Robot implements RobotAction {
 	if (this == obj) {
 	    return true;
 	}
-	if (obj == null) {
+	if (obj == null || getClass() != obj.getClass()) {
 	    return false;
 	}
-	if (getClass() != obj.getClass()) {
-	    return false;
-	}
+	
 	Robot other = (Robot) obj;
 	return serialNumber == other.serialNumber;
     }

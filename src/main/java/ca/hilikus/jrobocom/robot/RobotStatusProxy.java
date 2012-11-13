@@ -46,12 +46,12 @@ public class RobotStatusProxy implements RobotStatus {
     public int getActiveState(boolean local) {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return this.robot.getState().getActiveState();
+	    return this.robot.getData().getActiveState();
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().getActiveState();
+		return neighbour.getData().getActiveState();
 	    } else {
 		return 0;
 	    }
@@ -78,7 +78,7 @@ public class RobotStatusProxy implements RobotStatus {
     @Override
     public int getGeneration() {
 	turnsControl.waitTurns(Timing.LOCAL_READ);
-	return this.robot.getState().getGeneration();
+	return this.robot.getData().getGeneration();
     }
 
     /* (non-Javadoc)
@@ -127,12 +127,12 @@ public class RobotStatusProxy implements RobotStatus {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
 
-	    return this.robot.getState().getInstructionSet();
+	    return this.robot.getData().getInstructionSet();
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().getInstructionSet();
+		return neighbour.getData().getInstructionSet();
 	    } else {
 		return InstructionSet.BASIC;
 	    }
@@ -154,12 +154,12 @@ public class RobotStatusProxy implements RobotStatus {
     public int getTeamId(boolean local) {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return this.robot.getState().getTeamId();
+	    return this.robot.getData().getTeamId();
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().getTeamId();
+		return neighbour.getData().getTeamId();
 	    } else {
 		return 0;
 	    }
@@ -181,12 +181,12 @@ public class RobotStatusProxy implements RobotStatus {
     public boolean isEnabled(boolean local) {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return robot.getState().getActiveState() > 0;
+	    return robot.getData().getActiveState() > 0;
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().getActiveState() > 0;
+		return neighbour.getData().getActiveState() > 0;
 	    } else {
 		return false;
 	    }
@@ -209,12 +209,12 @@ public class RobotStatusProxy implements RobotStatus {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
 
-	    return this.robot.getState().isMobile();
+	    return this.robot.getData().isMobile();
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().isMobile();
+		return neighbour.getData().isMobile();
 	    } else {
 		return false;
 	    }
@@ -237,12 +237,12 @@ public class RobotStatusProxy implements RobotStatus {
 	if (local) {
 	    turnsControl.waitTurns(Timing.LOCAL_READ);
 
-	    return this.robot.getState().getAge();
+	    return this.robot.getData().getAge();
 	} else {
 	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 	    Robot neighbour = world.getNeighbour(this.robot);
 	    if (neighbour != null) {
-		return neighbour.getState().getAge();
+		return neighbour.getData().getAge();
 	    } else {
 		return 0;
 	    }
@@ -251,7 +251,7 @@ public class RobotStatusProxy implements RobotStatus {
 
     @Override
     public Direction getFacing() {
-	return robot.getState().getFacing();
+	return robot.getData().getFacing();
     }
 
     @Override

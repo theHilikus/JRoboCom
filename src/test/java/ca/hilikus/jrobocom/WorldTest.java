@@ -42,7 +42,7 @@ public class WorldTest extends AbstractTest {
     private static Robot createRobotMockup(int teamId, int serialNumber) {
 	Robot mockRobot = mock(Robot.class);
 	RobotStatusLocal mockStatus = mock(RobotStatusLocal.class);
-	when(mockRobot.getState()).thenReturn(mockStatus);
+	when(mockRobot.getData()).thenReturn(mockStatus);
 	when(mockRobot.getSerialNumber()).thenReturn(serialNumber);
 	when(mockStatus.getTeamId()).thenReturn(teamId);
 	when(mockStatus.getFacing()).thenReturn(Direction.EAST);
@@ -56,11 +56,11 @@ public class WorldTest extends AbstractTest {
     @Test(dependsOnMethods = { "addFirst" })
     public void add() {
 	Robot mockRobot = createRobotMockup(311, 0);
-	when(mockRobot.getState().getGeneration()).thenReturn(0);
+	when(mockRobot.getData().getGeneration()).thenReturn(0);
 	TU.addFirst(mockRobot);
 
 	Robot mock2 = createRobotMockup(311, 1);
-	when(mock2.getState().getGeneration()).thenReturn(1);
+	when(mock2.getData().getGeneration()).thenReturn(1);
 	TU.add(mockRobot, mock2);
     }
 
@@ -114,7 +114,7 @@ public class WorldTest extends AbstractTest {
     @Test(expectedExceptions=IllegalArgumentException.class)
     public void addFakeFirst() {
 	Robot mockRobot = createRobotMockup(311, 0);
-	when(mockRobot.getState().getGeneration()).thenReturn(10);
+	when(mockRobot.getData().getGeneration()).thenReturn(10);
 	TU.addFirst(mockRobot);
     }
 
@@ -157,7 +157,7 @@ public class WorldTest extends AbstractTest {
 
 	Robot mock2 = createRobotMockup(311, 5); // same team, different robot
 	when(mock2.isAlive()).thenReturn(true);
-	when(mock2.getState().getGeneration()).thenReturn(1);
+	when(mock2.getData().getGeneration()).thenReturn(1);
 	TU.addFirst(mockRobot);
 	TU.add(mockRobot, mock2);
 

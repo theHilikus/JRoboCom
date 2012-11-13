@@ -48,7 +48,7 @@ public class World {
 	if (isOccupied(newPosition)) {
 	    child.die("Occupied position");
 	}
-	if (child.getState().getGeneration() != parent.getState().getGeneration() + 1) {
+	if (child.getData().getGeneration() != parent.getData().getGeneration() + 1) {
 	    throw new IllegalArgumentException("Child robot is not a direct descentant of this parent");
 	}
 	addCommon(child, newPosition);
@@ -61,10 +61,10 @@ public class World {
      */
     public void addFirst(Robot eve) {
 
-	if (eve.getState().getGeneration() != 0) {
+	if (eve.getData().getGeneration() != 0) {
 	    throw new IllegalArgumentException("Robot is not first generation");
 	}
-	if (getBotsCount(eve.getState().getTeamId(), false) > 0) {
+	if (getBotsCount(eve.getData().getTeamId(), false) > 0) {
 	    throw new IllegalArgumentException(
 		    "Provided robot is not the first from its team. Use add(Robot, Robot) instead");
 	}
@@ -83,7 +83,7 @@ public class World {
 	    // robot already exists
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
-		
+
 	if (newRobot.isAlive()) {
 	    robotsPosition.put(newRobot, newPosition);
 	    clock.addListener(newRobot.getSerialNumber());
@@ -104,7 +104,26 @@ public class World {
 	robotsPosition.remove(robot);
 	clock.removeListener(robot.getSerialNumber());
 
-	// TODO: check if winner
+	if (robotsPosition.size() > 0) {
+	    int someTeamId = robotsPosition.keySet().iterator().next().getData().getTeamId();
+	    if (checkWinner(someTeamId)) {
+		declareWinner(someTeamId);
+	    }
+	}
+    }
+
+    private void declareWinner(int someTeamId) {
+	log.info("[declareWinner] Found winner! Team ID = {}", someTeamId);
+	clock.stop();
+    }
+
+    /**
+     * 
+     * @return true if there is a winner
+     */
+    private boolean checkWinner(int someTeamId) {
+	return getBotsCount(someTeamId, true) == 0;
+
     }
 
     /**
@@ -116,7 +135,7 @@ public class World {
 	if (!robotsPosition.containsKey(robot)) {
 	    throw new IllegalArgumentException("Robot doesn't exist");
 	}
-	if (!robot.getState().isMobile()) {
+	if (!robot.getData().isMobile()) {
 	    throw new IllegalArgumentException("Robot can't move");
 	}
 
@@ -143,7 +162,7 @@ public class World {
 	int x = robotsPosition.get(robot).x;
 	int y = robotsPosition.get(robot).y;
 
-	switch (robot.getState().getFacing()) {
+	switch (robot.getData().getFacing()) {
 	    case NORTH:
 		y = (y - dist) % size;
 		break;
@@ -190,7 +209,7 @@ public class World {
 	if (inPosition == null) {
 	    ret = new ScanResult(Found.EMPTY, dist);
 	} else {
-	    if (robot.getState().getTeamId() == inPosition.getState().getTeamId()) {
+	    if (robot.getData().getTeamId() == inPosition.getData().getTeamId()) {
 		ret = new ScanResult(Found.FRIEND, dist);
 	    } else {
 		ret = new ScanResult(Found.ENEMY, dist);
@@ -225,7 +244,7 @@ public class World {
     public int getBotsCount(int teamId, boolean invert) {
 	int total = 0;
 	for (Robot bot : robotsPosition.keySet()) {
-	    if (bot.getState().getTeamId() == teamId) {
+	    if (bot.getData().getTeamId() == teamId) {
 		if (!invert) {
 		    total++;
 		}
