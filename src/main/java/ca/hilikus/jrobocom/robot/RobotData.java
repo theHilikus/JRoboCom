@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom.robot;
 
 import ca.hilikus.jrobocom.Direction;
+import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
@@ -9,7 +10,7 @@ import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
  * The robot's current data
  * 
  */
-public class RobotState implements RobotStatusLocal {
+public class RobotData implements RobotStatusLocal {
     private final boolean mobile;
     private int activeState;
     private final InstructionSet set;
@@ -32,7 +33,7 @@ public class RobotState implements RobotStatusLocal {
      * @param pGeneration 
      * @param pBanksCount number of banks slots in the robot
      */
-    public RobotState(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile, int pTeamId,
+    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile, int pTeamId,
 	    int pGeneration, int pBanksCount) {
 	this.activeState = 0;
 	this.creationTimestamp = System.currentTimeMillis();
@@ -42,6 +43,7 @@ public class RobotState implements RobotStatusLocal {
 	generation = pGeneration;
 	banksCount = pBanksCount;
 	turnsManager = pTurnsManager;
+	facing = Direction.fromInt(World.generator.nextInt(Direction.COUNT));
 
 	cyclesAtCreation = pTurnsManager.getTurnsCount();
 

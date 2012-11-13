@@ -32,7 +32,7 @@ public class Robot implements RobotAction {
 
     private Logger log = LoggerFactory.getLogger(Robot.class);
 
-    private RobotState data;
+    private RobotData data;
 
     private boolean alive;
 
@@ -55,7 +55,7 @@ public class Robot implements RobotAction {
 	    throw new IllegalArgumentException("World cannot be null");
 	}
 	serialNumber = Robot.getNextSerialNumber();
-	
+
 	world = theWorld;
 	turnsControl = new TurnManager(world.getClock());
 	worldProxy = new WorldPlayerProxy(turnsControl, world);
@@ -63,7 +63,7 @@ public class Robot implements RobotAction {
 	status = new RobotStatusProxy(this, world);
 	banks = new Bank[banksCount];
     }
-    
+
     /**
      * Creates first robot in the world
      * 
@@ -72,14 +72,14 @@ public class Robot implements RobotAction {
      */
     public Robot(World theWorld, Bank[] allBanks) {
 	this(theWorld, allBanks.length);
-	
+
 	Random generator = new Random();
 	int potentialTeamId;
 	do {
 	    potentialTeamId = generator.nextInt(1000);
 	} while (!world.validateTeamId(potentialTeamId));
 
-	data = new RobotState(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
+	data = new RobotData(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
@@ -98,7 +98,7 @@ public class Robot implements RobotAction {
      */
     public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent) {
 	this(parent.world, banksCount);
-	
+
 	if (banksCount > GameSettings.MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
 	}
@@ -106,9 +106,9 @@ public class Robot implements RobotAction {
 	    throw new IllegalArgumentException("Parent could not have created child");
 	}
 
-	data = new RobotState(turnsControl, pSet, pMobile, parent.data.getTeamId(),
+	data = new RobotData(turnsControl, pSet, pMobile, parent.data.getTeamId(),
 		parent.data.getGeneration() + 1, banksCount);
-	
+
 	postInit();
     }
 
@@ -340,9 +340,7 @@ public class Robot implements RobotAction {
 	int robotsCount = world.getBotsCount(data.getTeamId(), false);
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
 	    Robot child = new Robot(pSet, banksCount, pMobile, this);
-	    world.add(this, child); // world does further verification so add
-				    // is not
-	    // guaranteed yet
+	    world.add(this, child); // world does further verification so add is not guaranteed yet
 	}
 
     }
@@ -394,6 +392,35 @@ public class Robot implements RobotAction {
      */
     public RobotStatusLocal getState() {
 	return data;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+	final int prime = 31;
+	int result = 1;
+	result = prime * result + serialNumber;
+	return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj) {
+	    return true;
+	}
+	if (obj == null) {
+	    return false;
+	}
+	if (getClass() != obj.getClass()) {
+	    return false;
+	}
+	Robot other = (Robot) obj;
+	return serialNumber == other.serialNumber;
     }
 
 }

@@ -34,7 +34,7 @@ public class GameSettings {
     public static final int MAX_CREATE_WAIT = 0;
     public static final int MAX_BANKS = 50;
     public static final int MAX_GENERATION = 15;
-    public static final int BOARD_SIZE = 0;
+    public static final int BOARD_SIZE = 18;
     public static final int MAX_AGE = 1000;
     public static final int MAX_BOTS = 0;
     public static final int MAX_WORLD_AGE = 0;

@@ -8,13 +8,13 @@ package ca.hilikus.jrobocom;
 public enum Direction {
     NORTH, EAST, SOUTH, WEST;
 
-    private static final int size = Direction.values().length;
+    public static final int COUNT = Direction.values().length;
 
     /**
      * @return the direction left from the current one
      */
     public Direction left() {
-        int next = (ordinal() - 1) % size;
+        int next = (ordinal() - 1) % COUNT;
         return values()[next];
     }
 
@@ -22,8 +22,15 @@ public enum Direction {
      * @return the direction right from the current one
      */
     public Direction right() {
-        int next = (ordinal() + 1) % size;
+        int next = (ordinal() + 1) % COUNT;
         return values()[next];
 
+    }
+
+    public static Direction fromInt(int position) {
+	if (position > COUNT) {
+	    throw new IllegalArgumentException("Invalid index for Direction");
+	}
+	return values()[position];
     }
 }

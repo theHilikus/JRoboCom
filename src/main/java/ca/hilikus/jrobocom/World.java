@@ -29,32 +29,29 @@ public class World {
     private Set<Integer> teamIds = new HashSet<>();
 
     private MasterClock clock = new MasterClock();
-    
+
     private static final Logger log = LoggerFactory.getLogger(World.class);
-    
+
+    /**
+     * Common random number generator
+     */
+    public static Random generator = new Random();
 
     /**
      * Adds a new robot to the world in the reference field of the parent
      * 
-     * @param parent
-     * @param child
+     * @param parent the creating robot
+     * @param child the newly created robot
      */
     public void add(Robot parent, Robot child) {
 	Point newPosition = getReferenceField(parent, 1);
 	if (isOccupied(newPosition)) {
 	    child.die("Occupied position");
 	}
-	if (robotsPosition.containsKey(child)) {
-	    // child already exists
-	    throw new IllegalArgumentException("Trying to add an existing robot");
+	if (child.getState().getGeneration() != parent.getState().getGeneration() + 1) {
+	    throw new IllegalArgumentException("Child robot is not a direct descentant of this parent");
 	}
-	if (child.isAlive()) {
-	robotsPosition.put(child, newPosition);
-	clock.addListener(child.getSerialNumber());
-	} else {
-	    log.debug("[add] Trying to add dead robot");
-	    
-	}
+	addCommon(child, newPosition);
     }
 
     /**
@@ -63,8 +60,14 @@ public class World {
      * @param eve the first robot of the player
      */
     public void addFirst(Robot eve) {
-	Random generator = new Random();
 
+	if (eve.getState().getGeneration() != 0) {
+	    throw new IllegalArgumentException("Robot is not first generation");
+	}
+	if (getBotsCount(eve.getState().getTeamId(), false) > 0) {
+	    throw new IllegalArgumentException(
+		    "Provided robot is not the first from its team. Use add(Robot, Robot) instead");
+	}
 	Point newPosition;
 	do {
 	    int x = generator.nextInt(GameSettings.BOARD_SIZE);
@@ -72,12 +75,22 @@ public class World {
 	    newPosition = new Point(x, y);
 	} while (isOccupied(newPosition));
 
-	if (robotsPosition.containsKey(eve)) {
+	addCommon(eve, newPosition);
+    }
+
+    private void addCommon(Robot newRobot, Point newPosition) {
+	if (robotsPosition.containsKey(newRobot)) {
 	    // robot already exists
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
-	robotsPosition.put(eve, newPosition);
-	clock.addListener(eve.getSerialNumber());
+		
+	if (newRobot.isAlive()) {
+	    robotsPosition.put(newRobot, newPosition);
+	    clock.addListener(newRobot.getSerialNumber());
+	} else {
+	    log.debug("[add] Trying to add dead robot");
+
+	}
     }
 
     /**
@@ -121,10 +134,14 @@ public class World {
     private Point getReferenceField(Robot robot, int dist) {
 	assert dist > 0;
 	assert robotsPosition.containsKey(robot);
+	int size = GameSettings.BOARD_SIZE;
+
+	if (dist >= size) {
+	    throw new IllegalArgumentException("Cannot scan bigger than the board");
+	}
 
 	int x = robotsPosition.get(robot).x;
 	int y = robotsPosition.get(robot).y;
-	int size = GameSettings.BOARD_SIZE;
 
 	switch (robot.getState().getFacing()) {
 	    case NORTH:
