@@ -47,9 +47,9 @@ public abstract class Bank {
     }
 
     /**
-     * User-friendly name. Used for debugging only
+     * User-friendly name
      * 
-     * @param bankName
+     * @param bankName a description of the bank
      */
     final protected void setName(String bankName) {
 	name = bankName;

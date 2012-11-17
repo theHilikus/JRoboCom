@@ -14,6 +14,7 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
  * Automatic tests for {@link World}
@@ -36,7 +37,7 @@ public class WorldTest extends AbstractTest {
      */
     @BeforeMethod
     public void setUp() {
-	TU = new World();
+	TU = new World(new MasterClock());
     }
 
     private static Robot createRobotMockup(int teamId, int serialNumber) {

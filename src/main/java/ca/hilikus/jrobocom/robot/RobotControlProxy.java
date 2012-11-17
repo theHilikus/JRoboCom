@@ -15,7 +15,7 @@ import ca.hilikus.jrobocom.robot.api.RobotAction;
  */
 public final class RobotControlProxy implements RobotAction {
     /**
-     * 
+     * the robot that gets controlled
      */
     private final Robot robot;
     
@@ -46,7 +46,7 @@ public final class RobotControlProxy implements RobotAction {
      * @see ca.hilikus.jrobocom.RobotControl#createRobot(ca.hilikus.jrobocom.player.InstructionSet, int, boolean)
      */
     @Override
-    public void createRobot(InstructionSet pSet, int banksCount, boolean pMobile) {
+    public void createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile) {
 	int turnsForBanks = Timing.CREATION_BASE + Timing.CREATION_PER_BANK * banksCount;
 	if (pMobile) {
 	    turnsForBanks *= Timing.MOBILITY_PENALTY + Timing.MOBILITY_CONSTANT;
@@ -62,7 +62,7 @@ public final class RobotControlProxy implements RobotAction {
 	int totalWait = Math.min(turnsForBanks + turnsForSet, GameSettings.MAX_CREATE_WAIT);
 	turnsControl.waitTurns(totalWait);
 
-	robot.createRobot(pSet, banksCount, pMobile);
+	robot.createRobot(name, pSet, banksCount, pMobile);
     }
 
     /* (non-Javadoc)

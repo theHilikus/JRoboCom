@@ -28,7 +28,7 @@ public class World {
 
     private Set<Integer> teamIds = new HashSet<>();
 
-    private MasterClock clock = new MasterClock();
+    private MasterClock clock;
 
     private static final Logger log = LoggerFactory.getLogger(World.class);
 
@@ -37,6 +37,15 @@ public class World {
      */
     public static Random generator = new Random();
 
+    
+    /**
+     * @param pClock the world clock
+     */
+    public World(MasterClock pClock) {
+	clock = pClock;
+    }
+    
+    
     /**
      * Adds a new robot to the world in the reference field of the parent
      * 
@@ -87,6 +96,7 @@ public class World {
 	if (newRobot.isAlive()) {
 	    robotsPosition.put(newRobot, newPosition);
 	    clock.addListener(newRobot.getSerialNumber());
+	    log.trace("[addFirst] Added robot {}", newRobot);
 	} else {
 	    log.debug("[add] Trying to add dead robot");
 
@@ -265,11 +275,6 @@ public class World {
 	return (int) (clock.getCycles() / 1000);
     }
 
-    /**
-     * @return the master clock
-     */
-    public MasterClock getClock() {
-	return clock;
-    }
+
 
 }

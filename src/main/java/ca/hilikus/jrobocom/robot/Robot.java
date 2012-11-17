@@ -22,7 +22,7 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  * @author hilikus
  * 
  */
-public class Robot implements RobotAction {
+public class Robot implements RobotAction, Runnable {
 
     private static int lastSerial = 0;
 
@@ -32,7 +32,7 @@ public class Robot implements RobotAction {
 
     private Logger log = LoggerFactory.getLogger(Robot.class);
 
-    private RobotData data;
+    private RobotStatusLocal data;
 
     private boolean alive;
 
@@ -43,6 +43,8 @@ public class Robot implements RobotAction {
     private int runningBank;
 
     private int serialNumber;
+    
+    private final String name;
 
     private final RobotAction control;
 
@@ -50,28 +52,39 @@ public class Robot implements RobotAction {
 
     private final WorldInfo worldProxy;
 
-    private Robot(World theWorld, int banksCount) {
-	if (theWorld == null) {
-	    throw new IllegalArgumentException("World cannot be null");
+
+        
+    /**
+     * Common constructor for all robots
+     * @param theWorld the world the robots lives in
+     * @param clock the clock that controls the robot turns
+     * @param banksCount number of banks
+     */
+    private Robot(World theWorld, MasterClock clock, int banksCount, String pName) {
+	if (theWorld == null || clock == null) {
+	    throw new IllegalArgumentException("Arguments cannot be null");
 	}
 	serialNumber = Robot.getNextSerialNumber();
 
 	world = theWorld;
-	turnsControl = new TurnManager(world.getClock());
+	turnsControl = new TurnManager(clock);
 	worldProxy = new WorldPlayerProxy(turnsControl, world);
 	control = new RobotControlProxy(this);
 	status = new RobotStatusProxy(this, world);
 	banks = new Bank[banksCount];
+	name = pName;
     }
 
     /**
      * Creates first robot in the world
      * 
      * @param theWorld the environment of the robot
-     * @param allBanks All the player's banks
+     * @param clock the ticker to control turns
+     * @param allBanks the code to execute
+     * @param name this robot's name
      */
-    public Robot(World theWorld, Bank[] allBanks) {
-	this(theWorld, allBanks.length);
+    public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name) {
+	this(theWorld, clock, allBanks.length, name);
 
 	Random generator = new Random();
 	int potentialTeamId;
@@ -80,7 +93,7 @@ public class Robot implements RobotAction {
 	} while (!world.validateTeamId(potentialTeamId));
 
 	data = new RobotData(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
-
+	
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
 	}
@@ -95,9 +108,10 @@ public class Robot implements RobotAction {
      * @param banksCount number of banks
      * @param pMobile true if robot is mobile
      * @param parent creator of this robot
+     * @param name a name of this single robot
      */
-    public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent) {
-	this(parent.world, banksCount);
+    public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
+	this(parent.world, parent.turnsControl.clock, banksCount, name);
 
 	if (banksCount > GameSettings.MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
@@ -106,7 +120,7 @@ public class Robot implements RobotAction {
 	    throw new IllegalArgumentException("Parent could not have created child");
 	}
 
-	data = new RobotData(turnsControl, pSet, pMobile, parent.data.getTeamId(),
+	data = new RobotData(turnsControl,pSet, pMobile, parent.data.getTeamId(),
 		parent.data.getGeneration() + 1, banksCount);
 
 	postInit();
@@ -154,8 +168,10 @@ public class Robot implements RobotAction {
     /**
      * The main loop of the robot
      */
+    @Override
     public void run() {
 	try {
+	    turnsControl.waitTurns(1); //block at the beginning so that all robots start at the same time
 	    while (alive) {
 		if (runningBank == 0) {
 		    if (banks[0] == null || banks[0].isEmpty()) {
@@ -319,9 +335,9 @@ public class Robot implements RobotAction {
     @Override
     public void turn(boolean right) {
 	if (right) {
-	    data.setFacing(data.getFacing().right());
+	    ((RobotData)data).setFacing(data.getFacing().right());
 	} else {
-	    data.setFacing(data.getFacing().left());
+	    ((RobotData)data).setFacing(data.getFacing().left());
 	}
 
     }
@@ -332,14 +348,14 @@ public class Robot implements RobotAction {
     }
 
     @Override
-    public void createRobot(InstructionSet pSet, int banksCount, boolean pMobile) {
+    public void createRobot(String pName, InstructionSet pSet, int banksCount, boolean pMobile) {
 	if (data.getInstructionSet() != InstructionSet.SUPER) {
 	    die("Robot cannot create other robots");
 	}
 
 	int robotsCount = world.getBotsCount(data.getTeamId(), false);
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
-	    Robot child = new Robot(pSet, banksCount, pMobile, this);
+	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
 	}
 

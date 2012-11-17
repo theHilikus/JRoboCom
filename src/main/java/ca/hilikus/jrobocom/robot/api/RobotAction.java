@@ -23,11 +23,12 @@ public interface RobotAction {
     /**
      * Creates a new, empty robot in the adjacent field in the robot's current direction
      * 
+     * @param name robot's friendly name
      * @param pSet the instruction set of the new robot
      * @param banksCount the number of empty banks to create
      * @param pMobile true if the robot should be able to move
      */
-    public void createRobot(InstructionSet pSet, int banksCount, boolean pMobile);
+    public void createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile);
 
     /**
      * kills the robot

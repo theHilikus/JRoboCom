@@ -7,7 +7,8 @@ import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 
 /**
- * The robot's current data
+ * The robot's current data. Everything here needs to serve the implemented interface; otherwise it
+ * should be in the robot itself
  * 
  */
 public class RobotData implements RobotStatusLocal {
@@ -15,7 +16,6 @@ public class RobotData implements RobotStatusLocal {
     private int activeState;
     private final InstructionSet set;
     private Direction facing;
-    private long creationTimestamp;
     private final int generation;
     private final int teamId;
 
@@ -30,13 +30,12 @@ public class RobotData implements RobotStatusLocal {
      * @param pMobile true if the robot is mobile
      * @param pSet instruction set
      * @param pTeamId unique team identifier
-     * @param pGeneration 
+     * @param pGeneration the number of ancestors this robot has
      * @param pBanksCount number of banks slots in the robot
      */
-    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile, int pTeamId,
-	    int pGeneration, int pBanksCount) {
+    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile,
+	    int pTeamId, int pGeneration, int pBanksCount) {
 	this.activeState = 0;
-	this.creationTimestamp = System.currentTimeMillis();
 	set = pSet;
 	mobile = pMobile;
 	teamId = pTeamId;

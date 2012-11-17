@@ -47,12 +47,12 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 	Bank[] dummyBanks = new Bank[3];
-	Robot eve = new Robot(mockWorld, dummyBanks);
+	Robot eve = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
 
 	int banks = 3;
 
 	InstructionSet set = InstructionSet.ADVANCED;
-	Robot TU = new Robot(set, banks, false, eve);
+	Robot TU = new Robot(set, banks, false, eve, "Test Robot");
 	assertFalse(TU.getData().isMobile());
 	assertEquals(TU.getBanksCount(), banks);
 	assertEquals(TU.getData().getAge(), 0);
@@ -61,7 +61,7 @@ public class RobotTest extends AbstractTest {
 	assertEquals(TU.getData().getGeneration(), eve.getData().getGeneration() + 1);
 	assertTrue(TU.isAlive());
 
-	Robot TU2 = new Robot(set, 8, true, eve);
+	Robot TU2 = new Robot(set, 8, true, eve, "Test Robot");
 	assertEquals(TU2.getData().getGeneration(), eve.getData().getGeneration() + 1);
 	assertEquals(TU2.getSerialNumber(), TU.getSerialNumber() + 1);
 
@@ -77,7 +77,7 @@ public class RobotTest extends AbstractTest {
 
 	final int BANK_COUNT = 3;
 	Bank[] dummyBanks = new Bank[BANK_COUNT];
-	Robot TU = new Robot(mockWorld, dummyBanks);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
 
 	// check generation and serial #?
 	verify(mockWorld, atLeast(2)).validateTeamId(anyInt());
@@ -102,7 +102,7 @@ public class RobotTest extends AbstractTest {
 	when(mockParent.getData()).thenReturn(mockStatus);
 
 	@SuppressWarnings("unused")
-	Robot TU = new Robot(InstructionSet.BASIC, 3, true, mockParent);
+	Robot TU = new Robot(InstructionSet.BASIC, 3, true, mockParent, "Test Robot");
 	fail("Should not have created");
     }
 
@@ -114,7 +114,6 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 	MasterClock mockClock = mock(MasterClock.class);
-	when(mockWorld.getClock()).thenReturn(mockClock);
 
 	mockClock.start(true);
 
@@ -140,7 +139,7 @@ public class RobotTest extends AbstractTest {
 	Bank second = mock(Bank.class);
 	dummyBanks[2] = second;
 
-	Robot TU = new Robot(mockWorld, dummyBanks);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
 	mockClock.addListener(TU.getSerialNumber());
 	TU.run();
 
@@ -164,7 +163,7 @@ public class RobotTest extends AbstractTest {
 	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 
 	Bank[] dummyBanks = new Bank[3];
-	Robot TU = new Robot(mockWorld, dummyBanks);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
 
 	TU.run();
 
@@ -180,7 +179,7 @@ public class RobotTest extends AbstractTest {
 	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 
 	Bank[] dummyBanks = new Bank[3];
-	Robot TU = new Robot(mockWorld, dummyBanks);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
 
 	TU.die("test die");
 
