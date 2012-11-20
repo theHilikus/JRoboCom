@@ -43,7 +43,7 @@ public class Robot implements RobotAction, Runnable {
     private int runningBank;
 
     private int serialNumber;
-    
+
     private final String name;
 
     private final RobotAction control;
@@ -52,10 +52,9 @@ public class Robot implements RobotAction, Runnable {
 
     private final WorldInfo worldProxy;
 
-
-        
     /**
      * Common constructor for all robots
+     * 
      * @param theWorld the world the robots lives in
      * @param clock the clock that controls the robot turns
      * @param banksCount number of banks
@@ -76,7 +75,8 @@ public class Robot implements RobotAction, Runnable {
     }
 
     /**
-     * Creates first robot in the world
+     * Creates first robot in the world. It is the responsibility of the caller to start the robot's
+     * thread
      * 
      * @param theWorld the environment of the robot
      * @param clock the ticker to control turns
@@ -93,7 +93,7 @@ public class Robot implements RobotAction, Runnable {
 	} while (!world.validateTeamId(potentialTeamId));
 
 	data = new RobotData(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
-	
+
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
 	}
@@ -102,7 +102,7 @@ public class Robot implements RobotAction, Runnable {
     }
 
     /**
-     * Creates a child robot
+     * Creates a child robot. It is the responsibility of the caller to start the robot's thread
      * 
      * @param pSet maximum instruction set supported
      * @param banksCount number of banks
@@ -120,7 +120,7 @@ public class Robot implements RobotAction, Runnable {
 	    throw new IllegalArgumentException("Parent could not have created child");
 	}
 
-	data = new RobotData(turnsControl,pSet, pMobile, parent.data.getTeamId(),
+	data = new RobotData(turnsControl, pSet, pMobile, parent.data.getTeamId(),
 		parent.data.getGeneration() + 1, banksCount);
 
 	postInit();
@@ -171,7 +171,8 @@ public class Robot implements RobotAction, Runnable {
     @Override
     public void run() {
 	try {
-	    turnsControl.waitTurns(1); //block at the beginning so that all robots start at the same time
+	    turnsControl.waitTurns(1); // block at the beginning so that all robots start at the
+				       // same time
 	    while (alive) {
 		if (runningBank == 0) {
 		    if (banks[0] == null || banks[0].isEmpty()) {
@@ -335,9 +336,9 @@ public class Robot implements RobotAction, Runnable {
     @Override
     public void turn(boolean right) {
 	if (right) {
-	    ((RobotData)data).setFacing(data.getFacing().right());
+	    ((RobotData) data).setFacing(data.getFacing().right());
 	} else {
-	    ((RobotData)data).setFacing(data.getFacing().left());
+	    ((RobotData) data).setFacing(data.getFacing().left());
 	}
 
     }
@@ -357,6 +358,9 @@ public class Robot implements RobotAction, Runnable {
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
 	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
+	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Robot "
+		    + child.getSerialNumber());
+	    newThread.start(); // jumpstarts the robot
 	}
 
     }
@@ -432,9 +436,16 @@ public class Robot implements RobotAction, Runnable {
 	if (obj == null || getClass() != obj.getClass()) {
 	    return false;
 	}
-	
+
 	Robot other = (Robot) obj;
 	return serialNumber == other.serialNumber;
+    }
+
+    /**
+     * @return the name of this robot
+     */
+    public String getName() {
+	return name;
     }
 
 }
