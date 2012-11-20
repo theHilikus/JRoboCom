@@ -34,7 +34,7 @@ public class Player {
 
     private static final Logger log = LoggerFactory.getLogger(Player.class);
 
-    private static final int ROBOTS_MAX_PRIORITY = 10;
+    private static final int ROBOTS_MAX_PRIORITY = 3;
 
     private final ThreadGroup robotsThreads;
 
@@ -46,6 +46,10 @@ public class Player {
     public Player(File codePath) throws PlayerException {
 	if (!codePath.exists() || !codePath.canRead()) {
 	    throw new IllegalArgumentException("Path is invalid: " + codePath);
+	}
+	
+	if (Thread.currentThread().getPriority() < ROBOTS_MAX_PRIORITY) {
+	    throw new PlayerException("Robot priority cannot be greater than game's");
 	}
 
 	try (PlayerClassLoader loader = new PlayerClassLoader(new URL[] { codePath.toURI().toURL() })) {
