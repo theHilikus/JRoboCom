@@ -33,8 +33,8 @@ public class RobotData implements RobotStatusLocal {
      * @param pGeneration the number of ancestors this robot has
      * @param pBanksCount number of banks slots in the robot
      */
-    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile,
-	    int pTeamId, int pGeneration, int pBanksCount) {
+    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile, int pTeamId,
+	    int pGeneration, int pBanksCount) {
 	this.activeState = 0;
 	set = pSet;
 	mobile = pMobile;
@@ -81,8 +81,9 @@ public class RobotData implements RobotStatusLocal {
 
     @Override
     public int getAge() {
-	return (int) Math.round((turnsManager.getTurnsCount() - cyclesAtCreation) / 1000.0);
-
+	return (int) Math.round((turnsManager.getTurnsCount() - cyclesAtCreation) / 1.0);
+	// TODO: look into using thread CPU time instead?
+	// http://stackoverflow.com/questions/755899/monitor-cpu-usage-per-thread-in-java
     }
 
     @Override

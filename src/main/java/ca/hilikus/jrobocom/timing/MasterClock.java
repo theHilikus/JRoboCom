@@ -92,7 +92,7 @@ public class MasterClock {
     public void waitFor(Integer clientId, int turns) {
 	// for safety, check if we know the robot, otherwise fail
 	if (!registered.contains(clientId)) {
-	    throw new IllegalArgumentException("Unknown robot. All robots must first register");
+	    throw new IllegalArgumentException("Unknown robot. All robots must first register with clock");
 	}
 
 	synchronized (waitingList) {

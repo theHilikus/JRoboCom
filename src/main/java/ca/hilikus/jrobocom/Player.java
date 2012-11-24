@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.SecureClassLoader;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class Player {
 
     }
 
-    private Bank[] loadBanks(PlayerClassLoader loader, String[] banksClasses) throws ClassNotFoundException,
+    private Bank[] loadBanks(SecureClassLoader loader, String[] banksClasses) throws ClassNotFoundException,
 	    InstantiationException, IllegalAccessException, ClassCastException, PlayerException {
 	log.debug("[loadCode] Attempting to load code for {}", teamName);
 	if (banksClasses.length == 0) {

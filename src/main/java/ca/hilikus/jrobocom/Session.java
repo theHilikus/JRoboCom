@@ -31,6 +31,7 @@ public class Session {
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha");
+	    theWorld.addFirst(eve);
 	    onePlayer.startRobot(eve);
 
 	}

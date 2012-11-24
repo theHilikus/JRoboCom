@@ -368,7 +368,7 @@ public class Robot implements RobotAction, Runnable {
     @Override
     public void move() {
 	if (!data.isMobile()) {
-	    die();
+	    die("Robot is not mobile but tried to move");
 	}
 	world.move(this);
 
@@ -386,7 +386,7 @@ public class Robot implements RobotAction, Runnable {
 	}
 
 	if (data.getInstructionSet().isLessThan(InstructionSet.ADVANCED)) {
-	    die();
+	    die("Robot doesn't have Scan operation in its Instruction Set");
 	}
 
 	ScanResult res = null;
