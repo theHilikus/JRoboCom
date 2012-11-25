@@ -33,7 +33,7 @@ public class MasterClock {
     private Delayer delayer = new Delayer();
 
     /**
-     * Starts the clock and resets the cycles to 0
+     * Starts the clock and resets the cycles to 0 if specified
      * 
      * @param reset true if cycles counter you be reset to 0 (e.g. in new sessions)
      */
@@ -168,6 +168,14 @@ public class MasterClock {
      */
     public boolean isRunning() {
 	return currentTicker != null;
+    }
+
+    /**
+     * Starts the clock and resets the cycles to 0
+     */
+    public void start() {
+	start(true);
+	
     }
 
 }

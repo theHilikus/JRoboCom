@@ -111,7 +111,7 @@ public class Robot implements RobotAction, Runnable {
      * @param name a name of this single robot
      */
     public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
-	this(parent.world, parent.turnsControl.clock, banksCount, name);
+	this(parent.world, parent.getTurnsControl().clock, banksCount, name);
 
 	if (banksCount > GameSettings.MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");

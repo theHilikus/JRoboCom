@@ -18,6 +18,7 @@ import ca.hilikus.jrobocom.AbstractTest;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
+import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
@@ -97,6 +98,7 @@ public class RobotTest extends AbstractTest {
     @Test(expectedExceptions = IllegalArgumentException.class, dependsOnGroups = { "init.*" })
     public void testInvalidCreation() {
 	Robot mockParent = mock(Robot.class);
+	when(mockParent.getTurnsControl()).thenReturn(mock(TurnManager.class));
 	RobotStatusLocal mockStatus = mock(RobotStatusLocal.class);
 	when(mockStatus.getInstructionSet()).thenReturn(InstructionSet.ADVANCED);
 	when(mockParent.getData()).thenReturn(mockStatus);
@@ -139,7 +141,7 @@ public class RobotTest extends AbstractTest {
 	Bank second = mock(Bank.class);
 	dummyBanks[2] = second;
 
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
+	Robot TU = new Robot(mockWorld, mockClock, dummyBanks, "Test Robot");
 	mockClock.addListener(TU.getSerialNumber());
 	TU.run();
 
@@ -163,7 +165,10 @@ public class RobotTest extends AbstractTest {
 	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 
 	Bank[] dummyBanks = new Bank[3];
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
+	MasterClock clock = new MasterClock();
+	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Test Robot");
+	clock.addListener(TU.getSerialNumber());
+	clock.start();
 
 	TU.run();
 

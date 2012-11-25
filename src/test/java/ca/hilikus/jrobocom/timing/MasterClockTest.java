@@ -66,6 +66,7 @@ public class MasterClockTest extends AbstractTest {
      */
     @Test(dependsOnMethods={"ca.hilikus.jrobocom.timing.DelayerTest.blockMe"})
     public void testMultipleWaits() throws Throwable {
+	TU.start();
 	TU.addListener(332);
 
 	Callable<Boolean> second = new Callable<Boolean>() {

@@ -43,6 +43,7 @@ public class WorldTest extends AbstractTest {
     private static Robot createRobotMockup(int teamId, int serialNumber) {
 	Robot mockRobot = mock(Robot.class);
 	RobotStatusLocal mockStatus = mock(RobotStatusLocal.class);
+	when(mockRobot.isAlive()).thenReturn(true);
 	when(mockRobot.getData()).thenReturn(mockStatus);
 	when(mockRobot.getSerialNumber()).thenReturn(serialNumber);
 	when(mockStatus.getTeamId()).thenReturn(teamId);
@@ -157,7 +158,6 @@ public class WorldTest extends AbstractTest {
 	Robot mockRobot = createRobotMockup(311, 0);
 
 	Robot mock2 = createRobotMockup(311, 5); // same team, different robot
-	when(mock2.isAlive()).thenReturn(true);
 	when(mock2.getData().getGeneration()).thenReturn(1);
 	TU.addFirst(mockRobot);
 	TU.add(mockRobot, mock2);

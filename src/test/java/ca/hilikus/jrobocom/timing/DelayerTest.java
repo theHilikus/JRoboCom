@@ -34,7 +34,6 @@ public class DelayerTest extends AbstractTest {
 
     private Logger log = LoggerFactory.getLogger(MasterClock.class);
 
-
     /**
      * Configures each test
      * 
@@ -69,10 +68,10 @@ public class DelayerTest extends AbstractTest {
 	Thread thread = new Thread(blockingTask, "Fake blocking task");
 	thread.start();
 
-	while (State.BLOCKED != thread.getState());
+	while (!thread.isAlive() || thread.getState() != State.WAITING);
 	// assertEquals(State.BLOCKED, thread.getState(), "Blocked");
 	TU.tick();
-	assertEquals(State.BLOCKED, thread.getState(), "Still Blocked");
+	assertEquals(State.WAITING, thread.getState(), "Still Blocked");
 	TU.tick();
 	assertTrue(blockingTask.get(), "Blocking thread finished correctly");
     }
