@@ -1,5 +1,6 @@
 package ca.hilikus.jrobocom.robot;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -137,7 +138,7 @@ public class Robot implements RobotAction, Runnable {
 	}
 	Robot neighbour = world.getNeighbour(this);
 	if (neighbour != null) {
-	    Bank remoteBank = neighbour.getBank(remoteBankIndex);
+	    Bank remoteBank = neighbour.getBankCopy(remoteBankIndex);
 	    setBank(remoteBank, localBankIndex);
 	    return remoteBank.getCost();
 	} else {
@@ -153,9 +154,18 @@ public class Robot implements RobotAction, Runnable {
 	}
 	Robot neighbour = world.getNeighbour(Robot.this);
 	if (neighbour != null) {
-	    Bank localBank = banks[localBankIndex];
-	    neighbour.setBank(localBank, remoteBankIndex);
-	    return localBank.getCost();
+	    Bank localBankCopy;
+	    try {
+		localBankCopy = banks[localBankIndex].getClass().getConstructor().newInstance();
+
+		neighbour.setBank(localBankCopy, remoteBankIndex);
+		return localBankCopy.getCost();
+	    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+		    | InvocationTargetException | NoSuchMethodException | SecurityException exc) {
+
+		log.error("[transfer] Error instantiating Bank for transfer", exc);
+		return 0;
+	    }
 	} else {
 	    return 0;
 	}
@@ -261,12 +271,19 @@ public class Robot implements RobotAction, Runnable {
 	}
     }
 
-    private Bank getBank(int localBankIndex) {
+    private Bank getBankCopy(int localBankIndex) {
 	if (banks == null || localBankIndex > banks.length) {
 	    throw new IllegalArgumentException("Bank doesn't exist");
 	}
 
-	return banks[localBankIndex];
+	try {
+	    return banks[localBankIndex].getClass().getConstructor().newInstance();
+	} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+		| InvocationTargetException | NoSuchMethodException | SecurityException exc) {
+
+	    log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);
+	    return null;
+	}
     }
 
     /*    private void setTeamId(int teamId) {
