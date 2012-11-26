@@ -38,6 +38,10 @@ public class Player {
     private static final int ROBOTS_MAX_PRIORITY = 3;
 
     private final ThreadGroup robotsThreads;
+    
+    final static ThreadGroup PLAYERS_GROUP = new ThreadGroup("Players' common ancestor");
+    
+    
 
     /**
      * @param codePath path to player's code. If ends in '/' it assumes the code is in .class'es in
@@ -53,8 +57,9 @@ public class Player {
 	    throw new PlayerException("Robot priority cannot be greater than game's");
 	}
 
-	try (PlayerClassLoader loader = new PlayerClassLoader(new URL[] { codePath.toURI().toURL() })) {
-
+	
+	try(PlayerClassLoader loader = new PlayerClassLoader(new URL[] { codePath.toURI().toURL() }))  {
+	    
 	    InputStream stream = loader.getResourceAsStream(PLAYER_PROPERTIES_FILE);
 
 	    if (stream == null) {
@@ -70,7 +75,7 @@ public class Player {
 
 		teamName = playerInfo.getProperty("Team", "Unknown team");
 
-		robotsThreads = new ThreadGroup(teamName + " Threads");
+		robotsThreads = new ThreadGroup(PLAYERS_GROUP, teamName + " Threads");
 		robotsThreads.setMaxPriority(ROBOTS_MAX_PRIORITY);
 
 		String banksList = playerInfo.getProperty("Banks");

@@ -2,10 +2,10 @@ package ca.hilikus.jrobocom.timing;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * A class that blocks threads for a specified number of cycles. A separate thread needs to make the
@@ -56,24 +56,6 @@ public class Delayer {
 	    if (entry.getTimeout() >= cycles) {
 		entry.getSync().release();
 	    }
-	}
-    }
-
-    private class BlockedEntry {
-	private long timeout;
-
-	Semaphore sync = new Semaphore(0);
-
-	public BlockedEntry(long pTimeout) {
-	    timeout = pTimeout;
-	}
-
-	public Semaphore getSync() {
-	    return sync;
-	}
-
-	public long getTimeout() {
-	    return timeout;
 	}
     }
 

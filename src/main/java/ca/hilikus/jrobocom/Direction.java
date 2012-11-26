@@ -15,6 +15,7 @@ public enum Direction {
      */
     public Direction left() {
         int next = (ordinal() - 1) % COUNT;
+        assert next >= 0;
         return values()[next];
     }
 
@@ -23,6 +24,7 @@ public enum Direction {
      */
     public Direction right() {
         int next = (ordinal() + 1) % COUNT;
+        assert next >= 0;
         return values()[next];
 
     }
