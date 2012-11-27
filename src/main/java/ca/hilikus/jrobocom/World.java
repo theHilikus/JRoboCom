@@ -119,8 +119,17 @@ public class World {
 	    if (checkWinner(someTeamId)) {
 		declareWinner(someTeamId);
 	    }
+	} else {
+	    //no winner
+	    declareDraw();
 	}
     }
+
+    private void declareDraw() {
+	log.info("[declareDraw] No robots left. The game is a draw :S");
+	clock.stop();
+    }
+
 
     private void declareWinner(int someTeamId) {
 	log.info("[declareWinner] Found winner! Team ID = {}", someTeamId);
@@ -272,7 +281,7 @@ public class World {
      * @return the age of the world in cycles / 1000
      */
     public int getAge() {
-	return (int) (clock.getCycles() / 1000);
+	return (int) clock.getCycles();
     }
 
 

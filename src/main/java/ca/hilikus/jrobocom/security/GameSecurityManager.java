@@ -4,9 +4,6 @@ import java.net.SocketPermission;
 import java.security.AccessControlException;
 import java.security.Permission;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.player.Bank;
 
@@ -16,8 +13,6 @@ import ca.hilikus.jrobocom.player.Bank;
  * @author hilikus
  */
 public class GameSecurityManager extends SecurityManager {
-
-    private static final Logger log = LoggerFactory.getLogger(GameSecurityManager.class);
 
     private boolean isPlayer() {
 	Class<?>[] context = getClassContext();
@@ -85,7 +80,7 @@ public class GameSecurityManager extends SecurityManager {
 
     private void checkGamePermission(GamePermission perm) {
 	if ("connectBank".equals(perm.getName()) && isPlayerThread()) {
-	    throw new SecurityException("Player cannot execute this action");
+	    throw new SecurityException("Player cannot connect a bank to a robot. Only the game can do that");
 	}
 
     }

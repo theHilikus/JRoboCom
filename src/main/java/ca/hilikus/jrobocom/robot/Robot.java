@@ -213,7 +213,7 @@ public class Robot implements RobotAction, Runnable {
 	    }
 	} catch (Exception all) {
 	    log.error("[run] Problem running robot " + this, all);
-	    die("Execution Error: " + all.getClass().getName());
+	    die("Execution Error -- " + all);
 	}
     }
 
@@ -237,7 +237,7 @@ public class Robot implements RobotAction, Runnable {
      */
     @Override
     public void die(String reason) {
-	log.debug("[die] Robot {} died with reason: {}", serialNumber, reason);
+	log.info("[die] Robot {} died with reason: {}", serialNumber, reason);
 	alive = false;
 	world.remove(Robot.this);
     }
