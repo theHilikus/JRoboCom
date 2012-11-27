@@ -3,6 +3,7 @@ package ca.hilikus.jrobocom.player;
 import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatus;
+import ca.hilikus.jrobocom.security.GamePermission;
 
 /**
  * The class that each player needs to extend to control their robots
@@ -77,6 +78,10 @@ public abstract class Bank {
      * @param newWorld world info provider to attach
      */
     final public void plugInterfaces(RobotAction newControl, RobotStatus newStatus, WorldInfo newWorld) {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("connectBank"));
+	}
 	control = newControl;
 	info = newStatus;
 	world = newWorld;

@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom;
+package ca.hilikus.jrobocom.security;
 
 import java.net.SocketPermission;
 import java.security.AccessControlException;
@@ -7,6 +7,7 @@ import java.security.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.player.Bank;
 
 /**
@@ -25,7 +26,7 @@ public class GameSecurityManager extends SecurityManager {
 		return true;
 	    }
 	}
-	// return Player.PLAYERS_GROUP.parentOf(getThreadGroup());
+
 	return false;
     }
 
@@ -68,12 +69,29 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkPermission(Permission perm) {
-	if (isPlayer()) {
-	    if (perm instanceof SocketPermission) {
-		throw new SecurityException("Cannot use sockets");
+	if (perm instanceof GamePermission) {
+	    checkGamePermission((GamePermission) perm);
+	} else {
+	    if (isPlayer()) {
+		if (perm instanceof SocketPermission) {
+		    throw new SecurityException("Cannot use sockets");
+		} else if (perm instanceof RuntimePermission) {
+		    throw new SecurityException("No Runtime Permissions");
+		}
+		super.checkPermission(perm);
 	    }
-	    super.checkPermission(perm);
 	}
+    }
+
+    private void checkGamePermission(GamePermission perm) {
+	if ("connectBank".equals(perm.getName()) && isPlayerThread()) {
+	    throw new SecurityException("Player cannot execute this action");
+	}
+
+    }
+
+    private boolean isPlayerThread() {
+	return Player.PLAYERS_GROUP.parentOf(getThreadGroup());
     }
 
     @Override
@@ -89,6 +107,5 @@ public class GameSecurityManager extends SecurityManager {
 	    throw new SecurityException("Cannot use reflection");
 	}
     }
-
 
 }

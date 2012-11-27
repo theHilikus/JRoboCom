@@ -39,7 +39,7 @@ public class Player {
 
     private final ThreadGroup robotsThreads;
     
-    final static ThreadGroup PLAYERS_GROUP = new ThreadGroup("Players' common ancestor");
+    public final static ThreadGroup PLAYERS_GROUP = new ThreadGroup("Players' common ancestor");
     
     
 
