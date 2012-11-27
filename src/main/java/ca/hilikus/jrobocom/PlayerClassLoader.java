@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 public class PlayerClassLoader extends URLClassLoader {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerClassLoader.class);
-    private static final String GAME_PACKAGE = "ca.hilikus.jrobocom.";
-    private static final String GAME_PLAYER_PACKAGE = "ca.hilikus.jrobocom.player";
 
     public PlayerClassLoader(URL[] urls) {
 	super(urls);

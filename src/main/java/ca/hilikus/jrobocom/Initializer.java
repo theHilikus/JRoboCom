@@ -2,6 +2,7 @@ package ca.hilikus.jrobocom;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -27,7 +28,13 @@ public final class Initializer {
 	System.setSecurityManager(new GameSecurityManager());
 	
 	launchUI();
-	List<String> playersData = new ArrayList<>();
+	
+	List<String> playersData = null;
+	if (args.length > 0) {
+	    log.info("[main] Initializing with {} main args: {}", args.length, Arrays.toString(args));
+	    playersData = new ArrayList<>(Arrays.asList(args));
+	}
+	 
 	start(playersData);
 
     }

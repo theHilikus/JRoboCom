@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.SecureClassLoader;
 import java.util.Properties;
 
@@ -38,10 +39,11 @@ public class Player {
     private static final int ROBOTS_MAX_PRIORITY = 3;
 
     private final ThreadGroup robotsThreads;
-    
+
+    /**
+     * The common parent of all player thread-groups
+     */
     public final static ThreadGroup PLAYERS_GROUP = new ThreadGroup("Players' common ancestor");
-    
-    
 
     /**
      * @param codePath path to player's code. If ends in '/' it assumes the code is in .class'es in
@@ -50,16 +52,16 @@ public class Player {
      */
     public Player(File codePath) throws PlayerException {
 	if (!codePath.exists() || !codePath.canRead()) {
-	    throw new IllegalArgumentException("Path is invalid: " + codePath);
+	    throw new IllegalArgumentException("Path is invalid: " + codePath
+		    + ". It can't be read or it doesn't exist");
 	}
-	
+
 	if (Thread.currentThread().getPriority() < ROBOTS_MAX_PRIORITY) {
 	    throw new PlayerException("Robot priority cannot be greater than game's");
 	}
 
-	
-	try(PlayerClassLoader loader = new PlayerClassLoader(new URL[] { codePath.toURI().toURL() }))  {
-	    
+	try (URLClassLoader loader = new URLClassLoader(new URL[] { codePath.toURI().toURL() })) {
+
 	    InputStream stream = loader.getResourceAsStream(PLAYER_PROPERTIES_FILE);
 
 	    if (stream == null) {

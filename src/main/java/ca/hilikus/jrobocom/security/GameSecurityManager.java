@@ -14,6 +14,8 @@ import ca.hilikus.jrobocom.player.Bank;
  */
 public class GameSecurityManager extends SecurityManager {
 
+    private static final String GAME_PACKAGE = "ca.hilikus.jrobocom.";
+
     private boolean isPlayer() {
 	Class<?>[] context = getClassContext();
 	for (Class<?> level : context) {
@@ -29,7 +31,7 @@ public class GameSecurityManager extends SecurityManager {
     public void checkPackageAccess(String pkg) {
 	super.checkPackageAccess(pkg);
 	if (isPlayer()) {
-	    if (pkg.startsWith("ca.hilikus.jrobocom")) {
+	    if (pkg.startsWith(GAME_PACKAGE)) {
 		if (!"ca.hilikus.jrobocom.player".equals(pkg) && !"ca.hilikus.jrobocom.robot.api".equals(pkg)) {
 		    throw new SecurityException("No access to game packages");
 		}
@@ -42,7 +44,7 @@ public class GameSecurityManager extends SecurityManager {
 	super.checkPackageDefinition(pkg);
 
 	if (isPlayer()) {
-	    if (pkg.startsWith("ca.hilikus.jrobocom")) {
+	    if (pkg.startsWith(GAME_PACKAGE)) {
 		throw new SecurityException("Cannot create classes in game packages");
 	    }
 	}
