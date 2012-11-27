@@ -375,7 +375,7 @@ public class Robot implements RobotAction, Runnable {
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
 	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
-	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Robot "
+	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
 		    + child.getSerialNumber());
 	    newThread.start(); // jumpstarts the robot
 	}
