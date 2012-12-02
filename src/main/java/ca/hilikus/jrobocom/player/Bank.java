@@ -26,8 +26,6 @@ public abstract class Bank {
      */
     protected WorldInfo world;
 
-    private String name;
-
     /**
      * read-only settings
      */
@@ -48,19 +46,13 @@ public abstract class Bank {
     }
 
     /**
-     * User-friendly name
+     * Override to set a bank's name
      * 
-     * @param bankName a description of the bank
-     */
-    final protected void setName(String bankName) {
-	name = bankName;
-    }
-
-    /**
      * @return the player-assigned name for the bank
      */
+    @SuppressWarnings("static-method")
     final public String getName() {
-	return name;
+	return "Unnamed Bank";
     }
 
     /**
