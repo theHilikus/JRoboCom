@@ -6,10 +6,16 @@ package ca.hilikus.jrobocom;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.SecureClassLoader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Random;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +45,10 @@ public class Player {
     private static final int ROBOTS_MAX_PRIORITY = 3;
 
     private final ThreadGroup robotsThreads;
+
+    private final int teamId;
+
+    private static Set<Integer> teamIds = new HashSet<>();
 
     /**
      * The common parent of all player thread-groups
@@ -88,6 +98,9 @@ public class Player {
 		}
 		String[] banksClasses = banksList.split(",");
 
+		teamId = getNextTeamId();
+		teamIds.add(teamId);
+
 		banks = loadBanks(loader, banksClasses);
 
 		log.info("[Player] Successfully loaded Player: {}. Banks found = {}", this,
@@ -95,15 +108,28 @@ public class Player {
 	    }
 
 	} catch (ClassCastException | IOException | ClassNotFoundException | InstantiationException
-		| IllegalAccessException exc) {
+		| IllegalAccessException | IllegalArgumentException | InvocationTargetException
+		| SecurityException exc) {
 	    throw new PlayerException("Error loading player's code", exc);
 
 	}
 
     }
 
+    private static int getNextTeamId() {
+	int potentialTeamId;
+	do {
+	    Random generator = new Random();
+	    potentialTeamId = generator.nextInt(1000);
+
+	} while (teamIds.contains(potentialTeamId));
+	// found good one
+	return potentialTeamId;
+    }
+
     private Bank[] loadBanks(SecureClassLoader loader, String[] banksClasses) throws ClassNotFoundException,
-	    InstantiationException, IllegalAccessException, ClassCastException, PlayerException {
+	    InstantiationException, IllegalAccessException, ClassCastException, PlayerException,
+	    IllegalArgumentException, InvocationTargetException, SecurityException {
 	log.debug("[loadCode] Attempting to load code for {}", teamName);
 	if (banksClasses.length == 0) {
 	    throw new PlayerException("Error loading configuration property: No banks found");
@@ -114,7 +140,15 @@ public class Player {
 	    @SuppressWarnings("unchecked")
 	    Class<? extends Bank> bankClass = (Class<? extends Bank>) loader.loadClass(banksClasses[pos]
 		    .trim());
-	    playerBanks[pos] = bankClass.newInstance();
+	    try {
+		playerBanks[pos] = bankClass.getDeclaredConstructor(int.class).newInstance(teamId);
+	    } catch (NoSuchMethodException exc) {
+		log.error(
+			"[loadBanks] Player banks need a constructor(int) to be able to assign a teamId to it",
+			exc);
+		throw new PlayerException(
+			"Player banks need a constructor(int) to be able to assign a teamId to it", exc);
+	    }
 	}
 
 	return playerBanks;
@@ -149,6 +183,39 @@ public class Player {
 	Thread newThread = new Thread(robotsThreads, newRobot, "Robot " + newRobot.getSerialNumber());
 	newThread.start(); // jumpstarts the robot
 
+    }
+
+    /**
+     * Creates a list of players using the paths provided
+     * 
+     * @param playersFiles list of paths (jars or dirs) to the players code
+     * @return list of all created players
+     * @throws PlayerException if there was a problem loading one of the players
+     */
+    public static List<Player> loadPlayers(List<String> playersFiles) throws PlayerException {
+	log.info("[loadPlayers] Loading all players");
+	List<Player> players = new ArrayList<>();
+
+	for (String singlePath : playersFiles) {
+	    Player single = new Player(new File(singlePath));
+	    players.add(single);
+	}
+
+	return players;
+    }
+
+    /**
+     * @return the robot's creator
+     */
+    public String getAuthor() {
+	return author;
+    }
+
+    /**
+     * @return the unique team identification for this player
+     */
+    public int getTeamId() {
+	return teamId;
     }
 
 }

@@ -223,13 +223,4 @@ public class WorldTest extends AbstractTest {
 
     }
 
-    /**
-     * Checks repeated validation of team ids
-     */
-    @Test
-    public void validateTeamId() {
-	assertTrue(TU.validateTeamId(311));
-	assertFalse(TU.validateTeamId(311));
-	assertTrue(TU.validateTeamId(123));
-    }
 }

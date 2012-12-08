@@ -1,16 +1,20 @@
 package ca.hilikus.jrobocom;
 
 import java.awt.Point;
-import java.util.HashSet;
+import java.util.EventListener;
 import java.util.Random;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.gui.events.EventDispatcher;
+import ca.hilikus.jrobocom.gui.events.GenericEventDispatcher;
+import ca.hilikus.jrobocom.gui.events.RobotAdded;
+import ca.hilikus.jrobocom.gui.events.RobotRemoved;
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
+import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 import com.google.common.collect.BiMap;
@@ -26,26 +30,30 @@ public class World {
 
     private BiMap<Robot, Point> robotsPosition = HashBiMap.create();
 
-    private Set<Integer> teamIds = new HashSet<>();
-
     private MasterClock clock;
 
     private static final Logger log = LoggerFactory.getLogger(World.class);
+
+    private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
+
+    public interface WorldListener extends EventListener {
+	public void update(RobotAdded add);
+
+	public void update(RobotRemoved rem);
+    }
 
     /**
      * Common random number generator
      */
     public static Random generator = new Random();
 
-    
     /**
      * @param pClock the world clock
      */
     public World(MasterClock pClock) {
 	clock = pClock;
     }
-    
-    
+
     /**
      * Adds a new robot to the world in the reference field of the parent
      * 
@@ -96,6 +104,7 @@ public class World {
 	if (newRobot.isAlive()) {
 	    robotsPosition.put(newRobot, newPosition);
 	    clock.addListener(newRobot.getSerialNumber());
+	    eventDispatcher.fireEvent(new RobotAdded(newRobot, newPosition));
 	    log.trace("[addFirst] Added robot {}", newRobot);
 	} else {
 	    log.debug("[add] Trying to add dead robot");
@@ -111,8 +120,10 @@ public class World {
 	    throw new IllegalArgumentException("Robot doesn't exist");
 	}
 
+	Point lastPosition = robotsPosition.get(robot);
 	robotsPosition.remove(robot);
 	clock.removeListener(robot.getSerialNumber());
+	eventDispatcher.fireEvent(new RobotRemoved(robot, lastPosition));
 
 	if (robotsPosition.size() > 0) {
 	    int someTeamId = robotsPosition.keySet().iterator().next().getData().getTeamId();
@@ -120,7 +131,7 @@ public class World {
 		declareWinner(someTeamId);
 	    }
 	} else {
-	    //no winner
+	    // no winner
 	    declareDraw();
 	}
     }
@@ -129,7 +140,6 @@ public class World {
 	log.info("[declareDraw] No robots left. The game is a draw :S");
 	clock.stop();
     }
-
 
     private void declareWinner(int someTeamId) {
 	log.info("[declareWinner] Found winner! Team ID = {}", someTeamId);
@@ -238,22 +248,7 @@ public class World {
 	return ret;
     }
 
-    /**
-     * Checks if the teamId specified is available. if it is, it reserves it
-     * 
-     * @param teamId team id to query
-     * @return true if the value is unique
-     */
-    public boolean validateTeamId(int teamId) {
-	if (teamIds.contains(teamId)) {
-	    return false;
-	} else {
-	    teamIds.add(teamId);
-	    return true;
-	}
-    }
-
-    /**
+   /**
      * Get the total number of living robots from or not from a team
      * 
      * @param teamId the team to search for
@@ -284,6 +279,15 @@ public class World {
 	return (int) clock.getCycles();
     }
 
-
+    /**
+     * @return the object in charge of events
+     */
+    public EventDispatcher<WorldListener> getEventHandler() {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("eventsListener"));
+	}
+	return eventDispatcher;
+    }
 
 }
