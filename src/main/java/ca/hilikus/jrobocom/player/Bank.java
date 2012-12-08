@@ -30,12 +30,28 @@ public abstract class Bank {
      * read-only settings
      */
     protected ReadableSettings settings;
+    
+    /**
+     * the id of the author of the bank
+     */
+    private final int teamId;
 
     /**
      * the method that will be executed once the bank becomes active. This is where the player's
      * code is defined
      */
     public abstract void run();
+
+    /**
+     * Constructs a bank
+     * 
+     * @param pTeamId the team ID must be a parameter in the players' banks. This number comes from
+     *            the game and should <u>not</u> be hardcoded by the player. In other words, it
+     *            should be left as a parameter in the constructor of the player's bank
+     */
+    public Bank(int pTeamId) {
+	teamId = pTeamId;
+    }
 
     /**
      * @return the relative cost of a bank's logic
@@ -80,8 +96,8 @@ public abstract class Bank {
 
     }
 
-    private void verify() {
-	// TODO: implement
+    private int getTeamId() {
+	return teamId;
     }
 
 }

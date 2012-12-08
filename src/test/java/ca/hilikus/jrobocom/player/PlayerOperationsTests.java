@@ -10,6 +10,10 @@ import ca.hilikus.jrobocom.player.ScanResult;
 
 public class PlayerOperationsTests extends Bank {
 
+	public PlayerOperationsTests() {
+	super(321);
+    }
+
 	private Logger log = LoggerFactory.getLogger(PlayerOperationsTests.class);
 	
 	@Override
