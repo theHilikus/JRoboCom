@@ -15,6 +15,7 @@ import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.AbstractTest;
+import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
@@ -46,9 +47,9 @@ public class RobotTest extends AbstractTest {
     public void testOtherRobotsCreation() {
 
 	World mockWorld = mock(World.class);
-	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 	Bank[] dummyBanks = new Bank[3];
-	Robot eve = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
+	Player pla = mock(Player.class);
+	Robot eve = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", pla);
 
 	int banks = 3;
 
@@ -74,14 +75,13 @@ public class RobotTest extends AbstractTest {
     @Test(groups = "init")
     public void testFirstRobotCreation() {
 	World mockWorld = mock(World.class);
-	when(mockWorld.validateTeamId(anyInt())).thenReturn(false, true);
-
+	
 	final int BANK_COUNT = 3;
 	Bank[] dummyBanks = new Bank[BANK_COUNT];
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
+	Player pla = mock(Player.class);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", pla);
 
 	// check generation and serial #?
-	verify(mockWorld, atLeast(2)).validateTeamId(anyInt());
 
 	assertFalse(TU.getData().isMobile(), "First robot should not be mobile");
 	assertEquals(TU.getBanksCount(), BANK_COUNT, "First robot has all banks provided");
@@ -114,13 +114,12 @@ public class RobotTest extends AbstractTest {
     @Test(dependsOnMethods = { "testFirstRobotCreation" })
     public void testReboot() {
 	World mockWorld = mock(World.class);
-	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 	MasterClock mockClock = mock(MasterClock.class);
 
 	mockClock.start(true);
 
 	Bank[] dummyBanks = new Bank[3];
-	Bank first = new Bank() {
+	Bank first = new Bank(311) {
 	    int repeat = 0;
 
 	    @Override
@@ -141,7 +140,8 @@ public class RobotTest extends AbstractTest {
 	Bank second = mock(Bank.class);
 	dummyBanks[2] = second;
 
-	Robot TU = new Robot(mockWorld, mockClock, dummyBanks, "Test Robot");
+	Player pla = mock(Player.class);
+	Robot TU = new Robot(mockWorld, mockClock, dummyBanks, "Test Robot", pla);
 	mockClock.addListener(TU.getSerialNumber());
 	TU.run();
 
@@ -162,11 +162,11 @@ public class RobotTest extends AbstractTest {
     @Test(dependsOnMethods = { "testFirstRobotCreation" })
     public void testDataHunger() {
 	World mockWorld = mock(World.class);
-	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 
 	Bank[] dummyBanks = new Bank[3];
 	MasterClock clock = new MasterClock();
-	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Test Robot");
+	Player pla = mock(Player.class);
+	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Test Robot", pla);
 	clock.addListener(TU.getSerialNumber());
 	clock.start();
 
@@ -181,10 +181,10 @@ public class RobotTest extends AbstractTest {
     @Test(dependsOnMethods = { "testFirstRobotCreation" })
     public void testDie() {
 	World mockWorld = mock(World.class);
-	when(mockWorld.validateTeamId(anyInt())).thenReturn(true);
 
 	Bank[] dummyBanks = new Bank[3];
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot");
+	Player pla = mock(Player.class);
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", pla);
 
 	TU.die("test die");
 

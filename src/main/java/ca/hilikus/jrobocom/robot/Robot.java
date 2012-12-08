@@ -1,12 +1,12 @@
 package ca.hilikus.jrobocom.robot;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.GameSettings;
+import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.player.Bank;
@@ -52,6 +52,8 @@ public class Robot implements RobotAction, Runnable {
     private final RobotStatus status;
 
     private final WorldInfo worldProxy;
+    
+    private final Player owner;
 
     /**
      * Common constructor for all robots
@@ -60,8 +62,8 @@ public class Robot implements RobotAction, Runnable {
      * @param clock the clock that controls the robot turns
      * @param banksCount number of banks
      */
-    private Robot(World theWorld, MasterClock clock, int banksCount, String pName) {
-	if (theWorld == null || clock == null) {
+    private Robot(World theWorld, MasterClock clock, int banksCount, String pName, Player pOwner) {
+	if (theWorld == null || clock == null || pOwner == null) {
 	    throw new IllegalArgumentException("Arguments cannot be null");
 	}
 	serialNumber = Robot.getNextSerialNumber();
@@ -72,6 +74,7 @@ public class Robot implements RobotAction, Runnable {
 	control = new RobotControlProxy(this);
 	status = new RobotStatusProxy(this, world);
 	banks = new Bank[banksCount];
+	owner = pOwner;
 	name = pName;
     }
 
@@ -83,17 +86,13 @@ public class Robot implements RobotAction, Runnable {
      * @param clock the ticker to control turns
      * @param allBanks the code to execute
      * @param name this robot's name
+     * @param pOwner the player that created this robot
      */
-    public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name) {
-	this(theWorld, clock, allBanks.length, name);
+    public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name, Player pOwner) {
+	this(theWorld, clock, allBanks.length, name, pOwner);
 
-	Random generator = new Random();
-	int potentialTeamId;
-	do {
-	    potentialTeamId = generator.nextInt(1000);
-	} while (!world.validateTeamId(potentialTeamId));
 
-	data = new RobotData(turnsControl, InstructionSet.SUPER, false, potentialTeamId, 0, allBanks.length);
+	data = new RobotData(turnsControl, InstructionSet.SUPER, false, pOwner.getTeamId(), 0, allBanks.length);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
@@ -112,7 +111,7 @@ public class Robot implements RobotAction, Runnable {
      * @param name a name of this single robot
      */
     public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
-	this(parent.world, parent.getTurnsControl().clock, banksCount, name);
+	this(parent.world, parent.getTurnsControl().clock, banksCount, name, parent.owner);
 
 	if (banksCount > GameSettings.MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
