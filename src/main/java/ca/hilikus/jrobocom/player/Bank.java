@@ -30,7 +30,7 @@ public abstract class Bank {
      * read-only settings
      */
     protected ReadableSettings settings;
-    
+
     /**
      * the id of the author of the bank
      */
@@ -96,7 +96,10 @@ public abstract class Bank {
 
     }
 
-    private int getTeamId() {
+    /**
+     * @return the id of the player that created the bank
+     */
+    public int getTeamId() {
 	return teamId;
     }
 

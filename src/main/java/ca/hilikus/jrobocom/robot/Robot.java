@@ -1,5 +1,6 @@
 package ca.hilikus.jrobocom.robot;
 
+import java.awt.Graphics2D;
 import java.lang.reflect.InvocationTargetException;
 
 import org.slf4j.Logger;
@@ -9,6 +10,8 @@ import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
+import ca.hilikus.jrobocom.gui.Drawable;
+import ca.hilikus.jrobocom.gui.ModelDrawingVisitor;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
@@ -23,7 +26,7 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  * @author hilikus
  * 
  */
-public class Robot implements RobotAction, Runnable {
+public class Robot implements RobotAction, Runnable, Drawable {
 
     private static int lastSerial = 0;
 
@@ -52,7 +55,7 @@ public class Robot implements RobotAction, Runnable {
     private final RobotStatus status;
 
     private final WorldInfo worldProxy;
-    
+
     private final Player owner;
 
     /**
@@ -91,8 +94,8 @@ public class Robot implements RobotAction, Runnable {
     public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name, Player pOwner) {
 	this(theWorld, clock, allBanks.length, name, pOwner);
 
-
-	data = new RobotData(turnsControl, InstructionSet.SUPER, false, pOwner.getTeamId(), 0, allBanks.length);
+	data = new RobotData(turnsControl, InstructionSet.SUPER, false, pOwner.getTeamId(), 0,
+		allBanks.length);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
@@ -462,6 +465,26 @@ public class Robot implements RobotAction, Runnable {
      */
     public String getName() {
 	return name;
+    }
+
+    @Override
+    public void accept(Graphics2D g2, ModelDrawingVisitor visitor) {
+	visitor.draw(g2, this);
+
+    }
+
+    /**
+     * @return the owner
+     */
+    public Player getOwner() {
+	return owner;
+    }
+
+    /**
+     * @return the id of the creator of the running bank
+     */
+    public int getRunningBankTeamId() {
+	return banks[runningBank].getTeamId();
     }
 
 }

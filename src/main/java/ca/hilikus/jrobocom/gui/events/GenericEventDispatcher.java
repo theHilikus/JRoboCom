@@ -77,7 +77,7 @@ public class GenericEventDispatcher<T extends EventListener> implements EventDis
 
     }
 
-    private void checkPermission() {
+    private static void checkPermission() {
 	SecurityManager sm = System.getSecurityManager();
 	if (sm != null) {
 	    sm.checkPermission(new GamePermission("eventsListener"));

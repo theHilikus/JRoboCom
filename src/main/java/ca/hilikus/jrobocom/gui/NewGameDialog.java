@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,43 +15,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractListModel;
-import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
+import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JButton;
-import javax.swing.JColorChooser;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.exceptions.PlayerException;
-import ca.hilikus.jrobocom.gui.ColouredCellRenderer.ColourProvider;
-
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
 
 /**
  * UI to add new teams of robots
  * 
  * @author hilikus
  */
-public class NewGameDialog extends JDialog implements ColourProvider {
+public class NewGameDialog extends JDialog implements ColourInfoProvider {
 
     private static final String CANCEL = "Cancel";
     private static final String OK = "OK";
@@ -119,7 +104,7 @@ public class NewGameDialog extends JDialog implements ColourProvider {
 			    teamsColours.put(newPlayer.getTeamId(), getNextColour());
 			    changeStatus("Added " + chooser.getSelectedFile() + " successfully");
 			    try {
-				prefs.put(LAST_DIR, chooser.getSelectedFile().getCanonicalPath());
+				prefs.put(LAST_DIR, chooser.getCurrentDirectory().getCanonicalPath());
 			    } catch (IOException exc) {
 				log.error("[actionPerformed] error saving last path", exc);
 			    }
