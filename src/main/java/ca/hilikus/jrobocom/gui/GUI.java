@@ -6,56 +6,34 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.Session;
-import ca.hilikus.jrobocom.gui.ColouredCellRenderer.ColourProvider;
 import ca.hilikus.jrobocom.gui.events.GameListener;
 import ca.hilikus.jrobocom.gui.events.RobotAdded;
 import ca.hilikus.jrobocom.gui.events.RobotRemoved;
 import ca.hilikus.jrobocom.robot.Robot;
-
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle.ComponentPlacement;
 
 /**
  * The composed UI
  * 
  * @author hilikus
  */
-public class GUI implements ColourProvider {
+public class GUI implements ColourInfoProvider {
 
     private JFrame frame;
 
     private Controller controller = new Controller();
 
-    private JButton btnNewGame;
-
-    private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
     private JToggleButton tglbtnStart;
 
@@ -69,6 +47,11 @@ public class GUI implements ColourProvider {
 
     private Map<Integer, Color> teamsColours;
 
+    private Session session;
+
+    private List<Player> players;
+
+    private JButton btnReload;
 
     /**
      * Event handler in charge of updating the UI and receiving user input
@@ -76,46 +59,37 @@ public class GUI implements ColourProvider {
      */
     public class Controller implements GameListener, ActionListener {
 
-	private Session session;
-
 	@Override
 	public void update(RobotAdded evt) {
 	    Robot source = (Robot) evt.getSource();
-	    board.addRobot(evt.getCoordinates(), teamsColours.get(source.getData().getTeamId()));
+	    board.addItem(evt.getCoordinates(), source);
 
 	}
 
 	@Override
 	public void update(RobotRemoved evt) {
-	    board.removeRobot(evt.getCoordinates());
+	    board.removeItem(evt.getCoordinates());
 
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-	    if (e.getSource() == btnNewGame) {
-		NewGameDialog newGameDialog = new NewGameDialog(frame);
-		newGameDialog.setVisible(true);
-		if (newGameDialog.getResult() == JOptionPane.OK_OPTION) {
-		    // user pressed ok
-		    assert newGameDialog.getSelectedTeams() != null;
-		    List<Player> players;
-		    players = newGameDialog.getSelectedTeams();
-		    teamsColours = newGameDialog.getColourMappings();
-		    session = new Session(players, controller);
-		    
-		    sessionReady(newGameDialog.getSelectedTeams().size() > 0);
-		    playersModel.clear();
-		    for (Player player : players) {
-			
-			playersModel.addElement(player);
-		    }
+	    switch (e.getActionCommand()) {
+		case Actions.NEW_GAME:
+		    createNewSession();
+		    break;
+		case Actions.RELOAD:
+		    reloadSession();
 
-		}
 	    }
 
 	}
 
+    }
+
+    private class Actions {
+	public static final String RELOAD = "reload";
+	public static final String NEW_GAME = "newGame";
     }
 
     /**
@@ -136,6 +110,7 @@ public class GUI implements ColourProvider {
 	tglbtnStart.setEnabled(isReady);
 	speedSlider.setEnabled(isReady);
 	btnStep.setEnabled(isReady);
+	btnReload.setEnabled(isReady);
 
     }
 
@@ -153,11 +128,17 @@ public class GUI implements ColourProvider {
 	JToolBar toolBar = new JToolBar();
 	frame.getContentPane().add(toolBar, BorderLayout.NORTH);
 
-	btnNewGame = new JButton("New game");
+	JButton btnNewGame = new JButton("New game");
+	btnNewGame.setActionCommand(Actions.NEW_GAME);
 	btnNewGame.addActionListener(controller);
+
 	toolBar.add(btnNewGame);
 
-	JButton btnReload = new JButton("Reload");
+	btnReload = new JButton("Reload");
+	btnReload.setEnabled(false);
+	btnReload.setActionCommand(Actions.RELOAD);
+	btnReload.addActionListener(controller);
+	
 	toolBar.add(btnReload);
 	toolBar.addSeparator();
 
@@ -178,7 +159,7 @@ public class GUI implements ColourProvider {
 	frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
 	mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-	board = new BoardPanel();
+	board = new BoardPanel(this);
 	mainPanel.add(board);
 	board.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), new BevelBorder(
 		BevelBorder.RAISED, null, null, null, null)));
@@ -238,20 +219,36 @@ public class GUI implements ColourProvider {
 	return controller;
     }
 
-    /**
-     * Changes the team's colour
-     * 
-     * @param teamId id of the player
-     * @param newColour the new colour for the team
-     */
-    public void setTeamColour(int teamId, Color newColour) {
-	teamsColours.put(teamId, newColour);
-    }
-
-
     @Override
     public Color getTeamColour(int teamId) {
 	return teamsColours.get(teamId);
+    }
+
+    private void createNewSession() {
+	NewGameDialog newGameDialog = new NewGameDialog(frame);
+	newGameDialog.setVisible(true);
+	if (newGameDialog.getResult() == JOptionPane.OK_OPTION) {
+	    // user pressed ok
+	    assert newGameDialog.getSelectedTeams() != null;
+	    board.clear();
+	    players = newGameDialog.getSelectedTeams();
+	    teamsColours = newGameDialog.getColourMappings();
+	    session = new Session(players, controller);
+
+	    sessionReady(newGameDialog.getSelectedTeams().size() > 0);
+	    playersModel.clear();
+	    for (Player player : players) {
+		playersModel.addElement(player);
+	    }
+
+	}
+    }
+
+    private void reloadSession() {
+	assert players != null && players.size() > 0 : "Players undefined, UI should not allow this action yet";
+	board.clear();
+	session = new Session(players, controller);
+
     }
 
 }

@@ -11,14 +11,10 @@ import ca.hilikus.jrobocom.Player;
 
 public class ColouredCellRenderer extends JLabel implements ListCellRenderer<Player> {
 
-    private ColourProvider colourProvider;
+    private ColourInfoProvider colourProvider;
 
-
-    public interface ColourProvider {
-	public Color getTeamColour(int teamId);
-    }
     
-    public ColouredCellRenderer(ColourProvider provider) {
+    public ColouredCellRenderer(ColourInfoProvider provider) {
 	setOpaque(true);
 	
 	colourProvider = provider;
