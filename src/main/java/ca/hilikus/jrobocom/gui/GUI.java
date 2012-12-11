@@ -18,9 +18,9 @@ import javax.swing.border.EmptyBorder;
 
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.Session;
-import ca.hilikus.jrobocom.gui.events.GameListener;
-import ca.hilikus.jrobocom.gui.events.RobotAdded;
-import ca.hilikus.jrobocom.gui.events.RobotRemoved;
+import ca.hilikus.jrobocom.events.GameListener;
+import ca.hilikus.jrobocom.events.RobotAddedEvent;
+import ca.hilikus.jrobocom.events.RobotRemovedEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**
@@ -60,14 +60,14 @@ public class GUI implements ColourInfoProvider {
     public class Controller implements GameListener, ActionListener {
 
 	@Override
-	public void update(RobotAdded evt) {
+	public void update(RobotAddedEvent evt) {
 	    Robot source = (Robot) evt.getSource();
 	    board.addItem(evt.getCoordinates(), source);
 
 	}
 
 	@Override
-	public void update(RobotRemoved evt) {
+	public void update(RobotRemovedEvent evt) {
 	    board.removeItem(evt.getCoordinates());
 
 	}

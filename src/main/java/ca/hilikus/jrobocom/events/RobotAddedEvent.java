@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui.events;
+package ca.hilikus.jrobocom.events;
 
 import java.awt.Point;
 import java.util.EventObject;
@@ -10,7 +10,7 @@ import ca.hilikus.jrobocom.robot.Robot;
  * 
  * @author hilikus
  */
-public class RobotAdded extends EventObject {
+public class RobotAddedEvent extends EventObject {
 
     private static final long serialVersionUID = 3701263690126469309L;
     private Point coordinates;
@@ -21,7 +21,7 @@ public class RobotAdded extends EventObject {
      * @param newRobot robot just added to the game
      * @param pCoordinates location of the new robot
      */
-    public RobotAdded(Robot newRobot, Point pCoordinates) {
+    public RobotAddedEvent(Robot newRobot, Point pCoordinates) {
 	super(newRobot);
 	coordinates = pCoordinates;
     }

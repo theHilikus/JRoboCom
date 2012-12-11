@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui.events;
+package ca.hilikus.jrobocom.events;
 
 import java.awt.Point;
 import java.util.EventObject;
@@ -10,7 +10,7 @@ import ca.hilikus.jrobocom.robot.Robot;
  * 
  * @author hilikus
  */
-public class RobotRemoved extends EventObject {
+public class RobotRemovedEvent extends EventObject {
 
     private static final long serialVersionUID = 8962044780427247123L;
     private Point lastPosition;
@@ -21,7 +21,7 @@ public class RobotRemoved extends EventObject {
      * @param robot robot removed
      * @param pLastPosition last coordinates of the robot
      */
-    public RobotRemoved(Robot robot, Point pLastPosition) {
+    public RobotRemovedEvent(Robot robot, Point pLastPosition) {
 	super(robot);
 
 	lastPosition = pLastPosition;

@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui.events;
+package ca.hilikus.jrobocom.events;
 
 import ca.hilikus.jrobocom.World.WorldListener;
 

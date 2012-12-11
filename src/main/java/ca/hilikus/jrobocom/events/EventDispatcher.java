@@ -1,8 +1,14 @@
-package ca.hilikus.jrobocom.gui.events;
+package ca.hilikus.jrobocom.events;
 
 import java.util.EventListener;
 import java.util.EventObject;
 
+/**
+ * Interface that listeners use to controls their registration
+ * 
+ * @param <T> the listening interface
+ * @author hilikus
+ */
 public interface EventDispatcher<T extends EventListener> {
 
     /**
