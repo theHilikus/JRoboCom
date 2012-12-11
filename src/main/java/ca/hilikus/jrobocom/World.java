@@ -7,10 +7,11 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.hilikus.jrobocom.gui.events.EventDispatcher;
-import ca.hilikus.jrobocom.gui.events.GenericEventDispatcher;
-import ca.hilikus.jrobocom.gui.events.RobotAdded;
-import ca.hilikus.jrobocom.gui.events.RobotRemoved;
+import ca.hilikus.jrobocom.events.EventDispatcher;
+import ca.hilikus.jrobocom.events.GenericEventDispatcher;
+import ca.hilikus.jrobocom.events.RobotAddedEvent;
+import ca.hilikus.jrobocom.events.RobotMovedEvent;
+import ca.hilikus.jrobocom.events.RobotRemovedEvent;
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
@@ -36,10 +37,20 @@ public class World {
 
     private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
 
+    /**
+     * Notification interface to be implemented by listeners of World events
+     * 
+     */
     public interface WorldListener extends EventListener {
-	public void update(RobotAdded add);
+	/**
+	 * @param add event details
+	 */
+	public void update(RobotAddedEvent add);
 
-	public void update(RobotRemoved rem);
+	/**
+	 * @param rem event details
+	 */
+	public void update(RobotRemovedEvent rem);
     }
 
     /**
@@ -104,7 +115,7 @@ public class World {
 	if (newRobot.isAlive()) {
 	    robotsPosition.put(newRobot, newPosition);
 	    clock.addListener(newRobot.getSerialNumber());
-	    eventDispatcher.fireEvent(new RobotAdded(newRobot, newPosition));
+	    eventDispatcher.fireEvent(new RobotAddedEvent(newRobot, newPosition));
 	    log.trace("[addFirst] Added robot {}", newRobot);
 	} else {
 	    log.debug("[add] Trying to add dead robot");
@@ -123,7 +134,7 @@ public class World {
 	Point lastPosition = robotsPosition.get(robot);
 	robotsPosition.remove(robot);
 	clock.removeListener(robot.getSerialNumber());
-	eventDispatcher.fireEvent(new RobotRemoved(robot, lastPosition));
+	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
 	if (robotsPosition.size() > 0) {
 	    int someTeamId = robotsPosition.keySet().iterator().next().getData().getTeamId();
@@ -170,7 +181,9 @@ public class World {
 
 	Point newPosition = getReferenceField(robot, 1);
 	if (!isOccupied(newPosition)) {
+	    Point oldPosition = robotsPosition.get(robot);
 	    robotsPosition.forcePut(robot, newPosition);
+	    eventDispatcher.fireEvent(new RobotMovedEvent(robot, oldPosition, newPosition));
 	}
 
     }
@@ -248,7 +261,7 @@ public class World {
 	return ret;
     }
 
-   /**
+    /**
      * Get the total number of living robots from or not from a team
      * 
      * @param teamId the team to search for

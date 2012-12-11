@@ -2,6 +2,7 @@ package ca.hilikus.jrobocom.robot;
 
 import java.awt.Graphics2D;
 import java.lang.reflect.InvocationTargetException;
+import java.util.EventListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,10 @@ import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
+import ca.hilikus.jrobocom.World.WorldListener;
+import ca.hilikus.jrobocom.events.EventDispatcher;
+import ca.hilikus.jrobocom.events.GenericEventDispatcher;
+import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.gui.Drawable;
 import ca.hilikus.jrobocom.gui.ModelDrawingVisitor;
 import ca.hilikus.jrobocom.player.Bank;
@@ -18,6 +23,7 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatus;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
@@ -57,6 +63,19 @@ public class Robot implements RobotAction, Runnable, Drawable {
     private final WorldInfo worldProxy;
 
     private final Player owner;
+
+    private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
+
+    /**
+     * Events interface
+     * 
+     */
+    public interface RobotListener extends EventListener {
+	/**
+	 * @param evt the change object
+	 */
+	public void update(RobotChangedEvent evt);
+    }
 
     /**
      * Common constructor for all robots
@@ -185,6 +204,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
 	try {
 	    turnsControl.waitTurns(1); // block at the beginning so that all robots start at the
 				       // same time
+	    int oldRunningBank = 0;
 	    while (alive) {
 		if (runningBank == 0) {
 		    if (banks[0] == null || banks[0].isEmpty()) {
@@ -204,10 +224,17 @@ public class Robot implements RobotAction, Runnable, Drawable {
 		}
 
 		if (alive) {
+		    if (runningBank != oldRunningBank
+			    && banks[runningBank].getTeamId() != banks[oldRunningBank].getTeamId()) {
+			eventDispatcher.fireEvent(new RobotChangedEvent(this));
+		    }
+		    oldRunningBank = runningBank;
 		    banks[runningBank].run();
+
 		    if (!pendingBankChange) {
 			reboot("End of bank");
 		    } else {
+
 			pendingBankChange = false;
 		    }
 		}
@@ -359,7 +386,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
 	} else {
 	    ((RobotData) data).setFacing(data.getFacing().left());
 	}
-
+	eventDispatcher.fireEvent(new RobotChangedEvent(this));
     }
 
     void setActiveState(int pActiveState) {
@@ -485,6 +512,17 @@ public class Robot implements RobotAction, Runnable, Drawable {
      */
     public int getRunningBankTeamId() {
 	return banks[runningBank].getTeamId();
+    }
+
+    /**
+     * @return the object in charge of events
+     */
+    public EventDispatcher<WorldListener> getEventHandler() {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("eventsListener"));
+	}
+	return eventDispatcher;
     }
 
 }
