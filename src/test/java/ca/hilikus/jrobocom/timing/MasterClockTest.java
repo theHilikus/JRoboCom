@@ -9,8 +9,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,13 +34,9 @@ public class MasterClockTest extends AbstractTest {
 
     private MasterClock TU;
 
-    private Logger log = LoggerFactory.getLogger(MasterClock.class);
-
-
     /**
      * Initializes each test
      * 
-     * @param met test about to be called
      */
     @BeforeMethod
     public void setUpTU() {
@@ -64,7 +58,7 @@ public class MasterClockTest extends AbstractTest {
      * 
      * @throws Throwable
      */
-    @Test(dependsOnMethods={"ca.hilikus.jrobocom.timing.DelayerTest.blockMe"})
+    @Test(dependsOnMethods = { "ca.hilikus.jrobocom.timing.DelayerTest.blockMe" })
     public void testMultipleWaits() throws Throwable {
 	TU.start();
 	TU.addListener(332);
@@ -161,7 +155,7 @@ public class MasterClockTest extends AbstractTest {
     @Test(dependsOnMethods = { "testStartStop" })
     public void testChangePeriod() throws InterruptedException, ExecutionException {
 	TU.addListener(332);
-	
+
 	Callable<Boolean> second = new Callable<Boolean>() {
 
 	    @Override

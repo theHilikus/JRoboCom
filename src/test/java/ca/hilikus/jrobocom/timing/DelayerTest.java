@@ -8,8 +8,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,8 +29,6 @@ public class DelayerTest extends AbstractTest {
     }
 
     private Delayer TU;
-
-    private Logger log = LoggerFactory.getLogger(MasterClock.class);
 
     /**
      * Configures each test

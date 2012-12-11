@@ -23,7 +23,6 @@ public final class Initializer {
 
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
-    private static GUI frame;
 
     /**
      * @param args
@@ -61,7 +60,8 @@ public final class Initializer {
 
 	    @Override
 	    public void run() {
-		frame = new GUI("JRobotCom");
+		@SuppressWarnings("unused")
+		GUI frame = new GUI("JRobotCom");
 
 	    }
 	});

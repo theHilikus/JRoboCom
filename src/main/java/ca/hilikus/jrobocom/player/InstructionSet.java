@@ -18,7 +18,7 @@ public enum InstructionSet {
      */
     ADVANCED, /**
      * The complete set of instructions:<br>
-     * BASIC + ADVANCED + {@link RobotAction#createRobot(InstructionSet, int, boolean)}
+     * BASIC + ADVANCED + {@link RobotAction#createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile)}
      */
     SUPER;
 
