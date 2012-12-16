@@ -1,10 +1,13 @@
 package ca.hilikus.jrobocom.security;
 
 import java.net.SocketPermission;
-import java.security.AccessControlException;
 import java.security.Permission;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.Player;
+import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.player.Bank;
 
 /**
@@ -16,19 +19,24 @@ public class GameSecurityManager extends SecurityManager {
 
     private static final String GAME_PACKAGE = "ca.hilikus.jrobocom.";
 
+    private static final Logger log = LoggerFactory.getLogger(GameSecurityManager.class);
+
     private boolean isPlayer() {
 	Class<?>[] context = getClassContext();
-	for (Class<?> level : context) {
+	/*for (Class<?> level : context) {
 	    if (Bank.class.isAssignableFrom(level)) {
 		return true;
 	    }
 	}
 
 	return false;
+	*/
+	return Bank.class.isAssignableFrom(context[3]);
     }
 
     @Override
     public void checkPackageAccess(String pkg) {
+	log.trace("[checkPackageAccess] Checking package access for {}", pkg);
 	super.checkPackageAccess(pkg);
 	if (isPlayer()) {
 	    if (pkg.startsWith(GAME_PACKAGE)) {
@@ -41,6 +49,7 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkPackageDefinition(String pkg) {
+	log.trace("[checkPackageDefinition] Check creating new classes in {}", pkg);
 	super.checkPackageDefinition(pkg);
 
 	if (isPlayer()) {
@@ -52,13 +61,16 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkRead(String file) {
+	log.trace("[checkRead] Check read access for {}", file);
 	if (isPlayer()) {
-	    throw new AccessControlException("Cannot read other resources");
+	    // TODO: this should be less restrictive super.checkRead(file);
+	    // throw new AccessControlException("Cannot read other resources");
 	}
     }
 
     @Override
     public void checkCreateClassLoader() {
+	log.trace("[checkCreateClassLoader] Tring to create class loader");
 	if (isPlayer()) {
 	    super.checkCreateClassLoader();
 	}
@@ -66,6 +78,7 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkPermission(Permission perm) {
+	log.trace("[checkPermission] Checking permission {}", perm);
 	if (perm instanceof GamePermission) {
 	    checkGamePermission((GamePermission) perm);
 	} else {
@@ -81,6 +94,7 @@ public class GameSecurityManager extends SecurityManager {
     }
 
     private void checkGamePermission(GamePermission perm) {
+	log.trace("[checkGamePermission] Checking game permission {}", perm);
 	if ("connectBank".equals(perm.getName()) && isPlayerThread()) {
 	    throw new SecurityException("Player cannot connect a bank to a robot. Only the game can do that");
 	}
@@ -93,6 +107,7 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkDelete(String file) {
+	log.trace("[checkDelete] Trying to delete file {}", file);
 	if (isPlayer()) {
 	    super.checkDelete(file);
 	}
@@ -100,7 +115,8 @@ public class GameSecurityManager extends SecurityManager {
 
     @Override
     public void checkMemberAccess(Class<?> clazz, int which) {
-	if (isPlayer()) {
+	log.trace("[checkMemberAccess] Trying to use reflection on {}", clazz);
+	if (isPlayer() && !getClassContext()[3].equals(GenericEventDispatcher.class)) {
 	    throw new SecurityException("Cannot use reflection");
 	}
     }

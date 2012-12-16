@@ -48,6 +48,13 @@ public class MasterClock {
     }
 
     /**
+     * A single clock tick
+     */
+    public void step() {
+	delayer.tick();
+    }
+
+    /**
      * Stops the clock
      */
     public void stop() {
@@ -175,7 +182,7 @@ public class MasterClock {
      */
     public void start() {
 	start(true);
-	
+
     }
 
 }
