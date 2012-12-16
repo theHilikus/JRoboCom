@@ -4,8 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,10 +19,17 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.Session;
 import ca.hilikus.jrobocom.events.GameListener;
+import ca.hilikus.jrobocom.events.ResultEvent;
+import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
+import ca.hilikus.jrobocom.events.RobotChangedEvent;
+import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 
@@ -33,7 +43,6 @@ public class GUI implements ColourInfoProvider {
     private JFrame frame;
 
     private Controller controller = new Controller();
-
 
     private JToggleButton tglbtnStart;
 
@@ -53,23 +62,40 @@ public class GUI implements ColourInfoProvider {
 
     private JButton btnReload;
 
+    private static final Logger log = LoggerFactory.getLogger(GUI.class);
+
     /**
      * Event handler in charge of updating the UI and receiving user input
      * 
      */
     public class Controller implements GameListener, ActionListener {
+	private Map<Robot, Point> robots = new HashMap<>();
 
 	@Override
-	public void update(RobotAddedEvent evt) {
-	    Robot source = (Robot) evt.getSource();
-	    board.addItem(evt.getCoordinates(), source);
+	public void update(final RobotAddedEvent evt) {
+	    final Robot source = evt.getSource();
+	    SwingUtilities.invokeLater(new Runnable() {
 
+		@Override
+		public void run() {
+		    board.addItem(evt.getCoordinates(), source);
+		}
+	    });
+
+	    robots.put(source, evt.getCoordinates());
 	}
 
 	@Override
-	public void update(RobotRemovedEvent evt) {
-	    board.removeItem(evt.getCoordinates());
+	public void update(final RobotRemovedEvent evt) {
+	    SwingUtilities.invokeLater(new Runnable() {
 
+		@Override
+		public void run() {
+		    board.removeItem(evt.getCoordinates());
+		}
+	    });
+
+	    robots.remove(evt.getSource());
 	}
 
 	@Override
@@ -80,8 +106,45 @@ public class GUI implements ColourInfoProvider {
 		    break;
 		case Actions.RELOAD:
 		    reloadSession();
+		    break;
+		case Actions.STEP:
+		    singleStep();
+		    break;
+		case Actions.START:
+		    start(!((JToggleButton) e.getSource()).isSelected());
 
 	    }
+
+	}
+
+	@Override
+	public void update(final RobotChangedEvent evt) {
+	    SwingUtilities.invokeLater(new Runnable() {
+
+		@Override
+		public void run() {
+		    board.refresh(robots.get(evt.getSource()));
+		}
+	    });
+
+	}
+
+	@Override
+	public void update(final RobotMovedEvent mov) {
+	    SwingUtilities.invokeLater(new Runnable() {
+
+		@Override
+		public void run() {
+		    board.moveItem(mov.getOldPosition(), mov.getNewPosition());
+		}
+	    });
+
+	    robots.put(mov.getSource(), mov.getNewPosition());
+	}
+
+	@Override
+	public void update(ResultEvent result) {
+	    displayResult(result);
 
 	}
 
@@ -90,6 +153,8 @@ public class GUI implements ColourInfoProvider {
     private class Actions {
 	public static final String RELOAD = "reload";
 	public static final String NEW_GAME = "newGame";
+	public static final String STEP = "step";
+	public static final String START = "start/stop";
     }
 
     /**
@@ -99,6 +164,20 @@ public class GUI implements ColourInfoProvider {
      */
     public GUI(String title) {
 	initialize(title);
+    }
+
+    private void singleStep() {
+	session.step();
+    }
+
+    private void start(boolean pause) {
+	if (pause) {
+	    assert session.isRunning();
+	    session.stop();
+	} else {
+	    assert !session.isRunning();
+	    session.start();
+	}
     }
 
     /**
@@ -138,21 +217,26 @@ public class GUI implements ColourInfoProvider {
 	btnReload.setEnabled(false);
 	btnReload.setActionCommand(Actions.RELOAD);
 	btnReload.addActionListener(controller);
-	
+
 	toolBar.add(btnReload);
 	toolBar.addSeparator();
 
 	tglbtnStart = new JToggleButton("Start");
 	tglbtnStart.setEnabled(false);
+	tglbtnStart.setActionCommand(Actions.START);
+	tglbtnStart.addActionListener(controller);
 	toolBar.add(tglbtnStart);
 
 	speedSlider = new JSlider();
+	speedSlider.setValue(10);
 	speedSlider.setEnabled(false);
 	speedSlider.setMaximumSize(new Dimension(100, 16));
 	toolBar.add(speedSlider);
 
 	btnStep = new JButton("Step");
 	btnStep.setEnabled(false);
+	btnStep.setActionCommand(Actions.STEP);
+	btnStep.addActionListener(controller);
 	toolBar.add(btnStep);
 
 	JPanel mainPanel = new JPanel();
@@ -200,7 +284,12 @@ public class GUI implements ColourInfoProvider {
 			.addContainerGap(364, Short.MAX_VALUE)));
 	rightPanel.setLayout(gl_rightPanel);
 
+	assertEDT();
 	frame.setVisible(true);
+    }
+
+    private static void assertEDT() {
+	assert SwingUtilities.isEventDispatchThread() : "Not in EDT";
     }
 
     /**
@@ -209,6 +298,7 @@ public class GUI implements ColourInfoProvider {
      * @param title new window title
      */
     public void setTitle(String title) {
+	assertEDT();
 	frame.setTitle(title);
     }
 
@@ -246,9 +336,44 @@ public class GUI implements ColourInfoProvider {
 
     private void reloadSession() {
 	assert players != null && players.size() > 0 : "Players undefined, UI should not allow this action yet";
-	board.clear();
+	SwingUtilities.invokeLater(new Runnable() {
+
+	    @Override
+	    public void run() {
+		board.clear();
+	    }
+	});
+
 	session = new Session(players, controller);
 
+    }
+
+    private void displayResult(ResultEvent result) {
+	String title;
+	String msg;
+	Icon icon = null;
+	if (result.getResult() == Result.DRAW) {
+	    title = "Draw";
+	    msg = "There were no winners in this run";
+	    icon = loadIcon("/images/draw.jpg");
+	} else {
+	    title = "And the Winner is...";
+	    msg = "The winner is " + result.getWinner().getAuthor() + " with "
+		    + result.getWinner().getTeamName();
+	    icon = loadIcon("/images/cup.jpg");
+	}
+
+	JOptionPane.showMessageDialog(frame, msg, title, JOptionPane.INFORMATION_MESSAGE, icon);
+    }
+
+    private Icon loadIcon(String path) {
+	URL imgURL = getClass().getResource(path);
+	if (imgURL != null) {
+	    return new ImageIcon(imgURL);
+	} else {
+	    log.warn("[loadIcon] Could not load icon from {}", path);
+	    return null;
+	}
     }
 
 }

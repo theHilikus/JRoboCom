@@ -7,6 +7,7 @@ import java.awt.Point;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,10 @@ public class BoardPanel extends JPanel {
      * @param item the drawable element
      */
     public void addItem(Point coordinates, Drawable item) {
+	assertEDT();
+	if (coordinates == null || item == null) {
+	    throw new IllegalArgumentException("Coordinates and added item cannot be null");
+	}
 	log.trace("[addItem] New item added @ {}", coordinates);
 	data[coordinates.x][coordinates.y].addModel(item);
 	data[coordinates.x][coordinates.y].repaint();
@@ -71,6 +76,10 @@ public class BoardPanel extends JPanel {
      * @param coordinates the position of the item to remove
      */
     public void removeItem(Point coordinates) {
+	assertEDT();
+	if (coordinates == null) {
+	    throw new IllegalArgumentException("Coordinates cannot be null");
+	}
 	log.trace("[removeItem] Item removed from {}", coordinates);
 	if (data[coordinates.x][coordinates.y].hasModel()) {
 	    data[coordinates.x][coordinates.y].removeModel();
@@ -85,6 +94,10 @@ public class BoardPanel extends JPanel {
      * @param newCoordinates position to move the item to
      */
     public void moveItem(Point oldCoordinates, Point newCoordinates) {
+	assertEDT();
+	if (oldCoordinates == null || newCoordinates == null) {
+	    throw new IllegalArgumentException("Coordinates cannot be null");
+	}
 	if (data[newCoordinates.x][newCoordinates.y].hasModel()) {
 	    throw new IllegalStateException(
 		    "New position contains a model in the UI already. New position = " + newCoordinates);
@@ -104,11 +117,30 @@ public class BoardPanel extends JPanel {
      * Removes all the drawn elements
      */
     public void clear() {
+	assertEDT();
 	log.debug("[clear] Cleaning board");
 	for (int row = 0; row < SIZE; row++) {
 	    for (int col = 0; col < SIZE; col++) {
 		removeItem(new Point(row, col));
 	    }
 	}
+    }
+
+    private static void assertEDT() {
+	assert SwingUtilities.isEventDispatchThread() : "Not in EDT";
+    }
+
+    /**
+     * Repaints the item specified
+     * 
+     * @param coordinates location of the item
+     */
+    public void refresh(Point coordinates) {
+	assertEDT();
+	if (coordinates == null) {
+	    throw new IllegalArgumentException("Coordinates cannot be null");
+	}
+	data[coordinates.x][coordinates.y].repaint();
+
     }
 }

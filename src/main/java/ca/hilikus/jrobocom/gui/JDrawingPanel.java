@@ -9,7 +9,6 @@ import java.awt.geom.Ellipse2D;
 
 import javax.swing.JPanel;
 
-import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**
@@ -61,27 +60,26 @@ public class JDrawingPanel extends JPanel {
 
 	    // draw head
 	    Polygon head = new Polygon();
-	    // switch (robot.getData().getFacing()) {
-	    switch (Direction.NORTH) {
+	    switch (robot.getData().getFacing()) {
 		case NORTH:
 		    head.addPoint(midPoint - headBase / 2, midPoint - baseStart);
 		    head.addPoint(midPoint + headBase / 2, midPoint - baseStart);
 		    head.addPoint(midPoint, midPoint - baseStart * 2);
 		    break;
 		case EAST:
-		    head.addPoint(midPoint - headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint + headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint, midPoint - baseStart * 2);
+		    head.addPoint(midPoint + baseStart, midPoint - headBase / 2);
+		    head.addPoint(midPoint + baseStart, midPoint + headBase / 2);
+		    head.addPoint(midPoint + baseStart * 2, midPoint);
 		    break;
 		case SOUTH:
-		    head.addPoint(midPoint - headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint + headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint, midPoint - baseStart * 2);
+		    head.addPoint(midPoint - headBase / 2, midPoint + baseStart);
+		    head.addPoint(midPoint + headBase / 2, midPoint + baseStart);
+		    head.addPoint(midPoint, midPoint + baseStart * 2);
 		    break;
 		case WEST:
-		    head.addPoint(midPoint - headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint + headBase / 2, midPoint - baseStart);
-		    head.addPoint(midPoint, midPoint - baseStart * 2);
+		    head.addPoint(midPoint - baseStart, midPoint - headBase / 2);
+		    head.addPoint(midPoint - baseStart, midPoint + headBase / 2);
+		    head.addPoint(midPoint - baseStart * 2, midPoint);
 		    break;
 	    }
 
