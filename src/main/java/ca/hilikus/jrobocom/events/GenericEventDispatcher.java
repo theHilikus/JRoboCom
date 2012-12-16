@@ -128,7 +128,7 @@ public class GenericEventDispatcher<T extends EventListener> implements EventDis
 	listeners.clear();
 	methodsCache.clear();
 
-	log.debug("[removeListeners] Cleared all listeners");
+	log.debug("[removeListeners] Cleared all listeners in {}", this);
 
     }
 
@@ -176,10 +176,13 @@ public class GenericEventDispatcher<T extends EventListener> implements EventDis
 		try {
 		    callback = listener.getClass().getDeclaredMethod(CALLBACK_NAME, handlerParam);
 		    methodsCache.put(hash, callback);
+
 		} catch (NoSuchMethodException exc) {
 		    log.error("[fireEvent] ", exc);
 		}
+
 	    }
+
 	    assert callback != null;
 	    try {
 		callback.invoke(listener, event);

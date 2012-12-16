@@ -1,7 +1,5 @@
 package ca.hilikus.jrobocom.events;
 
-import java.util.EventObject;
-
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**
@@ -9,7 +7,7 @@ import ca.hilikus.jrobocom.robot.Robot;
  * 
  * @author hilikus
  */
-public class RobotChangedEvent extends EventObject {
+public class RobotChangedEvent extends RobotEvent {
 
     private static final long serialVersionUID = 207547744025667582L;
 

@@ -13,7 +13,7 @@ public interface EventDispatcher<T extends EventListener> {
 
     /**
      * Adds a listener if it doesn't already exist. The event handler methods must have its first
-     * argument as a descendent of {@link EventObject} <br>
+     * argument as a descendant of {@link EventObject} <br>
      * The event handling methods must be declared directly in the listener and not in one of its
      * super-classes. This is a performance limitation
      * 

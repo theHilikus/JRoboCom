@@ -1,7 +1,6 @@
 package ca.hilikus.jrobocom.events;
 
 import java.awt.Point;
-import java.util.EventObject;
 
 import ca.hilikus.jrobocom.robot.Robot;
 
@@ -10,7 +9,7 @@ import ca.hilikus.jrobocom.robot.Robot;
  * 
  * @author hilikus
  */
-public class RobotAddedEvent extends EventObject {
+public class RobotAddedEvent extends RobotEvent {
 
     private static final long serialVersionUID = 3701263690126469309L;
     private Point coordinates;
