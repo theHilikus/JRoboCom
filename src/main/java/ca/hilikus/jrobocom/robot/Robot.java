@@ -36,6 +36,8 @@ public class Robot implements RobotAction, Runnable, Drawable {
 
     private static int lastSerial = 0;
 
+    private static RobotListener inheritedListener;
+
     private final TurnManager turnsControl;
 
     private final World world;
@@ -64,7 +66,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
 
     private final Player owner;
 
-    private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
+    private GenericEventDispatcher<RobotListener> eventDispatcher = new GenericEventDispatcher<>();
 
     /**
      * Events interface
@@ -132,7 +134,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
      * @param parent creator of this robot
      * @param name a name of this single robot
      */
-    public Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
+    private Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
 	this(parent.world, parent.getTurnsControl().clock, banksCount, name, parent.owner);
 
 	if (banksCount > GameSettings.MAX_BANKS) {
@@ -240,7 +242,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
 		}
 
 	    }
-	} catch (Exception all) {
+	} catch (Exception | Error all) {
 	    log.error("[run] Problem running robot " + this, all);
 	    die("Execution Error -- " + all);
 	}
@@ -269,6 +271,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
 	log.info("[die] Robot {} died with reason: {}", serialNumber, reason);
 	alive = false;
 	world.remove(Robot.this);
+	eventDispatcher.removeListeners();
     }
 
     @Override
@@ -280,7 +283,7 @@ public class Robot implements RobotAction, Runnable, Drawable {
     /**
      * @return the total number of banks (including empty) in the robot
      */
-    public int getBanksCount() {
+    int getBanksCount() {
 	if (banks == null) {
 	    return 0;
 	}
@@ -403,6 +406,8 @@ public class Robot implements RobotAction, Runnable, Drawable {
 	int robotsCount = world.getBotsCount(data.getTeamId(), false);
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
 	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
+	    
+	    child.eventDispatcher.addListener(inheritedListener);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
 	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
 		    + child.getSerialNumber());
@@ -517,12 +522,21 @@ public class Robot implements RobotAction, Runnable, Drawable {
     /**
      * @return the object in charge of events
      */
-    public EventDispatcher<WorldListener> getEventHandler() {
+    public EventDispatcher<RobotListener> getEventHandler() {
 	SecurityManager sm = System.getSecurityManager();
 	if (sm != null) {
 	    sm.checkPermission(new GamePermission("eventsListener"));
 	}
 	return eventDispatcher;
+    }
+
+    /**
+     * Sets a special listener that gets passed to robots created by robots
+     * 
+     * @param listener
+     */
+    public static void setInheritableListener(RobotListener listener) {
+	inheritedListener = listener;
     }
 
 }

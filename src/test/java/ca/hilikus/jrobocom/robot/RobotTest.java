@@ -37,10 +37,10 @@ public class RobotTest extends AbstractTest {
 	super(Robot.class);
     }
 
-
-    /**
+/*
+    *//**
      * Tests creation of subsequent robots
-     */
+     *//*
     @Test(dependsOnMethods = { "testFirstRobotCreation" }, groups = "init")
     public void testOtherRobotsCreation() {
 
@@ -65,7 +65,7 @@ public class RobotTest extends AbstractTest {
 	assertEquals(TU2.getData().getGeneration(), eve.getData().getGeneration() + 1);
 	assertEquals(TU2.getSerialNumber(), TU.getSerialNumber() + 1);
 
-    }
+    }*/
 
     /**
      * Tests creation of first robot
@@ -90,9 +90,9 @@ public class RobotTest extends AbstractTest {
 	assertTrue(TU.isAlive(), "New robot is alive");
     }
 
-    /**
+/*    *//**
      * Tests an infertile robot trying to create
-     */
+     *//*
     @Test(expectedExceptions = IllegalArgumentException.class, dependsOnGroups = { "init.*" })
     public void testInvalidCreation() {
 	Robot mockParent = mock(Robot.class);
@@ -104,7 +104,7 @@ public class RobotTest extends AbstractTest {
 	@SuppressWarnings("unused")
 	Robot TU = new Robot(InstructionSet.BASIC, 3, true, mockParent, "Test Robot");
 	fail("Should not have created");
-    }
+    }*/
 
     /**
      * Tests the jump to bank 0 after a bank finished execution
