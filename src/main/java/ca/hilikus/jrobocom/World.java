@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.events.EventDispatcher;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
+import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -43,14 +44,32 @@ public class World {
      */
     public interface WorldListener extends EventListener {
 	/**
+	 * Called when a robot was added to the world
+	 * 
 	 * @param add event details
 	 */
 	public void update(RobotAddedEvent add);
 
 	/**
+	 * Called when a robot was removed from the world
+	 * 
 	 * @param rem event details
 	 */
 	public void update(RobotRemovedEvent rem);
+
+	/**
+	 * Called when a robot changed its location
+	 * 
+	 * @param mov event details
+	 */
+	public void update(RobotMovedEvent mov);
+
+	/**
+	 * Called when a game ends
+	 * 
+	 * @param result info about the result
+	 */
+	public void update(ResultEvent result);
     }
 
     /**
@@ -137,9 +156,9 @@ public class World {
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
 	if (robotsPosition.size() > 0) {
-	    int someTeamId = robotsPosition.keySet().iterator().next().getData().getTeamId();
-	    if (checkWinner(someTeamId)) {
-		declareWinner(someTeamId);
+	    Robot someRobot = robotsPosition.keySet().iterator().next();
+	    if (checkWinner(someRobot.getData().getTeamId())) {
+		declareWinner(someRobot.getOwner());
 	    }
 	} else {
 	    // no winner
@@ -149,12 +168,19 @@ public class World {
 
     private void declareDraw() {
 	log.info("[declareDraw] No robots left. The game is a draw :S");
-	clock.stop();
+	eventDispatcher.fireEvent(new ResultEvent(this));
+	stop();
     }
 
-    private void declareWinner(int someTeamId) {
-	log.info("[declareWinner] Found winner! Team ID = {}", someTeamId);
+    private void stop() {
 	clock.stop();
+	eventDispatcher.removeListeners();
+    }
+
+    private void declareWinner(Player winner) {
+	log.info("[declareWinner] Found winner! {}", winner);
+	eventDispatcher.fireEvent(new ResultEvent(this, winner));
+	stop();
     }
 
     /**

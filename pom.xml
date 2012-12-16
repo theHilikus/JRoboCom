@@ -50,4 +50,28 @@
 		</dependency>
 	</dependencies>
 	<description>A Java reimplementation of the programming game RoboCom http://robocom.rrobek.de/</description>
+	<url>https://github.com/theHilikus/JRoboCom</url>
+	<issueManagement>
+		<url>https://github.com/theHilikus/JRoboCom/issues</url>
+	</issueManagement>
+	
+	<developers>
+		<developer>
+			<name>Alejandro Endo</name>
+			<id>theHilikus</id>
+			<timezone>-5</timezone>
+			<email>theHilikus@gmail.com</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git://github.com/theHilikus/JRoboCom.git</connection>
+		<url>https://github.com/theHilikus/JRoboCom</url>
+	</scm>
+	<inceptionYear>2012</inceptionYear>
+	<licenses>
+		<license>
+			<name>GNU General Public License v3.0 or later</name>
+			<url>http://www.spdx.org/licenses/GPL-3.0+</url>
+		</license>
+	</licenses>
 </project>

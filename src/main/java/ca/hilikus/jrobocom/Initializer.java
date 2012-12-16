@@ -23,6 +23,7 @@ public final class Initializer {
 
     private static final Logger log = LoggerFactory.getLogger(Initializer.class);
 
+    private static GUI frame;
 
     /**
      * @param args
@@ -46,8 +47,7 @@ public final class Initializer {
 	try {
 
 	    List<Player> players = Player.loadPlayers(playersData);
-	    Session session = new Session(players);
-
+	    Session session = new Session(players, frame.getController());
 	    session.start();
 
 	} catch (PlayerException exc) {
@@ -58,10 +58,11 @@ public final class Initializer {
     private static void launchUI() {
 	SwingUtilities.invokeLater(new Runnable() {
 
+	    
+
 	    @Override
 	    public void run() {
-		@SuppressWarnings("unused")
-		GUI frame = new GUI("JRobotCom");
+		frame = new GUI("JRobotCom");
 
 	    }
 	});

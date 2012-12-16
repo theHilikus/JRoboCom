@@ -26,7 +26,7 @@ public class Session {
      * Creates a new session with a list of player whose code is to be loaded
      * 
      * @param pPlayers list of player whose code is to be loaded
-     * @param controller receiver of game events
+     * @param controller receiver of game events. Can be null
      */
     public Session(List<Player> pPlayers, GameListener controller) {
 	theWorld = new World(clock);
@@ -37,6 +37,8 @@ public class Session {
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha",
 		    onePlayer);
+	    eve.getEventHandler().addListener(controller);
+	    Robot.setInheritableListener(controller);
 	    theWorld.addFirst(eve);
 	    onePlayer.startRobot(eve);
 
@@ -69,6 +71,14 @@ public class Session {
     }
 
     /**
+     * Execute a single turn
+     */
+    public void step() {
+	log.debug("[step] Single step");
+	clock.step();
+    }
+
+    /**
      * @param teamId the team number to search for
      * @return the team with the matching id or null if no match found
      */
@@ -81,4 +91,12 @@ public class Session {
 
 	return null;
     }
+
+    /**
+     * @return true if the session is currently running; false otherwise
+     */
+    public boolean isRunning() {
+	return clock.isRunning();
+    }
+
 }
