@@ -76,7 +76,7 @@ public class GameSettings {
 	/**
 	 * cycles to turn
 	 */
-	public static final int TURN = 0;
+	public static final int TURN = 1;
     }
 
     /**

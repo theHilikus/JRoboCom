@@ -155,6 +155,11 @@ public class World {
 	clock.removeListener(robot.getSerialNumber());
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
+	if (getBotsCount(robot.getData().getTeamId(), false) <= 0) {
+	    //last bot of this team
+	    robot.getOwner().clean();
+	}
+	
 	if (robotsPosition.size() > 0) {
 	    Robot someRobot = robotsPosition.keySet().iterator().next();
 	    if (checkWinner(someRobot.getData().getTeamId())) {

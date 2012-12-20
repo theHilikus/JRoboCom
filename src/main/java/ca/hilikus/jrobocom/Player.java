@@ -55,6 +55,8 @@ public class Player {
      */
     public final static ThreadGroup PLAYERS_GROUP = new ThreadGroup("Players' common ancestor");
 
+    private URLClassLoader loader;
+
     /**
      * @param codePath path to player's code. If ends in '/' it assumes the code is in .class'es in
      *            a directory; otherwise assumes a jar
@@ -70,8 +72,8 @@ public class Player {
 	    throw new PlayerException("Robot priority cannot be greater than game's");
 	}
 
-	try (URLClassLoader loader = new URLClassLoader(new URL[] { codePath.toURI().toURL() })) {
-
+	try {
+	    loader = new URLClassLoader(new URL[] { codePath.toURI().toURL() });
 	    InputStream stream = loader.getResourceAsStream(PLAYER_PROPERTIES_FILE);
 
 	    if (stream == null) {
@@ -112,6 +114,15 @@ public class Player {
 		| SecurityException exc) {
 	    throw new PlayerException("Error loading player's code", exc);
 
+	} catch (PlayerException exc) {
+
+	    try {
+		loader.close();
+	    } catch (IOException exc1) {
+		log.error("[Player] problem closing loader", exc1);
+	    }
+	    throw exc;
+
 	}
 
     }
@@ -127,7 +138,7 @@ public class Player {
 	return potentialTeamId;
     }
 
-    private Bank[] loadBanks(SecureClassLoader loader, String[] banksClasses) throws ClassNotFoundException,
+    private Bank[] loadBanks(SecureClassLoader pLoader, String[] banksClasses) throws ClassNotFoundException,
 	    InstantiationException, IllegalAccessException, ClassCastException, PlayerException,
 	    IllegalArgumentException, InvocationTargetException, SecurityException {
 	log.debug("[loadCode] Attempting to load code for {}", teamName);
@@ -137,8 +148,7 @@ public class Player {
 
 	Bank[] playerBanks = new Bank[banksClasses.length];
 	for (int pos = 0; pos < playerBanks.length; pos++) {
-	    @SuppressWarnings("unchecked")
-	    Class<? extends Bank> bankClass = (Class<? extends Bank>) loader.loadClass(banksClasses[pos]
+	    Class<? extends Bank> bankClass = (Class<? extends Bank>) pLoader.loadClass(banksClasses[pos]
 		    .trim());
 	    try {
 		playerBanks[pos] = bankClass.getDeclaredConstructor(int.class).newInstance(teamId);
@@ -216,6 +226,20 @@ public class Player {
      */
     public int getTeamId() {
 	return teamId;
+    }
+
+    /**
+     * Called when all the robots of the player are finished
+     */
+    public void clean() {
+	log.info("[clean] Cleaning player {}", this);
+	if (loader != null) {
+	    try {
+		loader.close();
+	    } catch (IOException exc) {
+		log.error("[clean] Problem closing class loader of " + this, exc);
+	    }
+	}
     }
 
 }
