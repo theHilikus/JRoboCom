@@ -47,10 +47,10 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
     private static final Logger log = LoggerFactory.getLogger(NewGameDialog.class);
     private JTextField statusField;
     private JButton btnRemoveTeam;
-    private DefaultListModel<String> teamDetailsModel;
+    
     private JList<Player> selectedTeams;
     private Map<Integer, Color> teamsColours = new HashMap<>();
-    
+
     private static int currentColour = 0;
     private static Color[] palette = new Color[] { new Color(0x2F91D8), new Color(0xE57875),
 	    new Color(0xFFDE1A), new Color(0xFF7A00), new Color(0x9A61B7), new Color(0xE0332F),
@@ -97,6 +97,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 		    JFileChooser chooser = new JFileChooser(lastDir);
 		    chooser.setFileFilter(new RobotFilter());
 		    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		    chooser.setAccessory(new RobotDetailsPanel(chooser));
 		    if (chooser.showOpenDialog(NewGameDialog.this) == JFileChooser.APPROVE_OPTION) {
 			try {
 			    Player newPlayer = new Player(chooser.getSelectedFile());
@@ -129,13 +130,6 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	public void valueChanged(ListSelectionEvent evt) {
 	    int selection = evt.getFirstIndex();
 	    btnRemoveTeam.setEnabled(selection >= 0 && teamModel.size() > 0);
-	    if (selection >= 0 && !evt.getValueIsAdjusting() && teamModel.size() > 0) {
-		teamDetailsModel.add(0, "Author:\t " + teamModel.get(selection).getAuthor());
-		teamDetailsModel.add(1, "Team Name:\t " + teamModel.get(selection).getTeamName());
-		teamDetailsModel.add(2, "Banks count:\t " + teamModel.get(selection).getCode().length);
-	    } else {
-		teamDetailsModel.clear();
-	    }
 
 	}
 
@@ -143,11 +137,12 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	public void mouseClicked(MouseEvent e) {
 	    if (e.getSource() == selectedTeams) {
 		if (e.getClickCount() == 2) {
-		    Color ret = JColorChooser.showDialog(NewGameDialog.this, "Choose the team's colour", teamsColours.get(selectedTeams.getSelectedValue().getTeamId()));
+		    Color ret = JColorChooser.showDialog(NewGameDialog.this, "Choose the team's colour",
+			    teamsColours.get(selectedTeams.getSelectedValue().getTeamId()));
 		    if (ret != null) {
 			teamsColours.put(selectedTeams.getSelectedValue().getTeamId(), ret);
 		    }
-		    
+
 		}
 	    }
 
@@ -188,7 +183,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	super(parent, true);
 	setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 	setTitle("Select Teams");
-	setBounds(100, 100, 450, 300);
+	setBounds(100, 100, 257, 301);
 	getContentPane().setLayout(new BorderLayout());
 	contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 	getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -210,80 +205,47 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 
 	selectedTeams.setModel(teamModel);
 
-	JList<String> teamDetails = new JList<>();
-	teamDetails.setBorder(new LineBorder(new Color(0, 0, 0)));
-	teamDetails.setBackground(UIManager.getColor("Button.background"));
-
-	teamDetailsModel = new DefaultListModel<>();
-	teamDetails.setModel(teamDetailsModel);
-
 	JLabel lblSelectedTeams = new JLabel("Selected Teams");
-
-	JLabel lblDetails = new JLabel("Details");
 
 	statusField = new JTextField();
 	changeStatus("Status");
 	statusField.setEditable(false);
 	statusField.setColumns(10);
 	GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
-	gl_contentPanel.setHorizontalGroup(gl_contentPanel
-		.createParallelGroup(Alignment.LEADING)
-		.addGroup(
-			gl_contentPanel
-				.createSequentialGroup()
-				.addGroup(
-					gl_contentPanel
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-							gl_contentPanel.createSequentialGroup().addGap(122)
-								.addComponent(btnAddTeam))
-						.addGroup(
-							gl_contentPanel
-								.createSequentialGroup()
-								.addContainerGap()
-								.addComponent(selectedTeams,
-									GroupLayout.DEFAULT_SIZE, 186,
-									Short.MAX_VALUE)))
-				.addGroup(
-					gl_contentPanel
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-							gl_contentPanel.createSequentialGroup().addGap(27)
-								.addComponent(btnRemoveTeam))
-						.addGroup(
-							gl_contentPanel
-								.createSequentialGroup()
-								.addGap(18)
-								.addComponent(teamDetails,
-									GroupLayout.DEFAULT_SIZE, 210,
-									Short.MAX_VALUE))).addContainerGap())
-		.addGroup(
-			gl_contentPanel.createSequentialGroup().addGap(36).addComponent(lblSelectedTeams)
-				.addPreferredGap(ComponentPlacement.RELATED, 147, Short.MAX_VALUE)
-				.addComponent(lblDetails).addGap(93))
-		.addComponent(statusField, GroupLayout.DEFAULT_SIZE, 438, Short.MAX_VALUE));
-	gl_contentPanel.setVerticalGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING).addGroup(
-		gl_contentPanel
-			.createSequentialGroup()
-			.addContainerGap()
-			.addGroup(
-				gl_contentPanel.createParallelGroup(Alignment.BASELINE)
-					.addComponent(btnAddTeam).addComponent(btnRemoveTeam))
-			.addGap(7)
-			.addGroup(
-				gl_contentPanel.createParallelGroup(Alignment.BASELINE)
-					.addComponent(lblSelectedTeams).addComponent(lblDetails))
-			.addPreferredGap(ComponentPlacement.RELATED)
-			.addGroup(
-				gl_contentPanel
-					.createParallelGroup(Alignment.LEADING)
-					.addComponent(selectedTeams, GroupLayout.DEFAULT_SIZE, 124,
-						Short.MAX_VALUE)
-					.addComponent(teamDetails, GroupLayout.DEFAULT_SIZE, 124,
-						Short.MAX_VALUE))
-			.addGap(18)
-			.addComponent(statusField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-				GroupLayout.PREFERRED_SIZE)));
+	gl_contentPanel.setHorizontalGroup(
+		gl_contentPanel.createParallelGroup(Alignment.LEADING)
+			.addGroup(gl_contentPanel.createSequentialGroup()
+				.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+					.addGroup(gl_contentPanel.createSequentialGroup()
+						.addGap(25)
+						.addComponent(btnAddTeam, GroupLayout.PREFERRED_SIZE, 76, GroupLayout.PREFERRED_SIZE)
+						.addGap(29)
+						.addComponent(btnRemoveTeam))
+					.addGroup(gl_contentPanel.createSequentialGroup()
+						.addGap(66)
+						.addComponent(lblSelectedTeams))
+					.addGroup(gl_contentPanel.createSequentialGroup()
+						.addGap(6)
+						.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
+							.addComponent(selectedTeams, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addComponent(statusField, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE))))
+				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+	);
+	gl_contentPanel.setVerticalGroup(
+		gl_contentPanel.createParallelGroup(Alignment.LEADING)
+			.addGroup(gl_contentPanel.createSequentialGroup()
+				.addContainerGap()
+				.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
+					.addComponent(btnAddTeam)
+					.addComponent(btnRemoveTeam))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(lblSelectedTeams)
+				.addGap(7)
+				.addComponent(selectedTeams, GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
+				.addGap(18)
+				.addComponent(statusField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addContainerGap())
+	);
 	contentPanel.setLayout(gl_contentPanel);
 	{
 	    JPanel buttonPane = new JPanel();
@@ -291,6 +253,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	    getContentPane().add(buttonPane, BorderLayout.SOUTH);
 	    {
 		JButton okButton = new JButton(OK);
+		okButton.setHorizontalAlignment(SwingConstants.RIGHT);
 		okButton.setActionCommand(OK);
 		buttonPane.add(okButton);
 		okButton.addActionListener(controller);
@@ -298,6 +261,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	    }
 	    {
 		JButton cancelButton = new JButton(CANCEL);
+		cancelButton.setHorizontalAlignment(SwingConstants.RIGHT);
 		cancelButton.setActionCommand(CANCEL);
 		cancelButton.addActionListener(controller);
 		buttonPane.add(cancelButton);
@@ -344,7 +308,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
     public Color getTeamColour(int teamId) {
 	return teamsColours.get(teamId);
     }
-    
+
     private static Color getNextColour() {
 	Color ret = palette[currentColour];
 	currentColour = (currentColour + 1) % palette.length;
