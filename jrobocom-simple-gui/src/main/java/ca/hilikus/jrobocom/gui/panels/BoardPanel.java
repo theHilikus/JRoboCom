@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui;
+package ca.hilikus.jrobocom.gui.panels;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.GameSettings;
+import ca.hilikus.jrobocom.gui.ColourInfoProvider;
+import ca.hilikus.jrobocom.gui.Drawable;
 
 /**
  * The playing board UI

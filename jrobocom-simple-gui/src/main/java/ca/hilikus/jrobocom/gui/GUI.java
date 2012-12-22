@@ -31,6 +31,9 @@ import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
+import ca.hilikus.jrobocom.gui.drawables.DrawableRobot;
+import ca.hilikus.jrobocom.gui.panels.BoardPanel;
+import ca.hilikus.jrobocom.gui.panels.NewGameDialog;
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**
@@ -61,6 +64,8 @@ public class GUI implements ColourInfoProvider {
     private List<Player> players;
 
     private JButton btnReload;
+    
+    private static GUI view;
 
     private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
@@ -78,7 +83,7 @@ public class GUI implements ColourInfoProvider {
 
 		@Override
 		public void run() {
-		    board.addItem(evt.getCoordinates(), source);
+		    board.addItem(evt.getCoordinates(), new DrawableRobot(source));
 		}
 	    });
 
@@ -157,6 +162,21 @@ public class GUI implements ColourInfoProvider {
 	public static final String START = "start/stop";
     }
 
+    /**
+     * @param args ignored
+     */
+    public static void main(String[] args) {
+
+	SwingUtilities.invokeLater(new Runnable() {
+	    @Override
+	    public void run() {
+		view = new GUI("JRobotCom");
+
+	    }
+	});
+
+
+    }
     /**
      * Create the application.
      * 

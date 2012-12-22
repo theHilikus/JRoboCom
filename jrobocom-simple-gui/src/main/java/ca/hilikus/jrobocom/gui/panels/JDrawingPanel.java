@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui;
+package ca.hilikus.jrobocom.gui.panels;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,6 +9,9 @@ import java.awt.geom.Ellipse2D;
 
 import javax.swing.JPanel;
 
+import ca.hilikus.jrobocom.gui.ColourInfoProvider;
+import ca.hilikus.jrobocom.gui.Drawable;
+import ca.hilikus.jrobocom.gui.ModelDrawingVisitor;
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**

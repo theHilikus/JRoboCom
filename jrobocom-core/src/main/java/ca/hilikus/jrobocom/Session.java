@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.events.GameListener;
 import ca.hilikus.jrobocom.robot.Robot;
+import ca.hilikus.jrobocom.security.GameSecurityManager;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
@@ -21,6 +22,10 @@ public class Session {
     private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
+    
+    static {
+	System.setSecurityManager(new GameSecurityManager());
+    }
 
     /**
      * Creates a new session with a list of player whose code is to be loaded

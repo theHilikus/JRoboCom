@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui;
+package ca.hilikus.jrobocom.gui.panels;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;

@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui;
+package ca.hilikus.jrobocom.gui.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.exceptions.PlayerException;
+import ca.hilikus.jrobocom.gui.ColourInfoProvider;
+import ca.hilikus.jrobocom.gui.ColouredCellRenderer;
 
 /**
  * UI to add new teams of robots
@@ -281,7 +283,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
      * @return {@link JOptionPane#OK_OPTION} if the user pressed OK; otherwise
      *         {@link JOptionPane#CANCEL_OPTION}
      */
-    int getResult() {
+    public int getResult() {
 	return result;
     }
 
@@ -289,7 +291,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
      * @return a list of paths to the players' code selected. If the dialog was cancelled, this
      *         returns null
      */
-    List<Player> getSelectedTeams() {
+    public List<Player> getSelectedTeams() {
 	if (result != JOptionPane.OK_OPTION) {
 	    return null;
 	}
@@ -300,7 +302,10 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	return teams;
     }
 
-    Map<Integer, Color> getColourMappings() {
+    /**
+     * @return the mapping between team id and colour
+     */
+    public Map<Integer, Color> getColourMappings() {
 	return teamsColours;
     }
 

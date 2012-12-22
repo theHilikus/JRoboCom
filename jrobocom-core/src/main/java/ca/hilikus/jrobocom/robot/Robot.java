@@ -11,12 +11,9 @@ import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
-import ca.hilikus.jrobocom.World.WorldListener;
 import ca.hilikus.jrobocom.events.EventDispatcher;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
-import ca.hilikus.jrobocom.gui.Drawable;
-import ca.hilikus.jrobocom.gui.ModelDrawingVisitor;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
@@ -32,7 +29,7 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  * @author hilikus
  * 
  */
-public class Robot implements RobotAction, Runnable, Drawable {
+public class Robot implements RobotAction, Runnable {
 
     private static int lastSerial = 0;
 
@@ -497,12 +494,6 @@ public class Robot implements RobotAction, Runnable, Drawable {
      */
     public String getName() {
 	return name;
-    }
-
-    @Override
-    public void accept(Graphics2D g2, ModelDrawingVisitor visitor) {
-	visitor.draw(g2, this);
-
     }
 
     /**
