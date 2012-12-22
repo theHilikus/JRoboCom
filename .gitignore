@@ -6,10 +6,10 @@
 *.ear
 
 # eclipse files#
-/.settings
-/.classpath
-/.project
+.settings/
+.classpath
+.project
 
 # maven files#
-/target
-/test-output
+target/
+test-output/
