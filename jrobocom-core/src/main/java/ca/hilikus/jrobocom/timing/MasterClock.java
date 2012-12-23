@@ -86,7 +86,7 @@ public class MasterClock {
      * @param listenerId a unique ID of the listener
      */
     public void removeListener(int listenerId) {
-	registered.remove(listenerId);
+	registered.remove(Integer.valueOf(listenerId));
     }
 
     /**

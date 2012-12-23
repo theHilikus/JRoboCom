@@ -8,7 +8,8 @@ import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatus;
 
 /**
- * Interface used from Banks. Maps one-to-one with robots on one end; on the other end it can change banks
+ * Interface used from Banks. Maps one-to-one with robots on one end; on the other end it can change
+ * banks
  * 
  * @author hilikus
  * 
@@ -25,7 +26,7 @@ public class RobotStatusProxy implements RobotStatus {
      * @param pRobot the robot mapped to this proxy
      * @param pWorld the world where the robot lives
      */
-    public RobotStatusProxy(Robot pRobot, World pWorld) {
+    RobotStatusProxy(Robot pRobot, World pWorld) {
 	robot = pRobot;
 	world = pWorld;
 	turnsControl = pRobot.getTurnsControl();
@@ -36,40 +37,34 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getActiveState() {
-	return getActiveState(true);
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getData().getActiveState();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#getActiveState(boolean)
      */
     @Override
-    public int getActiveState(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return this.robot.getData().getActiveState();
+    public int getRemoteActiveState() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().getActiveState();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().getActiveState();
-	    } else {
-		return 0;
-	    }
+	    return 0;
 	}
+
     }
 
     @Override
-    public void setActiveState(int pActiveState, boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_WRITE);
-	    this.robot.setActiveState(pActiveState);
-	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(robot);
-	    if (neighbour != null) {
-		setActiveState(pActiveState, true);
-	    }
+    public void setRemoteActiveState(int pActiveState) {
+
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(robot);
+	if (neighbour != null) {
+	    neighbour.getData().setActiveState(pActiveState);
 	}
+
     }
 
     /* (non-Javadoc)
@@ -86,28 +81,24 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getBanksCount() {
-	return getBanksCount(true);
-
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getBanksCount();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#getBanksCount(boolean)
      */
     @Override
-    public int getBanksCount(boolean local) {
-	if (local) {
+    public int getRemoteBanksCount() {
 
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return this.robot.getBanksCount();
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getBanksCount();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getBanksCount();
-	    } else {
-		return 0;
-	    }
+	    return 0;
 	}
+
     }
 
     /* (non-Javadoc)
@@ -115,27 +106,21 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public InstructionSet getInstructionSet() {
-	return getInstructionSet(true);
-
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getData().getInstructionSet();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#getInstructionSet(boolean)
      */
     @Override
-    public InstructionSet getInstructionSet(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-
-	    return this.robot.getData().getInstructionSet();
+    public InstructionSet getRemoteInstructionSet() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().getInstructionSet();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().getInstructionSet();
-	    } else {
-		return InstructionSet.BASIC;
-	    }
+	    return InstructionSet.BASIC;
 	}
     }
 
@@ -144,26 +129,23 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getTeamId() {
-	return getTeamId(true);
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getData().getTeamId();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#getTeamId(boolean)
      */
     @Override
-    public int getTeamId(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return this.robot.getData().getTeamId();
+    public int getRemoteTeamId() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().getTeamId();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().getTeamId();
-	    } else {
-		return 0;
-	    }
+	    return 0;
 	}
+
     }
 
     /* (non-Javadoc)
@@ -171,25 +153,21 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isEnabled() {
-	return isEnabled(true);
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return robot.getData().getActiveState() > 0;
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#isEnabled(boolean)
      */
     @Override
-    public boolean isEnabled(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-	    return robot.getData().getActiveState() > 0;
+    public boolean isRemoteEnabled() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().getActiveState() > 0;
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().getActiveState() > 0;
-	    } else {
-		return false;
-	    }
+	    return false;
 	}
     }
 
@@ -198,27 +176,23 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isMobile() {
-	return isMobile(true);
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getData().isMobile();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#isMobile(boolean)
      */
     @Override
-    public boolean isMobile(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-
-	    return this.robot.getData().isMobile();
+    public boolean isRemoteMobile() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().isMobile();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().isMobile();
-	    } else {
-		return false;
-	    }
+	    return false;
 	}
+
     }
 
     /* (non-Javadoc)
@@ -226,26 +200,21 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getAge() {
-	return getAge(true);
+	turnsControl.waitTurns(Timing.LOCAL_READ);
+	return this.robot.getData().getAge();
     }
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotInfo#getAge(boolean)
      */
     @Override
-    public int getAge(boolean local) {
-	if (local) {
-	    turnsControl.waitTurns(Timing.LOCAL_READ);
-
-	    return this.robot.getData().getAge();
+    public int getRemoteAge() {
+	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
+	Robot neighbour = world.getNeighbour(this.robot);
+	if (neighbour != null) {
+	    return neighbour.getData().getAge();
 	} else {
-	    turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
-	    Robot neighbour = world.getNeighbour(this.robot);
-	    if (neighbour != null) {
-		return neighbour.getData().getAge();
-	    } else {
-		return 0;
-	    }
+	    return 0;
 	}
     }
 
@@ -256,7 +225,8 @@ public class RobotStatusProxy implements RobotStatus {
 
     @Override
     public void setActiveState(int pActiveState) {
-	robot.setActiveState(pActiveState);
+	turnsControl.waitTurns(Timing.LOCAL_WRITE);
+	this.robot.setActiveState(pActiveState);
 
     }
 }

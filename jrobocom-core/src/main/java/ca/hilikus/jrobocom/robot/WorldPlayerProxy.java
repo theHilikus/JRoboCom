@@ -22,7 +22,7 @@ public class WorldPlayerProxy implements WorldInfo {
      * @param turnManager turns handler for calling robot
      * @param pWorld the world of the calling robot
      */
-    public WorldPlayerProxy(TurnManager turnManager, World pWorld) {
+    WorldPlayerProxy(TurnManager turnManager, World pWorld) {
 	turnsControl = turnManager;
 	world = pWorld;
     }
