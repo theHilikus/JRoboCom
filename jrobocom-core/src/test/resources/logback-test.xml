@@ -14,9 +14,5 @@
 	<root level="DEBUG">
 		<appender-ref ref="Console" />
 	</root>
-	
-	<logger name="ca.hilikus.jrobocom.security.GameSecurityManag" level="TRACE"/>
-	
-
 
 </configuration>
