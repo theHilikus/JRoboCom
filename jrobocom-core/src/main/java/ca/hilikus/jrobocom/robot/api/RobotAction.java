@@ -13,7 +13,7 @@ import ca.hilikus.jrobocom.robot.Robot;
 public interface RobotAction {
 
     /**
-     * Changes the running bank once the current bank <b>ends its execution</b>
+     * Changes the running bank <u>once the current bank ends its execution</u>
      * 
      * @param newBank the 0-based index of the bank to run
      * 

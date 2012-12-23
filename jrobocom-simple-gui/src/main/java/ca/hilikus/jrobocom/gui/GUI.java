@@ -64,8 +64,6 @@ public class GUI implements ColourInfoProvider {
     private List<Player> players;
 
     private JButton btnReload;
-    
-    private static GUI view;
 
     private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
@@ -170,7 +168,8 @@ public class GUI implements ColourInfoProvider {
 	SwingUtilities.invokeLater(new Runnable() {
 	    @Override
 	    public void run() {
-		view = new GUI("JRobotCom");
+		@SuppressWarnings("unused")
+		GUI view = new GUI("JRobotCom");
 
 	    }
 	});

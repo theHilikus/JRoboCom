@@ -27,11 +27,6 @@ public abstract class Bank {
     protected WorldInfo world;
 
     /**
-     * read-only settings
-     */
-    protected ReadableSettings settings;
-
-    /**
      * the id of the author of the bank
      */
     private final int teamId;
@@ -57,7 +52,7 @@ public abstract class Bank {
      * @return the relative cost of a bank's logic
      */
     final public int getCost() {
-	// TODO Auto-generated method stub
+	// TODO implement
 	return 1;
     }
 
@@ -66,8 +61,7 @@ public abstract class Bank {
      * 
      * @return the player-assigned name for the bank
      */
-    @SuppressWarnings("static-method")
-    final public String getName() {
+    public String getName() {
 	return "Unnamed Bank";
     }
 
@@ -99,7 +93,7 @@ public abstract class Bank {
     /**
      * @return the id of the player that created the bank
      */
-    public int getTeamId() {
+    final public int getTeamId() {
 	return teamId;
     }
 

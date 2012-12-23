@@ -55,12 +55,6 @@ public class Robot implements RobotAction, Runnable {
 
     private final String name;
 
-    private final RobotAction control;
-
-    private final RobotStatus status;
-
-    private final WorldInfo worldProxy;
-
     private final Player owner;
 
     private GenericEventDispatcher<RobotListener> eventDispatcher = new GenericEventDispatcher<>();
@@ -91,9 +85,6 @@ public class Robot implements RobotAction, Runnable {
 
 	world = theWorld;
 	turnsControl = new TurnManager(clock);
-	worldProxy = new WorldPlayerProxy(turnsControl, world);
-	control = new RobotControlProxy(this);
-	status = new RobotStatusProxy(this, world);
 	banks = new Bank[banksCount];
 	owner = pOwner;
 	name = pName;
@@ -233,8 +224,11 @@ public class Robot implements RobotAction, Runnable {
 		    if (!pendingBankChange) {
 			reboot("End of bank");
 		    } else {
-
 			pendingBankChange = false;
+		    }
+		    if (oldRunningBank != runningBank) {
+			eventDispatcher.fireEvent(new RobotChangedEvent(this)); // running bank
+										// changed
 		    }
 		}
 
@@ -293,7 +287,8 @@ public class Robot implements RobotAction, Runnable {
 	}
 
 	if (bank != null) {
-	    bank.plugInterfaces(control, status, worldProxy);
+	    bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
+		    new WorldPlayerProxy(turnsControl, world));
 	    banks[localBankIndex] = bank;
 	} else {
 	    banks[localBankIndex] = null;
@@ -403,7 +398,7 @@ public class Robot implements RobotAction, Runnable {
 	int robotsCount = world.getBotsCount(data.getTeamId(), false);
 	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
 	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
-	    
+
 	    child.eventDispatcher.addListener(inheritedListener);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
 	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
@@ -507,7 +502,11 @@ public class Robot implements RobotAction, Runnable {
      * @return the id of the creator of the running bank
      */
     public int getRunningBankTeamId() {
-	return banks[runningBank].getTeamId();
+	if (banks[runningBank] != null) {
+	    return banks[runningBank].getTeamId();
+	} else {
+	    return data.getTeamId(); //nothing is running, return robot's team id
+	}
     }
 
     /**

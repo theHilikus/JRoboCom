@@ -59,6 +59,8 @@ public interface RobotStatusLocal {
     public int getGeneration();
 
     /**
+     * Sets the state of the local robot
+     * 
      * @param pActiveState <= 0 to disable a robot; > 0 to enable
      */
     public void setActiveState(int pActiveState);
