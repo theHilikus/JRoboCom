@@ -31,6 +31,8 @@ import ca.hilikus.jrobocom.robot.Robot;
  */
 public class Player {
 
+    private static final int DEFAULT_START_STATE = 1;
+
     private static final String PLAYER_PROPERTIES_FILE = System.getProperty("jrobocom.player-properties",
 	    "player.properties");
 
@@ -190,6 +192,7 @@ public class Player {
      * @param newRobot the robot to start
      */
     public void startRobot(Robot newRobot) {
+	newRobot.getData().setActiveState(DEFAULT_START_STATE);
 	Thread newThread = new Thread(robotsThreads, newRobot, "Robot " + newRobot.getSerialNumber());
 	newThread.start(); // jumpstarts the robot
 

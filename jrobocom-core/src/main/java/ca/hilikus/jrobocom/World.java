@@ -94,11 +94,12 @@ public class World {
 	Point newPosition = getReferenceField(parent, 1);
 	if (isOccupied(newPosition)) {
 	    child.die("Occupied position");
+	} else {
+	    if (child.getData().getGeneration() != parent.getData().getGeneration() + 1) {
+		throw new IllegalArgumentException("Child robot is not a direct descentant of this parent");
+	    }
+	    addCommon(child, newPosition);
 	}
-	if (child.getData().getGeneration() != parent.getData().getGeneration() + 1) {
-	    throw new IllegalArgumentException("Child robot is not a direct descentant of this parent");
-	}
-	addCommon(child, newPosition);
     }
 
     /**
@@ -131,15 +132,11 @@ public class World {
 	    throw new IllegalArgumentException("Trying to add an existing robot");
 	}
 
-	if (newRobot.isAlive()) {
-	    robotsPosition.put(newRobot, newPosition);
-	    clock.addListener(newRobot.getSerialNumber());
-	    eventDispatcher.fireEvent(new RobotAddedEvent(newRobot, newPosition));
-	    log.trace("[addFirst] Added robot {}", newRobot);
-	} else {
-	    log.debug("[add] Trying to add dead robot");
+	robotsPosition.put(newRobot, newPosition);
+	clock.addListener(newRobot.getSerialNumber());
+	eventDispatcher.fireEvent(new RobotAddedEvent(newRobot, newPosition));
+	log.trace("[addFirst] Added robot {}", newRobot);
 
-	}
     }
 
     /**
@@ -156,10 +153,10 @@ public class World {
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
 	if (getBotsCount(robot.getData().getTeamId(), false) <= 0) {
-	    //last bot of this team
+	    // last bot of this team
 	    robot.getOwner().clean();
 	}
-	
+
 	if (robotsPosition.size() > 0) {
 	    Robot someRobot = robotsPosition.keySet().iterator().next();
 	    if (checkWinner(someRobot.getData().getTeamId())) {
