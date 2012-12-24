@@ -1,5 +1,6 @@
 package ca.hilikus.jrobocom.gui.panels;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,8 +11,8 @@ import java.awt.geom.Ellipse2D;
 import javax.swing.JPanel;
 
 import ca.hilikus.jrobocom.gui.ColourInfoProvider;
-import ca.hilikus.jrobocom.gui.Drawable;
-import ca.hilikus.jrobocom.gui.ModelDrawingVisitor;
+import ca.hilikus.jrobocom.gui.visitor.Drawable;
+import ca.hilikus.jrobocom.gui.visitor.ModelDrawingVisitor;
 import ca.hilikus.jrobocom.robot.Robot;
 
 /**
@@ -91,6 +92,16 @@ public class JDrawingPanel extends JPanel {
 
 	    g2.setColor(Color.BLACK); // draw outline
 	    g2.draw(head);
+
+	    if (!robot.getData().isEnabled()) {
+		// robot disabled, draw an X
+		int xBorder = (int) Math.round(getWidth()/8.0);
+		float lineThickness = (float) (getWidth()/9.0);
+		g2.setColor(Color.LIGHT_GRAY);
+		g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		g2.drawLine(xBorder, xBorder, getWidth() - xBorder, getWidth() - xBorder);
+		g2.drawLine(getWidth() - xBorder, xBorder, xBorder, getWidth() - xBorder);
+	    }
 	}
     }
 

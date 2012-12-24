@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.gui;
+package ca.hilikus.jrobocom.gui.visitor;
 
 import java.awt.Graphics2D;
 

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.gui.ColourInfoProvider;
-import ca.hilikus.jrobocom.gui.Drawable;
+import ca.hilikus.jrobocom.gui.visitor.Drawable;
 
 /**
  * The playing board UI
@@ -69,8 +69,8 @@ public class BoardPanel extends JPanel {
 	    throw new IllegalArgumentException("Coordinates and added item cannot be null");
 	}
 	log.trace("[addItem] New item added @ {}", coordinates);
-	data[coordinates.x][coordinates.y].addModel(item);
-	data[coordinates.x][coordinates.y].repaint();
+	data[coordinates.y][coordinates.x].addModel(item);
+	data[coordinates.y][coordinates.x].repaint();
 
     }
 
