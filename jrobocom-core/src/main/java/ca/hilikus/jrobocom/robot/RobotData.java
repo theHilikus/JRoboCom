@@ -2,7 +2,10 @@ package ca.hilikus.jrobocom.robot;
 
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.World;
+import ca.hilikus.jrobocom.events.GenericEventDispatcher;
+import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.player.InstructionSet;
+import ca.hilikus.jrobocom.robot.Robot.RobotListener;
 import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 
@@ -23,28 +26,30 @@ public class RobotData implements RobotStatusLocal {
     private final TurnManager turnsManager;
     private final int cyclesAtCreation;
 
+    private final GenericEventDispatcher<RobotListener> eventDispatcher;
+    private final Robot owner;
+
     /**
      * Main constructor
      * 
-     * @param pTurnsManager the robot's turn controller
-     * @param pMobile true if the robot is mobile
+     * @param pOwner the robot this data belongs to
      * @param pSet instruction set
-     * @param pTeamId unique team identifier
+     * @param pMobile true if the robot is mobile
      * @param pGeneration the number of ancestors this robot has
-     * @param pBanksCount number of banks slots in the robot
      */
-    public RobotData(TurnManager pTurnsManager, InstructionSet pSet, boolean pMobile, int pTeamId,
-	    int pGeneration, int pBanksCount) {
+    RobotData(Robot pOwner, InstructionSet pSet, boolean pMobile, int pGeneration, Direction direction) {
 	this.activeState = 0;
 	set = pSet;
 	mobile = pMobile;
-	teamId = pTeamId;
+	teamId = pOwner.getOwner().getTeamId();
 	generation = pGeneration;
-	banksCount = pBanksCount;
-	turnsManager = pTurnsManager;
-	facing = Direction.fromInt(World.generator.nextInt(Direction.COUNT));
+	banksCount = pOwner.getBanksCount();
+	turnsManager = pOwner.getTurnsControl();
+	facing = direction;
+	owner = pOwner;
+	eventDispatcher = (GenericEventDispatcher<RobotListener>) pOwner.getEventHandler();
 
-	cyclesAtCreation = pTurnsManager.getTurnsCount();
+	cyclesAtCreation = turnsManager.getTurnsCount();
 
     }
 
@@ -92,9 +97,17 @@ public class RobotData implements RobotStatusLocal {
     }
 
     @Override
-    public void setActiveState(int pActiveState) {
-	activeState = pActiveState;
+    public void setActiveState(int newState) {
+	int oldState = activeState;
+	activeState = newState;
 
+	if (newState > 0) {
+	    owner.activated();
+	}
+
+	if (oldState <= 0 && newState > 0 || oldState > 0 && newState <= 0) {
+	    eventDispatcher.fireEvent(new RobotChangedEvent(owner));
+	}
     }
 
     @Override

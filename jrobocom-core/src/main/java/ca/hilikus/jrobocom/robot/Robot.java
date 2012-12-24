@@ -1,16 +1,15 @@
 package ca.hilikus.jrobocom.robot;
 
-import java.awt.Graphics2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.EventListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
-import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.events.EventDispatcher;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
@@ -18,7 +17,6 @@ import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
-import ca.hilikus.jrobocom.robot.api.RobotStatus;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.MasterClock;
@@ -103,14 +101,14 @@ public class Robot implements RobotAction, Runnable {
     public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name, Player pOwner) {
 	this(theWorld, clock, allBanks.length, name, pOwner);
 
-	data = new RobotData(turnsControl, InstructionSet.SUPER, false, pOwner.getTeamId(), 0,
-		allBanks.length);
+	Direction randomDir = Direction.fromInt(World.generator.nextInt(Direction.COUNT));
+	data = new RobotData(this, InstructionSet.SUPER, false, 0, randomDir);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {
 	    setBank(allBanks[pos], pos);
 	}
 
-	postInit();
+	alive = data.getGeneration() < GameSettings.MAX_GENERATION;
     }
 
     /**
@@ -132,15 +130,9 @@ public class Robot implements RobotAction, Runnable {
 	    throw new IllegalArgumentException("Parent could not have created child");
 	}
 
-	data = new RobotData(turnsControl, pSet, pMobile, parent.data.getTeamId(),
-		parent.data.getGeneration() + 1, banksCount);
-
-	postInit();
+	data = new RobotData(this, pSet, pMobile, parent.data.getGeneration() + 1, parent.data.getFacing());
     }
 
-    private void postInit() {
-	alive = data.getGeneration() < GameSettings.MAX_GENERATION;
-    }
 
     @Override
     public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
@@ -167,7 +159,8 @@ public class Robot implements RobotAction, Runnable {
 	if (neighbour != null) {
 	    Bank localBankCopy;
 	    try {
-		localBankCopy = banks[localBankIndex].getClass().getConstructor().newInstance();
+		localBankCopy = banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
+			.newInstance(data.getTeamId());
 
 		neighbour.setBank(localBankCopy, remoteBankIndex);
 		return localBankCopy.getCost();
@@ -195,6 +188,7 @@ public class Robot implements RobotAction, Runnable {
 	    turnsControl.waitTurns(1); // block at the beginning so that all robots start at the
 				       // same time
 	    int oldRunningBank = 0;
+	    assert getData().isEnabled() : "Robot is disabled";
 	    while (alive) {
 		if (runningBank == 0) {
 		    if (banks[0] == null || banks[0].isEmpty()) {
@@ -213,6 +207,7 @@ public class Robot implements RobotAction, Runnable {
 		    }
 		}
 
+		// normal execution starts
 		if (alive) {
 		    if (runningBank != oldRunningBank
 			    && banks[runningBank].getTeamId() != banks[oldRunningBank].getTeamId()) {
@@ -225,10 +220,6 @@ public class Robot implements RobotAction, Runnable {
 			reboot("End of bank");
 		    } else {
 			pendingBankChange = false;
-		    }
-		    if (oldRunningBank != runningBank) {
-			eventDispatcher.fireEvent(new RobotChangedEvent(this)); // running bank
-										// changed
 		    }
 		}
 
@@ -260,8 +251,10 @@ public class Robot implements RobotAction, Runnable {
     @Override
     public void die(String reason) {
 	log.info("[die] Robot {} died with reason: {}", serialNumber, reason);
-	alive = false;
-	world.remove(Robot.this);
+	if (alive) { // if not alive it means it was killed at creation
+	    alive = false;
+	    world.remove(Robot.this);
+	}
 	eventDispatcher.removeListeners();
     }
 
@@ -334,6 +327,8 @@ public class Robot implements RobotAction, Runnable {
 
 	private MasterClock clock;
 
+	private final Object syncObj = new Object();
+
 	/**
 	 * @param pClock master clock used to schedule tasks
 	 */
@@ -347,11 +342,25 @@ public class Robot implements RobotAction, Runnable {
 	 * @param turns the number of turns to block
 	 */
 	public void waitTurns(int turns) {
+	    blockIfDisabled();
 	    if (turnsCounter > GameSettings.MAX_AGE) {
 		die("Old Age");
 	    } else {
 		clock.waitFor(serialNumber, turns);
 		turnsCounter += turns;
+	    }
+	    blockIfDisabled();
+	}
+
+	private void blockIfDisabled() {
+	    synchronized (syncObj) {
+		while (!data.isEnabled()) {
+		    try {
+			syncObj.wait();
+		    } catch (InterruptedException exc) {
+			log.error("[waitTurns]", exc);
+		    }
+		}
 	    }
 	}
 
@@ -360,6 +369,13 @@ public class Robot implements RobotAction, Runnable {
 	 */
 	public int getTurnsCount() {
 	    return turnsCounter;
+	}
+
+	private void activated() {
+	    synchronized (syncObj) {
+		syncObj.notifyAll();
+	    }
+
 	}
     }
 
@@ -384,11 +400,6 @@ public class Robot implements RobotAction, Runnable {
 	eventDispatcher.fireEvent(new RobotChangedEvent(this));
     }
 
-    void setActiveState(int pActiveState) {
-	data.setActiveState(pActiveState);
-
-    }
-
     @Override
     public void createRobot(String pName, InstructionSet pSet, int banksCount, boolean pMobile) {
 	if (data.getInstructionSet() != InstructionSet.SUPER) {
@@ -401,6 +412,9 @@ public class Robot implements RobotAction, Runnable {
 
 	    child.eventDispatcher.addListener(inheritedListener);
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
+
+	    // all verifications passed
+	    alive = true;
 	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
 		    + child.getSerialNumber());
 	    newThread.start(); // jumpstarts the robot
@@ -505,7 +519,7 @@ public class Robot implements RobotAction, Runnable {
 	if (banks[runningBank] != null) {
 	    return banks[runningBank].getTeamId();
 	} else {
-	    return data.getTeamId(); //nothing is running, return robot's team id
+	    return data.getTeamId(); // nothing is running, return robot's team id
 	}
     }
 
@@ -527,6 +541,11 @@ public class Robot implements RobotAction, Runnable {
      */
     public static void setInheritableListener(RobotListener listener) {
 	inheritedListener = listener;
+    }
+
+    void activated() {
+	turnsControl.activated();
+
     }
 
 }

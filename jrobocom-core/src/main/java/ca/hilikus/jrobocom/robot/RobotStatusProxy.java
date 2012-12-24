@@ -226,7 +226,7 @@ public class RobotStatusProxy implements RobotStatus {
     @Override
     public void setActiveState(int pActiveState) {
 	turnsControl.waitTurns(Timing.LOCAL_WRITE);
-	this.robot.setActiveState(pActiveState);
+	this.robot.getData().setActiveState(pActiveState);
 
     }
 }
