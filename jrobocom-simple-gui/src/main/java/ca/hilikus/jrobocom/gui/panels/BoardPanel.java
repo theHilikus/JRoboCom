@@ -69,23 +69,27 @@ public class BoardPanel extends JPanel {
 	    throw new IllegalArgumentException("Coordinates and added item cannot be null");
 	}
 	log.trace("[addItem] New item added @ {}", coordinates);
-	data[coordinates.y][coordinates.x].addModel(item);
-	data[coordinates.y][coordinates.x].repaint();
+	getPanelAt(coordinates).addModel(item);
+	getPanelAt(coordinates).repaint();
 
+    }
+
+    private JDrawingPanel getPanelAt(Point coordinates) {
+	return data[coordinates.y][coordinates.x];
     }
 
     /**
      * @param coordinates the position of the item to remove
      */
-    public void removeItem(Point coordinates) {
+    public void removeItem(final Point coordinates) {
 	assertEDT();
 	if (coordinates == null) {
 	    throw new IllegalArgumentException("Coordinates cannot be null");
 	}
 	log.trace("[removeItem] Item removed from {}", coordinates);
-	if (data[coordinates.x][coordinates.y].hasModel()) {
-	    data[coordinates.x][coordinates.y].removeModel();
-	    data[coordinates.x][coordinates.y].repaint();
+	if (getPanelAt(coordinates).hasModel()) {
+	    getPanelAt(coordinates).removeModel();
+	    getPanelAt(coordinates).repaint();
 	}
     }
 
@@ -100,16 +104,16 @@ public class BoardPanel extends JPanel {
 	if (oldCoordinates == null || newCoordinates == null) {
 	    throw new IllegalArgumentException("Coordinates cannot be null");
 	}
-	if (data[newCoordinates.x][newCoordinates.y].hasModel()) {
+	if (getPanelAt(newCoordinates).hasModel()) {
 	    throw new IllegalStateException(
 		    "New position contains a model in the UI already. New position = " + newCoordinates);
 	}
-	if (!data[oldCoordinates.x][oldCoordinates.y].hasModel()) {
+	if (!getPanelAt(oldCoordinates).hasModel()) {
 	    throw new IllegalStateException("Old position doesn't contain a model in the UI. Old position = "
 		    + oldCoordinates);
 	}
 	// all good
-	Drawable item = data[oldCoordinates.x][oldCoordinates.y].getModel();
+	Drawable item = getPanelAt(oldCoordinates).getModel();
 	removeItem(oldCoordinates);
 	addItem(newCoordinates, item);
 
@@ -123,7 +127,7 @@ public class BoardPanel extends JPanel {
 	log.debug("[clear] Cleaning board");
 	for (int row = 0; row < SIZE; row++) {
 	    for (int col = 0; col < SIZE; col++) {
-		removeItem(new Point(row, col));
+		removeItem(new Point(col, row));
 	    }
 	}
     }
@@ -142,7 +146,7 @@ public class BoardPanel extends JPanel {
 	if (coordinates == null) {
 	    throw new IllegalArgumentException("Coordinates cannot be null");
 	}
-	data[coordinates.x][coordinates.y].repaint();
+	getPanelAt(coordinates).repaint();
 
     }
 }

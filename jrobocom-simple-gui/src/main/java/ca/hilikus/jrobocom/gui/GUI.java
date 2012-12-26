@@ -6,7 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +35,7 @@ import ca.hilikus.jrobocom.gui.drawables.DrawableRobot;
 import ca.hilikus.jrobocom.gui.panels.BoardPanel;
 import ca.hilikus.jrobocom.gui.panels.NewGameDialog;
 import ca.hilikus.jrobocom.robot.Robot;
+import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
  * The composed UI
@@ -47,11 +48,9 @@ public class GUI implements ColourInfoProvider {
 
     private Controller controller = new Controller();
 
-    private JToggleButton tglbtnStart;
 
     private JSlider speedSlider;
 
-    private JButton btnStep;
 
     private DefaultListModel<Player> playersModel;
 
@@ -63,16 +62,21 @@ public class GUI implements ColourInfoProvider {
 
     private List<Player> players;
 
-    private JButton btnReload;
 
     private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
+    private UIAction startAction;
+
+    private UIAction stepAction;
+
+    private UIAction reloadAction;
+
     /**
-     * Event handler in charge of updating the UI and receiving user input
+     * Event handler in charge of updating the UI
      * 
      */
-    public class Controller implements GameListener, ActionListener {
-	private Map<Robot, Point> robots = new HashMap<>();
+    public class Controller implements GameListener {
+	private Map<Robot, Point> robots;
 
 	@Override
 	public void update(final RobotAddedEvent evt) {
@@ -85,6 +89,9 @@ public class GUI implements ColourInfoProvider {
 		}
 	    });
 
+	    if (robots == null) { // lazy init
+		robots = new HashMap<>();
+	    }
 	    robots.put(source, evt.getCoordinates());
 	}
 
@@ -98,26 +105,10 @@ public class GUI implements ColourInfoProvider {
 		}
 	    });
 
-	    robots.remove(evt.getSource());
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    switch (e.getActionCommand()) {
-		case Actions.NEW_GAME:
-		    createNewSession();
-		    break;
-		case Actions.RELOAD:
-		    reloadSession();
-		    break;
-		case Actions.STEP:
-		    singleStep();
-		    break;
-		case Actions.START:
-		    start(!((JToggleButton) e.getSource()).isSelected());
-
+	    if (robots == null) { // lazy init
+		robots = new HashMap<>();
 	    }
-
+	    robots.remove(evt.getSource());
 	}
 
 	@Override
@@ -153,11 +144,77 @@ public class GUI implements ColourInfoProvider {
 
     }
 
-    private class Actions {
-	public static final String RELOAD = "reload";
-	public static final String NEW_GAME = "newGame";
-	public static final String STEP = "step";
-	public static final String START = "start/stop";
+    private class UIAction extends AbstractAction {
+
+	private static final long serialVersionUID = 2865727921724644884L;
+
+	public UIAction(String actionName) {
+	    super(actionName);
+	    putValue(ACTION_COMMAND_KEY, actionName);
+	    putValue(SHORT_DESCRIPTION, getDescription(actionName));
+	    putValue(MNEMONIC_KEY, getMnemonic(actionName));
+	    
+	    if (ActionNames.NEW_GAME.equals(actionName)) {
+		setEnabled(true);
+	    } else {
+		setEnabled(false);
+	    }
+	}
+
+	private int getMnemonic(String actionName) {
+	    switch (actionName) {
+		case ActionNames.NEW_GAME:
+		    return KeyEvent.VK_N;
+		case ActionNames.RELOAD:
+		    return KeyEvent.VK_R;
+		case ActionNames.STEP:
+		    return KeyEvent.VK_T;
+		case ActionNames.START:
+		    return KeyEvent.VK_S;
+	    }
+	    return -1;
+	}
+
+	private String getDescription(String actionName) {
+	    switch (actionName) {
+		case ActionNames.NEW_GAME:
+		    return "Configures a new session";
+		case ActionNames.RELOAD:
+		    return "Starts a new session with the same robots";
+		case ActionNames.STEP:
+		    return "Executes a single clock of the Master clock";
+		case ActionNames.START:
+		    return "Starts or stops the Master clock";
+	    }
+	    return "n/a";
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+	    switch (e.getActionCommand()) {
+		case ActionNames.NEW_GAME:
+		    createNewSession();
+		    break;
+		case ActionNames.RELOAD:
+		    reloadSession();
+		    break;
+		case ActionNames.STEP:
+		    singleStep();
+		    break;
+		case ActionNames.START:
+		    start(!((JToggleButton) e.getSource()).isSelected());
+
+	    }
+
+	}
+
+    }
+
+    private class ActionNames {
+	public static final String RELOAD = "Reload";
+	public static final String NEW_GAME = "New Game";
+	public static final String STEP = "Step";
+	public static final String START = "Start";
     }
 
     /**
@@ -174,8 +231,8 @@ public class GUI implements ColourInfoProvider {
 	    }
 	});
 
-
     }
+
     /**
      * Create the application.
      * 
@@ -205,10 +262,13 @@ public class GUI implements ColourInfoProvider {
      * @param isReady true if session was configured correctly; false otherwise
      */
     public void sessionReady(boolean isReady) {
-	tglbtnStart.setEnabled(isReady);
+	if (isReady) {
+	    speedSlider.setValue(session.getClockPeriod());
+	}
+	startAction.setEnabled(isReady);
 	speedSlider.setEnabled(isReady);
-	btnStep.setEnabled(isReady);
-	btnReload.setEnabled(isReady);
+	stepAction.setEnabled(isReady);
+	reloadAction.setEnabled(isReady);
 
     }
 
@@ -226,36 +286,44 @@ public class GUI implements ColourInfoProvider {
 	JToolBar toolBar = new JToolBar();
 	frame.getContentPane().add(toolBar, BorderLayout.NORTH);
 
-	JButton btnNewGame = new JButton("New game");
-	btnNewGame.setActionCommand(Actions.NEW_GAME);
-	btnNewGame.addActionListener(controller);
+	UIAction newAction = new UIAction(ActionNames.NEW_GAME);
+	JButton btnNewGame = new JButton(newAction);
+	btnNewGame.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ctrl N"),
+		ActionNames.NEW_GAME);
+	btnNewGame.getActionMap().put(ActionNames.NEW_GAME, newAction);
+
 
 	toolBar.add(btnNewGame);
 
-	btnReload = new JButton("Reload");
-	btnReload.setEnabled(false);
-	btnReload.setActionCommand(Actions.RELOAD);
-	btnReload.addActionListener(controller);
+	reloadAction = new UIAction(ActionNames.RELOAD);
+	JButton btnReload = new JButton(reloadAction);
+	//btnReload.setEnabled(false);
+	btnReload.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F5"),
+		ActionNames.RELOAD);
+	btnReload.getActionMap().put(ActionNames.RELOAD, reloadAction);
 
 	toolBar.add(btnReload);
 	toolBar.addSeparator();
 
-	tglbtnStart = new JToggleButton("Start");
-	tglbtnStart.setEnabled(false);
-	tglbtnStart.setActionCommand(Actions.START);
-	tglbtnStart.addActionListener(controller);
+	startAction = new UIAction(ActionNames.START);
+	JToggleButton tglbtnStart = new JToggleButton(startAction);
+	//tglbtnStart.setEnabled(false);
 	toolBar.add(tglbtnStart);
 
 	speedSlider = new JSlider();
-	speedSlider.setValue(10);
+	speedSlider.setInverted(true);
+	speedSlider.setMinimum(MasterClock.MIN_PERIOD);
+	speedSlider.setMaximum(1000);
 	speedSlider.setEnabled(false);
 	speedSlider.setMaximumSize(new Dimension(100, 16));
 	toolBar.add(speedSlider);
 
-	btnStep = new JButton("Step");
-	btnStep.setEnabled(false);
-	btnStep.setActionCommand(Actions.STEP);
-	btnStep.addActionListener(controller);
+	stepAction = new UIAction(ActionNames.STEP);
+	JButton btnStep = new JButton(stepAction);
+	//btnStep.setEnabled(false);
+	btnStep.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F10"),
+		ActionNames.STEP);
+	btnStep.getActionMap().put(ActionNames.STEP, stepAction);
 	toolBar.add(btnStep);
 
 	JPanel mainPanel = new JPanel();
@@ -374,7 +442,7 @@ public class GUI implements ColourInfoProvider {
 	if (result.getResult() == Result.DRAW) {
 	    title = "Draw";
 	    msg = "There were no winners in this run";
-	    icon = loadIcon("/images/draw.jpg"); //TODO: find draw image
+	    icon = loadIcon("/images/draw.jpg"); // TODO: find draw image
 	} else {
 	    title = "And the Winner is...";
 	    msg = "The winner is " + result.getWinner().getAuthor() + " with "
