@@ -193,7 +193,7 @@ public class Player {
      */
     public void startRobot(Robot newRobot) {
 	newRobot.getData().setActiveState(DEFAULT_START_STATE);
-	Thread newThread = new Thread(robotsThreads, newRobot, "Robot " + newRobot.getSerialNumber());
+	Thread newThread = new Thread(robotsThreads, newRobot, "Bot-" + newRobot.getSerialNumber());
 	newThread.start(); // jumpstarts the robot
 
     }

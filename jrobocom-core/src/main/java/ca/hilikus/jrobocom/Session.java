@@ -22,7 +22,7 @@ public class Session {
     private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
-    
+
     static {
 	System.setSecurityManager(new GameSecurityManager());
     }
@@ -102,6 +102,22 @@ public class Session {
      */
     public boolean isRunning() {
 	return clock.isRunning();
+    }
+
+    /**
+     * Sets the period of the session's clock.
+     * 
+     * @param millis period length in milliseconds
+     */
+    public void setClockPeriod(int millis) {
+	clock.setPeriod(millis);
+    }
+
+    /**
+     * @return the period in milliseconds of the session's clock
+     */
+    public int getClockPeriod() {
+	return clock.getPeriod();
     }
 
 }

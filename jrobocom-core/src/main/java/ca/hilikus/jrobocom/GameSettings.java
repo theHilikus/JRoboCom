@@ -36,27 +36,27 @@ public class GameSettings {
 	/**
 	 * fixed cycles for creating a robot
 	 */
-	public static final int CREATION_BASE = 0;
+	public static final int CREATION_BASE = 5;
 	/**
 	 * cycles for each extra bank in the new robot
 	 */
-	public static final int CREATION_PER_BANK = 0;
+	public static final int CREATION_PER_BANK = 2;
 	/**
 	 * extra cycles coefficient for creating a mobile robot
 	 */
-	public static final int MOBILITY_PENALTY = 0;
+	public static final double MOBILITY_PENALTY = 1.5;
 	/**
 	 * fixed cycles for creating a mobile robot
 	 */
-	public static final int MOBILITY_CONSTANT = 0;
+	public static final int MOBILITY_CONSTANT = 4;
 	/**
 	 * extra cycles for creating a robot with the advanced instruction set
 	 */
-	public static final int ADVANCED_SET_PENALTY = 0;
+	public static final int ADVANCED_SET_PENALTY = 3;
 	/**
 	 * extra cycles for creating a robot with the super instruction set
 	 */
-	public static final int SUPER_SET_PENALTY = 0;
+	public static final int SUPER_SET_PENALTY = 7;
 	/**
 	 * cycles to move
 	 */
@@ -82,7 +82,7 @@ public class GameSettings {
     /**
      * maximum cycles when creating a robot
      */
-    public static final int MAX_CREATE_WAIT = 0;
+    public static final int MAX_CREATE_WAIT = 60;
     /**
      * maximum number of banks in a robot
      */
