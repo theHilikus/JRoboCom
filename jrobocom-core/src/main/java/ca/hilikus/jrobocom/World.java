@@ -38,6 +38,8 @@ public class World {
 
     private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
 
+    private int teams = 0;
+
     /**
      * Notification interface to be implemented by listeners of World events
      * 
@@ -116,8 +118,10 @@ public class World {
 	    throw new IllegalArgumentException(
 		    "Provided robot is not the first from its team. Use add(Robot, Robot) instead");
 	}
+	teams++;
 	Point newPosition;
 	do {
+	    // TODO: check this, looks biased
 	    int x = generator.nextInt(GameSettings.BOARD_SIZE);
 	    int y = generator.nextInt(GameSettings.BOARD_SIZE);
 	    newPosition = new Point(x, y);
@@ -157,14 +161,16 @@ public class World {
 	    robot.getOwner().clean();
 	}
 
-	if (robotsPosition.size() > 0) {
-	    Robot someRobot = robotsPosition.keySet().iterator().next();
-	    if (checkWinner(someRobot.getData().getTeamId())) {
-		declareWinner(someRobot.getOwner());
+	if (teams > 1) { // if there were more than 1 at the beginning, otherwise it is "practice"
+	    if (robotsPosition.size() > 0) {
+		Robot someRobot = robotsPosition.keySet().iterator().next();
+		if (checkWinner(someRobot.getData().getTeamId())) {
+		    declareWinner(someRobot.getOwner());
+		}
+	    } else {
+		// no winner
+		declareDraw();
 	    }
-	} else {
-	    // no winner
-	    declareDraw();
 	}
     }
 
@@ -246,6 +252,12 @@ public class World {
 		x = (x - dist) % size;
 		break;
 
+	}
+	if (x < 0) {
+	    x += size;
+	}
+	if (y < 0) {
+	    y += size;
 	}
 
 	return new Point(x, y);

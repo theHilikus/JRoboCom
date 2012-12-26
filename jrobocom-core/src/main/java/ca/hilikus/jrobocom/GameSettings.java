@@ -28,11 +28,11 @@ public class GameSettings {
 	/**
 	 * fixed cycles when transferring
 	 */
-	public static final int TRANSFER_BASE = 0;
+	public static final int TRANSFER_BASE = 2;
 	/**
 	 * cycles for each complexity unit of a bank
 	 */
-	public static final int TRANSFER_SINGLE = 0;
+	public static final int TRANSFER_SINGLE = 1;
 	/**
 	 * fixed cycles for creating a robot
 	 */
@@ -60,7 +60,7 @@ public class GameSettings {
 	/**
 	 * cycles to move
 	 */
-	public static final int MOVE = 0;
+	public static final int MOVE = 1;
 	/**
 	 * cycles to change banks
 	 */
@@ -68,11 +68,11 @@ public class GameSettings {
 	/**
 	 * fixed cycles to scan
 	 */
-	public static final int SCAN_BASE = 0;
+	public static final int SCAN_BASE = 3;
 	/**
 	 * cycles for every extra field to scan
 	 */
-	public static final int SCAN_PER_DIST = 0;
+	public static final int SCAN_PER_DIST = 1;
 	/**
 	 * cycles to turn
 	 */
