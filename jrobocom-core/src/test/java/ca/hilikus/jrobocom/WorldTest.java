@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.World.WorldListener;
 import ca.hilikus.jrobocom.events.ResultEvent;
+import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -94,6 +95,7 @@ public class WorldTest extends AbstractTest {
     }
 
     private World TU;
+    private EventReceiver listener;
 
     /**
      * 
@@ -108,6 +110,8 @@ public class WorldTest extends AbstractTest {
     @BeforeMethod
     public void setUp() {
 	TU = new World(new MasterClock());
+	listener = new EventReceiver();
+	TU.getEventHandler().addListener(listener);
 	World.setRandGenerator(new Random()); // reset it in case one of the tests changed it
     }
 
@@ -186,9 +190,6 @@ public class WorldTest extends AbstractTest {
 										       // robot use
 										       // real
 										       // method
-
-	EventReceiver listener = new EventReceiver();
-	TU.getEventHandler().addListener(listener);
 
 	TU.addFirst(mockRobot);
 	assertEquals(TU.getBotsCount(-1, true), 1, "Successful add");
@@ -273,6 +274,7 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot);
 	assertEquals(TU.getBotsCount(311, false), 1);
 	TU.remove(mockRobot);
+	assertNotNull(listener.getRemoved(), "Check we got message");
 	assertEquals(TU.getBotsCount(311, false), 0);
     }
 
@@ -332,8 +334,6 @@ public class WorldTest extends AbstractTest {
 	when(mockRobot.getData().getFacing()).thenReturn(Direction.NORTH);
 	when(mockRobot.getData().isMobile()).thenReturn(true);
 
-	EventReceiver listener = new EventReceiver();
-
 	Random rand = mock(Random.class);
 
 	World.setRandGenerator(rand);
@@ -343,12 +343,11 @@ public class WorldTest extends AbstractTest {
 
 	when(rand.nextInt(anyInt())).thenReturn(x).thenReturn(y);
 
-	TU.getEventHandler().addListener(listener);
-
 	TU.addFirst(mockRobot);
 
 	TU.move(mockRobot);
 
+	assertNotNull(listener.getMoved(), "Check we got message");
 	assertEquals(listener.getMoved().getOldPosition(), new Point(x, y), "Check old position in event");
 	assertEquals(listener.getMoved().getNewPosition(), new Point(x, y - 1), "Check new position in event");
 
@@ -407,6 +406,44 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot2);
 
 	assertEquals(mockRobot2, TU.getNeighbour(mockRobot), "Check neighbour is detected");
+    }
+
+    /**
+     * Tests if a winner is declared when a second team completely dies
+     */
+    @Test(dependsOnMethods = { "addFirst", "remove" })
+    public void declareWinner() {
+	Robot mockRobot = createRobotMockup(311, 0);
+	Player player = mock(Player.class);
+	when(mockRobot.getOwner()).thenReturn(player);
+
+	TU.addFirst(mockRobot);
+
+	Robot mockRobot2 = createRobotMockup(312, 1);
+	TU.addFirst(mockRobot2);
+
+	TU.remove(mockRobot2);
+
+	assertNotNull(listener.getResult(), "Check end of game event was generated");
+	assertEquals(listener.getResult().getResult(), Result.WIN, "Check result was a win");
+	assertEquals(listener.getResult().getWinner(), player, "Check winner is the correct one");
+    }
+
+    /**
+     * Verifies that if only one team is added, practice mode is detected
+     */
+    @Test(dependsOnMethods = { "addFirst", "remove" })
+    public void detectPractice() {
+	Robot mockRobot = createRobotMockup(311, 0);
+	TU.addFirst(mockRobot);
+	when(mockRobot.getData().getGeneration()).thenReturn(0);
+
+	Robot mockRobot2 = createRobotMockup(311, 1); // same team
+	when(mockRobot2.getData().getGeneration()).thenReturn(1);
+	TU.add(mockRobot, mockRobot2);
+
+	TU.remove(mockRobot2);
+	assertNull(listener.getResult(), "No results were generated");
     }
 
 }
