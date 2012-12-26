@@ -432,7 +432,6 @@ public class Robot implements RobotAction, Runnable {
 	    die("Robot is not mobile but tried to move");
 	}
 	world.move(this);
-
     }
 
     @Override

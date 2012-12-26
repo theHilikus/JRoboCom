@@ -14,7 +14,7 @@ import ca.hilikus.jrobocom.robot.api.RobotAction;
  * Interface used from Banks. Maps one-to-one with robots on one end; on the other end it can change
  * banks
  * 
- * 
+ * @author hilikus
  */
 public final class RobotControlProxy implements RobotAction {
     /**
@@ -102,8 +102,8 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
-	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}", Timing.REMOTE_ACCESS_PENALTY
-		+ Timing.TRANSFER_BASE, remoteBankIndex, localBankIndex);
+	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}",
+		Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE, remoteBankIndex, localBankIndex);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE);
 	int bankComplexity = robot.reverseTransfer(localBankIndex, remoteBankIndex);
 
@@ -127,7 +127,8 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public ScanResult scan(int maxDist) {
-	log.trace("[scan] Waiting {} cycles to scan {} fields", Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1), maxDist);
+	log.trace("[scan] Waiting {} cycles to scan {} fields", Timing.SCAN_BASE + Timing.SCAN_PER_DIST
+		* (maxDist - 1), maxDist);
 	turnsControl.waitTurns(Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1));
 
 	return robot.scan(maxDist);
@@ -158,7 +159,6 @@ public final class RobotControlProxy implements RobotAction {
 	log.trace("[turn] Waiting {} cycles", Timing.TURN);
 	turnsControl.waitTurns(Timing.TURN);
 	robot.turn(right);
-
     }
 
 }
