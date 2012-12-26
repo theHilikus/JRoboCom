@@ -101,7 +101,7 @@ public class Robot implements RobotAction, Runnable {
     public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name, Player pOwner) {
 	this(theWorld, clock, allBanks.length, name, pOwner);
 
-	Direction randomDir = Direction.fromInt(World.generator.nextInt(Direction.COUNT));
+	Direction randomDir = Direction.fromInt(World.getRandGenerator().nextInt(Direction.COUNT));
 	data = new RobotData(this, InstructionSet.SUPER, false, 0, randomDir);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {

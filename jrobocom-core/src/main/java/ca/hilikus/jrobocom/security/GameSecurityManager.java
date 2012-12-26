@@ -97,7 +97,7 @@ public class GameSecurityManager extends SecurityManager {
 
     private void checkGamePermission(GamePermission perm) {
 	log.trace("[checkGamePermission] Checking game permission {}", perm);
-	if ("connectBank".equals(perm.getName()) && isPlayer()) {
+	if (isPlayer()) {
 	    throw new SecurityException("Player cannot connect a bank to a robot. Only the game can do that");
 	}
 

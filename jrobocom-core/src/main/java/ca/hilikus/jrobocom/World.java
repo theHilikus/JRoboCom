@@ -44,7 +44,7 @@ public class World {
      * Notification interface to be implemented by listeners of World events
      * 
      */
-    public interface WorldListener extends EventListener {
+    public static interface WorldListener extends EventListener {
 	/**
 	 * Called when a robot was added to the world
 	 * 
@@ -77,7 +77,7 @@ public class World {
     /**
      * Common random number generator
      */
-    public static Random generator = new Random();
+    private static Random generator = new Random();
 
     /**
      * @param pClock the world clock
@@ -341,6 +341,22 @@ public class World {
 	    sm.checkPermission(new GamePermission("eventsListener"));
 	}
 	return eventDispatcher;
+    }
+
+    /**
+     * @return the generator
+     */
+    public static final Random getRandGenerator() {
+        return generator;
+    }
+    
+    static final void setRandGenerator(Random newGen) {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("setRandomGenerator"));
+	}
+	
+	generator = newGen;
     }
 
 }
