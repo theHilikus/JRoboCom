@@ -12,5 +12,6 @@
 		<module>jrobocom-core</module>
 		<module>jrobocom-parent</module>
 		<module>jrobocom-simple-gui</module>
+		<module>jrobocom-samples</module>
 	</modules>
 </project>
