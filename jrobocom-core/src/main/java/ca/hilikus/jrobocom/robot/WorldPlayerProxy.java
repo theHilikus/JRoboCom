@@ -1,5 +1,8 @@
 package ca.hilikus.jrobocom.robot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldInfo;
 import ca.hilikus.jrobocom.GameSettings.Timing;
@@ -17,6 +20,9 @@ public class WorldPlayerProxy implements WorldInfo {
     private final World world;
 
     private final TurnManager turnsControl;
+    
+    private static final Logger log = LoggerFactory.getLogger(WorldPlayerProxy.class);
+    
 
     /**
      * @param turnManager turns handler for calling robot
@@ -29,6 +35,7 @@ public class WorldPlayerProxy implements WorldInfo {
 
     @Override
     public int getBotsCount(int teamId, boolean invert) {
+	log.trace("[getBotsCount] Waiting {} cycles", Timing.REMOTE_ACCESS_PENALTY);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 
 	return world.getBotsCount(teamId, invert);
@@ -39,6 +46,7 @@ public class WorldPlayerProxy implements WorldInfo {
      */
     @Override
     public int getWorldAge() {
+	log.trace("[getWorldAge] Waiting {} cycles", Timing.REMOTE_ACCESS_PENALTY);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY);
 
 	return world.getAge();

@@ -21,11 +21,10 @@ public final class RobotControlProxy implements RobotAction {
      * the robot that gets controlled
      */
     private final Robot robot;
-    
+
     private final TurnManager turnsControl;
 
     private static final Logger log = LoggerFactory.getLogger(RobotControlProxy.class);
-        
 
     /**
      * @param robot
@@ -40,6 +39,7 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public void changeBank(int newBank) {
+	log.trace("[changeBank] Waiting {} cycles to change to bank {}", Timing.BANK_CHANGE, newBank);
 	turnsControl.waitTurns(Timing.BANK_CHANGE);
 	robot.changeBank(newBank);
 
@@ -63,6 +63,7 @@ public final class RobotControlProxy implements RobotAction {
 	}
 
 	int totalWait = Math.min(turnsForBanks + turnsForSet, GameSettings.MAX_CREATE_WAIT);
+	log.trace("[createRobot] Waiting {} cycles to create Robot {}", totalWait, name);
 	turnsControl.waitTurns(totalWait);
 
 	robot.createRobot(name, pSet, banksCount, pMobile);
@@ -84,17 +85,15 @@ public final class RobotControlProxy implements RobotAction {
 	die("No reason specified");
     }
 
-    
-
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotControl#move()
      */
     @Override
     public void move() {
+	log.trace("[move] Waiting {} cycles", Timing.MOVE);
 	turnsControl.waitTurns(Timing.MOVE);
-	
+
 	robot.move();
-	
 
     }
 
@@ -103,10 +102,15 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
+	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}", Timing.REMOTE_ACCESS_PENALTY
+		+ Timing.TRANSFER_BASE, remoteBankIndex, localBankIndex);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE);
 	int bankComplexity = robot.reverseTransfer(localBankIndex, remoteBankIndex);
+
+	log.trace("[reverseTransfer] Waiting {} cycles to complete transfer", Timing.TRANSFER_SINGLE
+		* bankComplexity);
 	turnsControl.waitTurns(Timing.TRANSFER_SINGLE * bankComplexity);
-	
+
 	return bankComplexity;
     }
 
@@ -123,24 +127,26 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public ScanResult scan(int maxDist) {
+	log.trace("[scan] Waiting {} cycles to scan {} fields", Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1), maxDist);
 	turnsControl.waitTurns(Timing.SCAN_BASE + Timing.SCAN_PER_DIST * (maxDist - 1));
-	
+
 	return robot.scan(maxDist);
     }
-
-
 
     /* (non-Javadoc)
      * @see ca.hilikus.jrobocom.RobotControl#transfer(int, int)
      */
     @Override
     public int transfer(int localBankIndex, int remoteBankIndex) {
-
+	log.trace("[transfer] Waiting {} cycles to start transfer from {} to {}",
+		Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE, localBankIndex, remoteBankIndex);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE);
 	int bankComplexity = robot.transfer(localBankIndex, remoteBankIndex);
-	
+
+	log.trace("[transfer] Waiting {} cycles to complete transfer", Timing.TRANSFER_SINGLE
+		* bankComplexity);
 	turnsControl.waitTurns(Timing.TRANSFER_SINGLE * bankComplexity);
-	
+
 	return bankComplexity;
     }
 
@@ -149,6 +155,7 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public void turn(boolean right) {
+	log.trace("[turn] Waiting {} cycles", Timing.TURN);
 	turnsControl.waitTurns(Timing.TURN);
 	robot.turn(right);
 

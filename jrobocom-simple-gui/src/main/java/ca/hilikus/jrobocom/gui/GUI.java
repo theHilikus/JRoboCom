@@ -48,9 +48,7 @@ public class GUI implements ColourInfoProvider {
 
     private Controller controller = new Controller();
 
-
     private JSlider speedSlider;
-
 
     private DefaultListModel<Player> playersModel;
 
@@ -61,7 +59,6 @@ public class GUI implements ColourInfoProvider {
     private Session session;
 
     private List<Player> players;
-
 
     private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
@@ -153,7 +150,7 @@ public class GUI implements ColourInfoProvider {
 	    putValue(ACTION_COMMAND_KEY, actionName);
 	    putValue(SHORT_DESCRIPTION, getDescription(actionName));
 	    putValue(MNEMONIC_KEY, getMnemonic(actionName));
-	    
+
 	    if (ActionNames.NEW_GAME.equals(actionName)) {
 		setEnabled(true);
 	    } else {
@@ -225,11 +222,16 @@ public class GUI implements ColourInfoProvider {
 	SwingUtilities.invokeLater(new Runnable() {
 	    @Override
 	    public void run() {
-		@SuppressWarnings("unused")
 		GUI view = new GUI("JRobotCom");
-
+		assertEDT();
+		view.setVisible(true);
 	    }
 	});
+
+    }
+
+    private void setVisible(boolean visible) {
+	frame.setVisible(visible);
 
     }
 
@@ -292,12 +294,10 @@ public class GUI implements ColourInfoProvider {
 		ActionNames.NEW_GAME);
 	btnNewGame.getActionMap().put(ActionNames.NEW_GAME, newAction);
 
-
 	toolBar.add(btnNewGame);
 
 	reloadAction = new UIAction(ActionNames.RELOAD);
 	JButton btnReload = new JButton(reloadAction);
-	//btnReload.setEnabled(false);
 	btnReload.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F5"),
 		ActionNames.RELOAD);
 	btnReload.getActionMap().put(ActionNames.RELOAD, reloadAction);
@@ -307,7 +307,6 @@ public class GUI implements ColourInfoProvider {
 
 	startAction = new UIAction(ActionNames.START);
 	JToggleButton tglbtnStart = new JToggleButton(startAction);
-	//tglbtnStart.setEnabled(false);
 	toolBar.add(tglbtnStart);
 
 	speedSlider = new JSlider();
@@ -320,7 +319,6 @@ public class GUI implements ColourInfoProvider {
 
 	stepAction = new UIAction(ActionNames.STEP);
 	JButton btnStep = new JButton(stepAction);
-	//btnStep.setEnabled(false);
 	btnStep.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F10"),
 		ActionNames.STEP);
 	btnStep.getActionMap().put(ActionNames.STEP, stepAction);
@@ -370,9 +368,6 @@ public class GUI implements ColourInfoProvider {
 			.addComponent(list, GroupLayout.PREFERRED_SIZE, 195, GroupLayout.PREFERRED_SIZE)
 			.addContainerGap(364, Short.MAX_VALUE)));
 	rightPanel.setLayout(gl_rightPanel);
-
-	assertEDT();
-	frame.setVisible(true);
     }
 
     private static void assertEDT() {
