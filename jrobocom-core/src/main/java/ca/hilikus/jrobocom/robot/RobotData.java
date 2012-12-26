@@ -1,7 +1,9 @@
 package ca.hilikus.jrobocom.robot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.Direction;
-import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.player.InstructionSet;
@@ -28,6 +30,9 @@ public class RobotData implements RobotStatusLocal {
 
     private final GenericEventDispatcher<RobotListener> eventDispatcher;
     private final Robot owner;
+    
+    private static final Logger log = LoggerFactory.getLogger(RobotData.class);
+    
 
     /**
      * Main constructor
@@ -108,6 +113,7 @@ public class RobotData implements RobotStatusLocal {
 	if (oldState <= 0 && newState > 0 || oldState > 0 && newState <= 0) {
 	    eventDispatcher.fireEvent(new RobotChangedEvent(owner));
 	}
+	log.trace("[setActiveState] Changed {} state from {} to {}", owner, oldState, newState);
     }
 
     @Override

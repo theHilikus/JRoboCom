@@ -1,5 +1,8 @@
 package ca.hilikus.jrobocom.robot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.GameSettings.Timing;
 import ca.hilikus.jrobocom.player.InstructionSet;
@@ -21,8 +24,8 @@ public final class RobotControlProxy implements RobotAction {
     
     private final TurnManager turnsControl;
 
-    
-    
+    private static final Logger log = LoggerFactory.getLogger(RobotControlProxy.class);
+        
 
     /**
      * @param robot
@@ -49,7 +52,7 @@ public final class RobotControlProxy implements RobotAction {
     public void createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile) {
 	int turnsForBanks = Timing.CREATION_BASE + Timing.CREATION_PER_BANK * banksCount;
 	if (pMobile) {
-	    turnsForBanks *= Timing.MOBILITY_PENALTY + Timing.MOBILITY_CONSTANT;
+	    turnsForBanks = (int) (turnsForBanks * Timing.MOBILITY_PENALTY + Timing.MOBILITY_CONSTANT);
 	}
 	int turnsForSet = 0;
 	if (pSet == InstructionSet.ADVANCED) {

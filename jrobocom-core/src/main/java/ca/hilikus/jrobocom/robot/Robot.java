@@ -237,7 +237,7 @@ public class Robot implements RobotAction, Runnable {
 
     @Override
     public void changeBank(int newBank) {
-	log.debug("[changeBank] Changing Bank. Old bank = {}, new bank = {}", runningBank, newBank);
+	log.debug("[changeBank] Changing Bank of {}. Old bank = {}, new bank = {}", this, runningBank, newBank);
 	runningBank = newBank;
 	pendingBankChange = true; // so the robot doesn't reboot at the end of this bank
 
@@ -414,7 +414,7 @@ public class Robot implements RobotAction, Runnable {
 	    world.add(this, child); // world does further verification so add is not guaranteed yet
 
 	    // all verifications passed
-	    alive = true;
+	    child.alive = true;
 	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
 		    + child.getSerialNumber());
 	    newThread.start(); // jumpstarts the robot
@@ -447,12 +447,13 @@ public class Robot implements RobotAction, Runnable {
 	}
 
 	ScanResult res = null;
-	for (int dist = 1; dist < maxDist; dist++) {
+	for (int dist = 1; dist <= maxDist; dist++) {
 	    res = world.scan(this, dist);
 	    if (!res.isEmpty()) {
 		return res;
 	    }
 	}
+	assert res != null : "Scan result can't be null";
 
 	return res;
     }
