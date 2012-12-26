@@ -56,15 +56,14 @@ public class ResultEvent extends EventObject {
      * @return the result
      */
     public Result getResult() {
-        return result;
+	return result;
     }
 
     /**
-     * @return the player that won
+     * @return the player that won. If the result was a draw, returns null
      */
     public Player getWinner() {
-        return player;
+	return player;
     }
-
 
 }

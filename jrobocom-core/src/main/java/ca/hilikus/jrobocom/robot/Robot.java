@@ -133,7 +133,6 @@ public class Robot implements RobotAction, Runnable {
 	data = new RobotData(this, pSet, pMobile, parent.data.getGeneration() + 1, parent.data.getFacing());
     }
 
-
     @Override
     public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
 	if (data.getInstructionSet().isLessThan(InstructionSet.ADVANCED)) {
@@ -237,7 +236,8 @@ public class Robot implements RobotAction, Runnable {
 
     @Override
     public void changeBank(int newBank) {
-	log.debug("[changeBank] Changing Bank of {}. Old bank = {}, new bank = {}", this, runningBank, newBank);
+	log.debug("[changeBank] Changing Bank of {}. Old bank = {}, new bank = {}", this, runningBank,
+		newBank);
 	runningBank = newBank;
 	pendingBankChange = true; // so the robot doesn't reboot at the end of this bank
 
@@ -254,6 +254,10 @@ public class Robot implements RobotAction, Runnable {
 	if (alive) { // if not alive it means it was killed at creation
 	    alive = false;
 	    world.remove(Robot.this);
+	    if (world.getBotsCount(data.getTeamId(), false) <= 0) {
+		// last bot of this team
+		owner.clean();
+	    }
 	}
 	eventDispatcher.removeListeners();
     }

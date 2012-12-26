@@ -144,9 +144,13 @@ public class World {
     }
 
     /**
+     * Removes a robot from the world and then determines if the game is over; in which case and
+     * event {@link ResultEvent} is fired with the details
+     * 
      * @param robot the robot to remove from the board
+     * @return true if the game is over due to this remove
      */
-    public void remove(Robot robot) {
+    public boolean remove(Robot robot) {
 	if (!robotsPosition.containsKey(robot)) {
 	    throw new IllegalArgumentException("Robot doesn't exist");
 	}
@@ -156,22 +160,26 @@ public class World {
 	clock.removeListener(robot.getSerialNumber());
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
-	if (getBotsCount(robot.getData().getTeamId(), false) <= 0) {
-	    // last bot of this team
-	    robot.getOwner().clean();
-	}
-
+	boolean end = false;
 	if (teams > 1) { // if there were more than 1 at the beginning, otherwise it is "practice"
 	    if (robotsPosition.size() > 0) {
 		Robot someRobot = robotsPosition.keySet().iterator().next();
 		if (checkWinner(someRobot.getData().getTeamId())) {
 		    declareWinner(someRobot.getOwner());
+		    end = true;
 		}
 	    } else {
 		// no winner
 		declareDraw();
+		end = true;
 	    }
+	} else if (robotsPosition.size() <= 0) {
+	    //last robot in practice died
+	    stop();
+	    end = true;
 	}
+
+	return end;
     }
 
     private void declareDraw() {
@@ -347,15 +355,15 @@ public class World {
      * @return the generator
      */
     public static final Random getRandGenerator() {
-        return generator;
+	return generator;
     }
-    
+
     static final void setRandGenerator(Random newGen) {
 	SecurityManager sm = System.getSecurityManager();
 	if (sm != null) {
 	    sm.checkPermission(new GamePermission("setRandomGenerator"));
 	}
-	
+
 	generator = newGen;
     }
 
