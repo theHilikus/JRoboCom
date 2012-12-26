@@ -20,7 +20,7 @@ public class MasterClock {
 
     private Logger log = LoggerFactory.getLogger(MasterClock.class);
 
-    private int period = 1000;
+    private int period = 400;
 
     private Timer timer;
 
@@ -31,6 +31,11 @@ public class MasterClock {
     private List<Integer> waitingList = new ArrayList<>();
 
     private Delayer delayer = new Delayer();
+    
+    /**
+     * Minimum clock period allowed
+     */
+    public static final int MIN_PERIOD = 10;
 
     /**
      * Starts the clock and resets the cycles to 0 if specified
@@ -38,7 +43,7 @@ public class MasterClock {
      * @param reset true if cycles counter you be reset to 0 (e.g. in new sessions)
      */
     public void start(boolean reset) {
-	log.debug("Starting Master Clock. Reset = {}", reset);
+	log.debug("Starting Master Clock. Period = {}, Reset = {}", period, reset);
 	if (reset) {
 	    cycles = 0;
 	}
@@ -145,7 +150,7 @@ public class MasterClock {
     }
 
     /**
-     * Changes the ticking period
+     * Changes the ticking period. If the value is too small, it will be overwritten by {@link #MIN_PERIOD}
      * 
      * @param pPeriod new period in ms.
      */
@@ -153,8 +158,9 @@ public class MasterClock {
 	if (pPeriod < 0) {
 	    throw new IllegalArgumentException("Period cannot be negative");
 	}
-	log.debug("Changing clock period to {}", pPeriod);
-	period = pPeriod;
+	int actual = Math.max(pPeriod, MIN_PERIOD);
+	log.debug("Changing clock period to {}", actual);
+	period = actual;
 
 	if (isRunning()) {
 	    stop();
