@@ -18,6 +18,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +74,7 @@ public class GUI implements ColourInfoProvider {
      * Event handler in charge of updating the UI
      * 
      */
-    public class Controller implements GameListener {
+    public class Controller implements GameListener, ChangeListener {
 	private Map<Robot, Point> robots;
 
 	@Override
@@ -136,6 +138,15 @@ public class GUI implements ColourInfoProvider {
 	@Override
 	public void update(ResultEvent result) {
 	    displayResult(result);
+
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+	    JSlider source = (JSlider) e.getSource();
+	    if (!source.getValueIsAdjusting()) {
+		session.setClockPeriod(source.getValue());
+	    }
 
 	}
 
@@ -312,9 +323,10 @@ public class GUI implements ColourInfoProvider {
 	speedSlider = new JSlider();
 	speedSlider.setInverted(true);
 	speedSlider.setMinimum(MasterClock.MIN_PERIOD);
-	speedSlider.setMaximum(1000);
+	speedSlider.setMaximum(700);
 	speedSlider.setEnabled(false);
 	speedSlider.setMaximumSize(new Dimension(100, 16));
+	speedSlider.addChangeListener(controller);
 	toolBar.add(speedSlider);
 
 	stepAction = new UIAction(ActionNames.STEP);
