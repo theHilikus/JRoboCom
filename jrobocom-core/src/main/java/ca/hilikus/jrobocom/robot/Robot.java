@@ -105,7 +105,7 @@ public class Robot implements RobotAction, Runnable {
 	data = new RobotData(this, InstructionSet.SUPER, false, 0, randomDir);
 
 	for (int pos = 0; pos < allBanks.length; pos++) {
-	    setBank(allBanks[pos], pos);
+	    setBank(allBanks[pos], pos, false);
 	}
 
 	alive = data.getGeneration() < GameSettings.MAX_GENERATION;
@@ -134,44 +134,50 @@ public class Robot implements RobotAction, Runnable {
     }
 
     @Override
-    public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
+    public int reverseTransfer(int remoteSource, int localDestination) {
 	if (data.getInstructionSet().isLessThan(InstructionSet.ADVANCED)) {
 	    die("Invalid action in Instruction Set");
-	}
-	Robot neighbour = world.getNeighbour(this);
-	if (neighbour != null) {
-	    Bank remoteBank = neighbour.getBankCopy(remoteBankIndex);
-	    setBank(remoteBank, localBankIndex);
-	    return remoteBank.getCost();
 	} else {
-
-	    return 0;
+	    Robot neighbour = world.getNeighbour(this);
+	    if (neighbour != null) {
+		Bank remoteBank = neighbour.getBankCopy(remoteSource, true);
+		if (remoteBank != null) {
+		    boolean success = setBank(remoteBank, localDestination, false);
+		    if (success) {
+			return remoteBank.getCost();
+		    }
+		}
+	    }
 	}
+	return 0;
     }
 
     @Override
-    public int transfer(int localBankIndex, int remoteBankIndex) {
+    public int transfer(int localSource, int remoteDestination) {
 	if (data.getInstructionSet().isLessThan(InstructionSet.ADVANCED)) {
 	    die("Invalid action in Instruction Set");
-	}
-	Robot neighbour = world.getNeighbour(Robot.this);
-	if (neighbour != null) {
-	    Bank localBankCopy;
-	    try {
-		localBankCopy = banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
-			.newInstance(data.getTeamId());
-
-		neighbour.setBank(localBankCopy, remoteBankIndex);
-		return localBankCopy.getCost();
-	    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-		    | InvocationTargetException | NoSuchMethodException | SecurityException exc) {
-
-		log.error("[transfer] Error instantiating Bank for transfer", exc);
-		return 0;
-	    }
+	} else if (localSource < 0 || localSource >= banks.length) {
+	    die("Invalid transfer position attempted");
 	} else {
-	    return 0;
+	    Robot neighbour = world.getNeighbour(Robot.this);
+	    if (neighbour != null) {
+		Bank localBankCopy;
+		try {
+		    localBankCopy = getBankCopy(localSource, false);
+
+		    if (localBankCopy != null) {
+			boolean success = neighbour.setBank(localBankCopy, remoteDestination, true);
+			if (success) {
+			    return localBankCopy.getCost();
+			}
+		    }
+		} catch (IllegalArgumentException | SecurityException exc) {
+		    log.error("[transfer] Error instantiating Bank for transfer", exc);
+		}
+	    }
+
 	}
+	return 0;
     }
 
     private static int getNextSerialNumber() {
@@ -278,33 +284,46 @@ public class Robot implements RobotAction, Runnable {
 	return banks.length;
     }
 
-    private void setBank(Bank bank, int localBankIndex) {
-	if (banks == null || localBankIndex > banks.length) {
-	    throw new IllegalArgumentException("Bank doesn't exist");
-	}
-
-	if (bank != null) {
-	    bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
-		    new WorldPlayerProxy(turnsControl, world));
-	    banks[localBankIndex] = bank;
+    private boolean setBank(Bank bank, int localBankIndex, boolean remoteInvoked) {
+	if (localBankIndex < 0 || localBankIndex >= banks.length) {
+	    if (!remoteInvoked) {
+		die("Invalid local bank position attempted");
+	    }
+	    return false;
 	} else {
-	    banks[localBankIndex] = null;
+
+	    if (bank != null) {
+		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
+			new WorldPlayerProxy(turnsControl, world));
+		banks[localBankIndex] = bank;
+	    } else {
+		banks[localBankIndex] = null;
+	    }
+	    return true;
 	}
     }
 
-    private Bank getBankCopy(int localBankIndex) {
-	if (banks == null || localBankIndex > banks.length) {
+    private Bank getBankCopy(int localBankIndex, boolean remoteInvoked) {
+	if (banks == null) {
 	    throw new IllegalArgumentException("Bank doesn't exist");
 	}
+	if (localBankIndex >= banks.length || localBankIndex < 0) {
+	    if (!remoteInvoked) {
+		die("Invalid local bank position");
+	    }
+	} else {
+	    if (banks[localBankIndex] != null) {
+		try {
+		    return banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
+			    .newInstance(banks[localBankIndex].getTeamId());
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+			| InvocationTargetException | NoSuchMethodException | SecurityException exc) {
+		    log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);
 
-	try {
-	    return banks[localBankIndex].getClass().getConstructor().newInstance();
-	} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-		| InvocationTargetException | NoSuchMethodException | SecurityException exc) {
-
-	    log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);
-	    return null;
+		}
+	    }
 	}
+	return null;
     }
 
     /**
