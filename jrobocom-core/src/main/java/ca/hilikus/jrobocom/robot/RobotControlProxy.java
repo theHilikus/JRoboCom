@@ -101,7 +101,7 @@ public final class RobotControlProxy implements RobotAction {
      * @see ca.hilikus.jrobocom.RobotControl#reverseTransfer(int, int)
      */
     @Override
-    public int reverseTransfer(int localBankIndex, int remoteBankIndex) {
+    public int reverseTransfer(int remoteBankIndex, int localBankIndex) {
 	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}",
 		Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE, remoteBankIndex, localBankIndex);
 	turnsControl.waitTurns(Timing.REMOTE_ACCESS_PENALTY + Timing.TRANSFER_BASE);

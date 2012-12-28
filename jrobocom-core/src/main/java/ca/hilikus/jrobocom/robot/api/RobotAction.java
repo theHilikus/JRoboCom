@@ -53,20 +53,22 @@ public interface RobotAction {
     /**
      * Uploads a local bank and overrides with it what was in the remote bank
      * 
-     * @param localBankIndex 0-based index of the local bank to upload
-     * @param remoteBankIndex 0-based index of remote bank space to use
-     * @return the complexity of the uploaded bank or 0 if upload failed
+     * @param localSource 0-based index of the local bank to upload
+     * @param remoteDestination 0-based index of remote bank space to use
+     * @return the complexity of the uploaded bank. 0 if upload failed or the transferred bank was
+     *         empty
      */
-    public int transfer(int localBankIndex, int remoteBankIndex);
+    public int transfer(int localSource, int remoteDestination);
 
     /**
      * Downloads a remote bank and overrides with it what was in the local bank
      * 
-     * @param localBankIndex 0-based index of the local bank space to use
-     * @param remoteBankIndex 0-based index of remote bank to download
-     * @return the complexity of the downloaded bank or 0 if download failed
+     * @param remoteSource 0-based index of remote bank to download
+     * @param localDestination 0-based index of the local bank space to use
+     * @return the complexity of the downloaded bank. 0 if download failed or the transferre bank
+     *         was empty
      */
-    public int reverseTransfer(int localBankIndex, int remoteBankIndex);
+    public int reverseTransfer(int remoteSource, int localDestination);
 
     /**
      * Scans the reference field
