@@ -4,13 +4,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.calls;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -71,10 +67,7 @@ public class CreateRobotTests extends AbstractTest {
 	when(mockWorld.getBotsCount(anyInt(), anyBoolean())).thenReturn(1);
 	TU.createRobot("son", InstructionSet.SUPER, 1, false);
 
-	ArgumentCaptor<Robot> childCatcher = ArgumentCaptor.forClass(Robot.class);
-	verify(mockWorld).add(eq(TU), childCatcher.capture());
-
-	Robot child = childCatcher.getValue();
+	Robot child = getChild(mockWorld, TU);
 
 	assertTrue(child.isAlive(), "Child is not alive");
 	assertEquals(child.getName(), "son", "Names don't match");
@@ -90,6 +83,21 @@ public class CreateRobotTests extends AbstractTest {
     }
 
     /**
+     * Extracts the child of a creation
+     * 
+     * @param world the mock world
+     * @param parent the parent of the robot
+     * @return the created robot if there was one created
+     */
+    public static Robot getChild(World world, Robot parent) {
+	ArgumentCaptor<Robot> childCatcher = ArgumentCaptor.forClass(Robot.class);
+	verify(world).add(eq(parent), childCatcher.capture());
+
+	Robot child = childCatcher.getValue();
+	return child;
+    }
+
+    /**
      * Tests when a robot without the right instruction set tries to create a robot
      */
     @Test
@@ -97,10 +105,7 @@ public class CreateRobotTests extends AbstractTest {
 	when(mockWorld.getBotsCount(anyInt(), anyBoolean())).thenReturn(1);
 	TU.createRobot("son", InstructionSet.BASIC, 1, false);
 
-	ArgumentCaptor<Robot> childCatcher = ArgumentCaptor.forClass(Robot.class);
-	verify(mockWorld).add(eq(TU), childCatcher.capture());
-
-	Robot child = childCatcher.getValue();
+	Robot child = getChild(mockWorld, TU);
 
 	assertTrue(child.isAlive(), "Infertile robot is fine");
 	child.createRobot("son^2", InstructionSet.BASIC, 1, false);

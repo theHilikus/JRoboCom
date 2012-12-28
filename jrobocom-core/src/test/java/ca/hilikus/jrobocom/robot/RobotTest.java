@@ -140,6 +140,7 @@ public class RobotTest extends AbstractTest {
 
 	TU.die("test die");
 
+	assertFalse(TU.isAlive(), "Robot didn't die");
 	verify(mockWorld).remove(TU);
 	verify(pla).clean(); // make sure the player was cleaned since it was its last robot
     }
