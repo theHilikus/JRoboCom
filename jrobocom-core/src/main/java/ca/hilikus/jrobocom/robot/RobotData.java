@@ -25,7 +25,6 @@ public class RobotData implements RobotStatusLocal {
     private final int teamId;
 
     private final int banksCount;
-    private final TurnManager turnsManager;
     private final int cyclesAtCreation;
 
     private final GenericEventDispatcher<RobotListener> eventDispatcher;
@@ -43,18 +42,20 @@ public class RobotData implements RobotStatusLocal {
      * @param pGeneration the number of ancestors this robot has
      */
     RobotData(Robot pOwner, InstructionSet pSet, boolean pMobile, int pGeneration, Direction direction) {
+	if (pOwner == null || pSet == null || pGeneration < 0 || direction == null) {
+	    throw new IllegalArgumentException("Invalid argument in constructor");
+	}
 	this.activeState = 0;
 	set = pSet;
 	mobile = pMobile;
 	teamId = pOwner.getOwner().getTeamId();
 	generation = pGeneration;
 	banksCount = pOwner.getBanksCount();
-	turnsManager = pOwner.getTurnsControl();
 	facing = direction;
 	owner = pOwner;
 	eventDispatcher = (GenericEventDispatcher<RobotListener>) pOwner.getEventHandler();
 
-	cyclesAtCreation = turnsManager.getTurnsCount();
+	cyclesAtCreation = pOwner.getTurnsControl().getTurnsCount();
 
     }
 
@@ -91,7 +92,7 @@ public class RobotData implements RobotStatusLocal {
 
     @Override
     public int getAge() {
-	return (int) Math.round((turnsManager.getTurnsCount() - cyclesAtCreation) / 1.0);
+	return (int) Math.round((owner.getTurnsControl().getTurnsCount() - cyclesAtCreation) / 1.0);
 	// TODO: look into using thread CPU time instead?
 	// http://stackoverflow.com/questions/755899/monitor-cpu-usage-per-thread-in-java
     }

@@ -57,12 +57,10 @@ public class RobotDetailsPanel extends JPanel implements PropertyChangeListener 
 	boolean update = false;
 	String prop = evt.getPropertyName();
 	File file = null;
-	// If the directory changed, don't show an image.
 	if (JFileChooser.DIRECTORY_CHANGED_PROPERTY.equals(prop)
 		|| JFileChooser.SELECTED_FILE_CHANGED_PROPERTY.equals(prop)) {
 	    update = true;
 	    file = (File) evt.getNewValue();
-	    // If a file became selected, find out which one.
 	}
 
 	if (update) {
@@ -81,7 +79,7 @@ public class RobotDetailsPanel extends JPanel implements PropertyChangeListener 
 	    teamDetailsModel.add(2, "Banks count:\t " + potential.getCode().length);
 	    potential.clean(); // since it's for previewing only
 	} catch (PlayerException exc) {
-	    log.debug("[showDetails] Selected file is not a player's code");
+	    log.debug("[showDetails] Selected file is not a valid player's code");
 
 	}
 

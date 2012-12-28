@@ -254,10 +254,10 @@ public class Robot implements RobotAction, Runnable {
 	if (alive) { // if not alive it means it was killed at creation
 	    alive = false;
 	    world.remove(Robot.this);
-	    if (world.getBotsCount(data.getTeamId(), false) <= 0) {
-		// last bot of this team
-		owner.clean();
-	    }
+	}
+	if (world.getBotsCount(data.getTeamId(), false) <= 0) {
+	    // last bot of this team
+	    owner.clean();
 	}
 	eventDispatcher.removeListeners();
     }
@@ -306,18 +306,6 @@ public class Robot implements RobotAction, Runnable {
 	    return null;
 	}
     }
-
-    /*    private void setTeamId(int teamId) {
-    	this.teamId = teamId;
-        }
-
-        private void setTurns(TurnManager turns) {
-    	this.turns = turns;
-        }
-
-        private void setWorld(World world) {
-    	this.world = world;
-        }*/
 
     /**
      * Controls waiting of I/O
@@ -406,24 +394,29 @@ public class Robot implements RobotAction, Runnable {
 
     @Override
     public void createRobot(String pName, InstructionSet pSet, int banksCount, boolean pMobile) {
-	if (data.getInstructionSet() != InstructionSet.SUPER) {
+	if (banksCount <= 0) {
+	    throw new IllegalArgumentException("Banks cannot be negative");
+	}
+	if (data.getInstructionSet().isLessThan(InstructionSet.SUPER)) {
 	    die("Robot cannot create other robots");
+	} else {
+	    int robotsCount = world.getBotsCount(data.getTeamId(), false);
+	    if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
+		Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
+
+		if (inheritedListener != null) {
+		    child.eventDispatcher.addListener(inheritedListener);
+		}
+		if (world.add(this, child)) { // world does further verification so add is not
+					      // guaranteed yet
+		    // all verifications passed
+		    child.alive = true;
+		    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
+			    + child.getSerialNumber());
+		    newThread.start(); // jumpstarts the robot
+		}
+	    }
 	}
-
-	int robotsCount = world.getBotsCount(data.getTeamId(), false);
-	if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
-	    Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
-
-	    child.eventDispatcher.addListener(inheritedListener);
-	    world.add(this, child); // world does further verification so add is not guaranteed yet
-
-	    // all verifications passed
-	    child.alive = true;
-	    Thread newThread = new Thread(Thread.currentThread().getThreadGroup(), child, "Bot-"
-		    + child.getSerialNumber());
-	    newThread.start(); // jumpstarts the robot
-	}
-
     }
 
     @Override
@@ -547,6 +540,9 @@ public class Robot implements RobotAction, Runnable {
 	inheritedListener = listener;
     }
 
+    /**
+     * called when a robot has been activated externally
+     */
     void activated() {
 	turnsControl.activated();
 
