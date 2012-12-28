@@ -4,8 +4,10 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.awt.Point;
@@ -138,7 +140,33 @@ public class WorldTest extends AbstractTest {
 
 	Robot mock2 = createRobotMockup(311, 1);
 	when(mock2.getData().getGeneration()).thenReturn(1);
-	TU.add(mockRobot, mock2);
+	assertTrue(TU.add(mockRobot, mock2), "Successfull add");
+    }
+    
+    /**
+     * Tests that adding a robot to an occupied field fails
+     */
+    @Test
+    public void addOccupied() {
+	Random rand = mock(Random.class);
+	World.setRandGenerator(rand);
+	int x = 5;
+	int y = 8;
+	when(rand.nextInt(anyInt())).thenReturn(x).thenReturn(y).thenReturn(x+1).thenReturn(y);
+	
+	Robot mockRobot = createRobotMockup(311, 0);
+	when(mockRobot.getData().getGeneration()).thenReturn(0);
+	when(mockRobot.getData().getFacing()).thenReturn(Direction.EAST); 
+	
+	TU.addFirst(mockRobot);
+	
+	Robot mockRobot2 = createRobotMockup(312, 1);
+	when(mockRobot2.getData().getGeneration()).thenReturn(0);
+	TU.addFirst(mockRobot2);
+	
+	Robot mockRobotChild = createRobotMockup(311, 2);
+	when(mockRobotChild.getData().getGeneration()).thenReturn(1);
+	assertFalse(TU.add(mockRobot, mockRobotChild), "Added robot into occupied field");
     }
 
     /**
@@ -339,17 +367,17 @@ public class WorldTest extends AbstractTest {
 	World.setRandGenerator(rand);
 
 	int x = 5;
-	int y = 8;
+	int y = 0;
 
 	when(rand.nextInt(anyInt())).thenReturn(x).thenReturn(y);
 
 	TU.addFirst(mockRobot);
 
-	TU.move(mockRobot);
+	TU.move(mockRobot); //should wrap around
 
 	assertNotNull(listener.getMoved(), "Check we got message");
 	assertEquals(listener.getMoved().getOldPosition(), new Point(x, y), "Check old position in event");
-	assertEquals(listener.getMoved().getNewPosition(), new Point(x, y - 1), "Check new position in event");
+	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.BOARD_SIZE-1), "Check new position in event");
 
     }
 

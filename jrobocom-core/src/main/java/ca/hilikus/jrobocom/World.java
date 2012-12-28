@@ -91,23 +91,29 @@ public class World {
      * 
      * @param parent the creating robot
      * @param child the newly created robot
+     * @return true if the child was added successfully; false if there was a normal problem with
+     *         the addition.
+     * @throws IllegalArgumentException if child is not a direct descendant of parent
      */
-    public void add(Robot parent, Robot child) {
+    public boolean add(Robot parent, Robot child) {
 	Point newPosition = getReferenceField(parent, 1);
 	if (isOccupied(newPosition)) {
-	    child.die("Occupied position");
+	    return false;
 	} else {
 	    if (child.getData().getGeneration() != parent.getData().getGeneration() + 1) {
-		throw new IllegalArgumentException("Child robot is not a direct descentant of this parent");
+		throw new IllegalArgumentException("Child robot is not a direct descendant of this parent");
 	    }
 	    addCommon(child, newPosition);
 	}
+	return true;
     }
 
     /**
      * Adds the first robot of a team
      * 
      * @param eve the first robot of the player
+     * @throws IllegalArgumentException if the robot is not the first from its team or it exists
+     *             already
      */
     public void addFirst(Robot eve) {
 
@@ -174,7 +180,7 @@ public class World {
 		end = true;
 	    }
 	} else if (robotsPosition.size() <= 0) {
-	    //last robot in practice died
+	    // last robot in practice died
 	    stop();
 	    end = true;
 	}
