@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -94,6 +95,8 @@ public class CreateRobotTests extends AbstractTest {
 	verify(world).add(eq(parent), childCatcher.capture());
 
 	Robot child = childCatcher.getValue();
+	assertNotNull(child, "Couldn't capture child");
+	assertTrue(child.isAlive(), "Child should be alive");
 	return child;
     }
 

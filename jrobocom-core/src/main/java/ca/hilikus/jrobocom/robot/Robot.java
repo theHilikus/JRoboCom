@@ -459,18 +459,20 @@ public class Robot implements RobotAction, Runnable {
 
 	if (data.getInstructionSet().isLessThan(InstructionSet.ADVANCED)) {
 	    die("Robot doesn't have Scan operation in its Instruction Set");
-	}
+	} else {
 
-	ScanResult res = null;
-	for (int dist = 1; dist <= maxDist; dist++) {
-	    res = world.scan(this, dist);
-	    if (!res.isEmpty()) {
-		return res;
+	    ScanResult res = null;
+	    for (int dist = 1; dist <= maxDist; dist++) {
+		res = world.scan(this, dist);
+		if (!res.isEmpty()) {
+		    break;
+		}
 	    }
-	}
-	assert res != null : "Scan result can't be null";
+	    assert res != null : "Scan result can't be null";
 
-	return res;
+	    return res;
+	}
+	return null;
     }
 
     /**

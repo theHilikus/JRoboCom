@@ -1,11 +1,15 @@
 package ca.hilikus.jrobocom.robot;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
@@ -92,7 +96,7 @@ public class RobotTest extends AbstractTest {
 	Robot TU = new Robot(mockWorld, mockClock, dummyBanks, "Test Robot", pla);
 	TU.getData().setActiveState(1);
 	mockClock.addListener(TU.getSerialNumber());
-	
+
 	TU.run();
 
 	/*InOrder interleaved seems to not work
@@ -118,7 +122,7 @@ public class RobotTest extends AbstractTest {
 	Player pla = mock(Player.class);
 	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Test Robot", pla);
 	TU.getData().setActiveState(1);
-		
+
 	clock.addListener(TU.getSerialNumber());
 	clock.start();
 
@@ -143,5 +147,23 @@ public class RobotTest extends AbstractTest {
 	assertFalse(TU.isAlive(), "Robot didn't die");
 	verify(mockWorld).remove(TU);
 	verify(pla).clean(); // make sure the player was cleaned since it was its last robot
+    }
+
+    /**
+     * Tests scanning when the robot doesn't have a valid instruction set for it
+     */
+    @Test
+    public void testScan() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Bank[] dummyBanks = new Bank[3];
+	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", mockPlayer);
+
+	when(mockWorld.add(eq(TU), any(Robot.class))).thenReturn(true);
+	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
+	Robot child = CreateRobotTests.getChild(mockWorld, TU);
+
+	assertNull(child.scan(3), "Should have been null");
+	assertFalse(child.isAlive(), "Should have died due to scan");
     }
 }

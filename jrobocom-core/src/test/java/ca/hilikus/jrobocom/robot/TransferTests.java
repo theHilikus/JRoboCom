@@ -165,8 +165,6 @@ public class TransferTests extends AbstractTest {
 	when(mockWorld.add(eq(TU), any(Robot.class))).thenReturn(true);
 	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
 	Robot child = CreateRobotTests.getChild(mockWorld, TU);
-	assertNotNull(child, "Couldn't capture child");
-	assertTrue(child.isAlive(), "Child should be alive");
 
 	assertEquals(child.transfer(1, 1), 0, "Invalid transfer succeeded");
 	assertFalse(child.isAlive(), "Robot should have died");

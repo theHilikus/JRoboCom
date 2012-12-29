@@ -73,7 +73,7 @@ public interface RobotAction {
     /**
      * Scans the reference field
      * 
-     * @return a report of the scan
+     * @return a report of the scan or null if there was a problem
      * @see #scan(int)
      */
     public ScanResult scan();
@@ -82,7 +82,7 @@ public interface RobotAction {
      * Progressively scans several fields in the facing direction. Stops if something is found
      * 
      * @param maxDist distance at which to stop the scan
-     * @return a report of the scan
+     * @return a report of the scan or null if there was a problem
      * @see #scan()
      */
     public ScanResult scan(int maxDist);
