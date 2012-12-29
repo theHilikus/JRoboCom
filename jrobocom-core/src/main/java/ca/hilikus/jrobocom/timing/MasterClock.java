@@ -9,6 +9,8 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.security.GamePermission;
+
 /**
  * A central unit to control turns and time
  * 
@@ -35,7 +37,16 @@ public class MasterClock {
 
     private List<ClockListener> listeners = new ArrayList<>();
 
+    /**
+     * Callback interface
+     * 
+     */
     public interface ClockListener extends EventListener {
+	/**
+	 * Method that gets called every time the clock ticks
+	 * 
+	 * @param cycles number of elapsed cycles
+	 */
 	public void tick(long cycles);
     }
 
@@ -200,32 +211,52 @@ public class MasterClock {
 
     }
 
-    private void notifyListeners(long cycles) {
+    private void notifyListeners(long pCycles) {
 	for (ClockListener listener : listeners) {
-	    listener.tick(cycles);
+	    listener.tick(pCycles);
 	}
 
     }
-    
+
+    /**
+     * Adds a listener interesting in being notified
+     * 
+     * @param listener the interested object
+     */
     public void addListener(ClockListener listener) {
 	if (listener == null) {
 	    throw new IllegalArgumentException("Listener can't be null");
 	}
+	checkPermission();
 	if (listeners.contains(listener)) {
 	    log.warn("[addListener] Listener is already registered");
 	} else {
 	    listeners.add(listener);
 	}
     }
-    
+
+    /**
+     * Removes a listener from the list
+     * 
+     * @param listener the object to stop notifying
+     */
     public void removeListener(ClockListener listener) {
 	if (listener == null) {
 	    throw new IllegalArgumentException("Listener can't be null");
 	}
+	checkPermission();
 	if (!listeners.contains(listener)) {
 	    log.warn("[addListener] Unknown listener");
 	} else {
 	    listeners.remove(listener);
 	}
+    }
+
+    private static void checkPermission() {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("eventsListener"));
+	}
+
     }
 }

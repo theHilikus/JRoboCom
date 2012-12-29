@@ -449,7 +449,7 @@ public class GUI implements ColourInfoProvider {
 	if (result.getResult() == Result.DRAW) {
 	    title = "Draw";
 	    msg = "There were no winners in this run";
-	    icon = loadIcon("/images/draw.jpg"); // TODO: find draw image
+	    icon = loadIcon("/images/cup.jpg");
 	} else {
 	    title = "And the Winner is...";
 	    msg = "The winner is " + result.getWinner().getAuthor() + " with "
