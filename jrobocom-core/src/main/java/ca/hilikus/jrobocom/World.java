@@ -130,8 +130,8 @@ public class World implements ClockListener {
 	Point newPosition;
 	do {
 	    // TODO: check this, looks biased
-	    int x = generator.nextInt(GameSettings.BOARD_SIZE);
-	    int y = generator.nextInt(GameSettings.BOARD_SIZE);
+	    int x = generator.nextInt(GameSettings.getInstance().BOARD_SIZE);
+	    int y = generator.nextInt(GameSettings.getInstance().BOARD_SIZE);
 	    newPosition = new Point(x, y);
 	} while (isOccupied(newPosition));
 
@@ -245,7 +245,7 @@ public class World implements ClockListener {
     private Point getReferenceField(Robot robot, int dist) {
 	assert dist > 0;
 	assert robotsPosition.containsKey(robot);
-	int size = GameSettings.BOARD_SIZE;
+	int size = GameSettings.getInstance().BOARD_SIZE;
 
 	if (dist >= size) {
 	    throw new IllegalArgumentException("Cannot scan bigger than the board");
@@ -384,7 +384,7 @@ public class World implements ClockListener {
     public void tick(long cycles) {
 	checkRobotsAge();
 	
-	if (cycles >= GameSettings.MAX_WORLD_AGE) {
+	if (cycles >= GameSettings.getInstance().MAX_WORLD_AGE) {
 	    // game over
 	    log.info("[tick] Maximum age of the world reached. Declaring a draw");
 	    declareDraw();
@@ -394,7 +394,7 @@ public class World implements ClockListener {
 
     private void checkRobotsAge() {
 	for (Robot robot : robotsPosition.keySet()) {
-	    if (robot.getData().getAge() > GameSettings.MAX_AGE) {
+	    if (robot.getData().getAge() > GameSettings.getInstance().MAX_AGE) {
 		robot.die("Too old to fight");
 	    }
 	}

@@ -325,7 +325,7 @@ public class WorldTest extends AbstractTest {
 	Robot mockRobot = createRobotMockup(311, 0);
 	TU.addFirst(mockRobot);
 
-	int size = GameSettings.BOARD_SIZE;
+	int size = GameSettings.getInstance().BOARD_SIZE;
 	for (int dist = 1; dist < size - 1; dist++) {
 	    ScanResult res = TU.scan(mockRobot, dist);
 	    assertEquals(res.getDistance(), dist, "Distance in result");
@@ -342,7 +342,7 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot);
 
 	@SuppressWarnings("unused")
-	ScanResult res = TU.scan(mockRobot, GameSettings.BOARD_SIZE);
+	ScanResult res = TU.scan(mockRobot, GameSettings.getInstance().BOARD_SIZE);
 	fail("Should throw exception");
 
     }
@@ -372,7 +372,7 @@ public class WorldTest extends AbstractTest {
 
 	assertNotNull(listener.getMoved(), "Check we got message");
 	assertEquals(listener.getMoved().getOldPosition(), new Point(x, y), "Check old position in event");
-	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.BOARD_SIZE - 1),
+	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.getInstance().BOARD_SIZE - 1),
 		"Check new position in event");
 
     }
@@ -476,7 +476,7 @@ public class WorldTest extends AbstractTest {
     @Test
     public void endOfTheWorld() {
 	Robot mockRobot = createRobotMockup(311, 0);
-	when(mockRobot.getData().getAge()).thenReturn(GameSettings.MAX_AGE + 2);
+	when(mockRobot.getData().getAge()).thenReturn(GameSettings.getInstance().MAX_AGE + 2);
 	TU.addFirst(mockRobot);
 
 	Robot mockRobot2 = createRobotMockup(311, 1); // same team
@@ -486,7 +486,7 @@ public class WorldTest extends AbstractTest {
 	TU.tick(1);
 	verify(mockRobot).die(anyString());
 
-	TU.tick(GameSettings.MAX_WORLD_AGE + 2);
+	TU.tick(GameSettings.getInstance().MAX_WORLD_AGE + 2);
 	assertNotNull(listener.getResult(), "Draw event was not generated");
 	assertEquals(listener.getResult().getResult(), Result.DRAW, "Event was not of type draw");
     }

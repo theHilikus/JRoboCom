@@ -108,7 +108,7 @@ public class Robot implements RobotAction, Runnable {
 	    setBank(allBanks[pos], pos, false);
 	}
 
-	alive = data.getGeneration() < GameSettings.MAX_GENERATION;
+	alive = data.getGeneration() < GameSettings.getInstance().MAX_GENERATION;
     }
 
     /**
@@ -123,7 +123,7 @@ public class Robot implements RobotAction, Runnable {
     private Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
 	this(parent.world, parent.getTurnsControl().clock, banksCount, name, parent.owner);
 
-	if (banksCount > GameSettings.MAX_BANKS) {
+	if (banksCount > GameSettings.getInstance().MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
 	}
 	if (parent.data.getInstructionSet().isLessThan(InstructionSet.SUPER)) {
@@ -201,7 +201,7 @@ public class Robot implements RobotAction, Runnable {
 		    }
 		} else {
 		    if (runningBank > banks.length) {
-			if (runningBank >= GameSettings.MAX_BANKS) {
+			if (runningBank >= GameSettings.getInstance().MAX_BANKS) {
 			    die("Impossible Bank number");
 			} else {
 			    reboot("Bank not found");
@@ -242,8 +242,7 @@ public class Robot implements RobotAction, Runnable {
 
     @Override
     public void changeBank(int newBank) {
-	log.debug("[changeBank] Changing Bank of {}. Old bank = {}, new bank = {}", this, runningBank,
-		newBank);
+	log.debug("[changeBank] Changing Bank of {}. Old bank = {}, new bank = {}", this, runningBank, newBank);
 	runningBank = newBank;
 	pendingBankChange = true; // so the robot doesn't reboot at the end of this bank
 
@@ -354,7 +353,7 @@ public class Robot implements RobotAction, Runnable {
 	 */
 	public void waitTurns(int turns) {
 	    blockIfDisabled();
-	    if (turnsCounter > GameSettings.MAX_AGE) {
+	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
 	    } else {
 		clock.waitFor(serialNumber, turns);
@@ -420,7 +419,8 @@ public class Robot implements RobotAction, Runnable {
 	    die("Robot cannot create other robots");
 	} else {
 	    int robotsCount = world.getBotsCount(data.getTeamId(), false);
-	    if (data.getGeneration() < GameSettings.MAX_GENERATION && robotsCount < GameSettings.MAX_BOTS) {
+	    if (data.getGeneration() < GameSettings.getInstance().MAX_GENERATION
+		    && robotsCount < GameSettings.getInstance().MAX_BOTS) {
 		Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
 
 		if (inheritedListener != null) {

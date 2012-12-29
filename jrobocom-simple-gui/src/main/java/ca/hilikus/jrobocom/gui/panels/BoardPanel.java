@@ -24,7 +24,7 @@ import ca.hilikus.jrobocom.gui.visitor.Drawable;
 public class BoardPanel extends JPanel {
 
     private static final long serialVersionUID = -3895988249674025563L;
-    private int SIZE = GameSettings.BOARD_SIZE;
+    private int SIZE = GameSettings.getInstance().BOARD_SIZE;
 
     private JDrawingPanel[][] data;
 

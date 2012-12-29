@@ -130,7 +130,7 @@ public class CreateRobotTests extends AbstractTest {
     @Test
     public void createTooManyRobots() {
 	when(mockWorld.getBotsCount(anyInt(), anyBoolean())).thenReturn(0).thenReturn(
-		GameSettings.MAX_BOTS + 3);
+		GameSettings.getInstance().MAX_BOTS + 3);
 	TU.createRobot("son", InstructionSet.BASIC, 1, false);
 	verify(mockWorld, times(1)).add(eq(TU), any(Robot.class));
 
