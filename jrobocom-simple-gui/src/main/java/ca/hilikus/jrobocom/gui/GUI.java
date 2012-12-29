@@ -233,7 +233,7 @@ public class GUI implements ColourInfoProvider {
 	SwingUtilities.invokeLater(new Runnable() {
 	    @Override
 	    public void run() {
-		GUI view = new GUI("JRobotCom");
+		GUI view = new GUI("JRoboCom");
 		assertEDT();
 		view.setVisible(true);
 	    }

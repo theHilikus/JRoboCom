@@ -38,6 +38,7 @@ public class Session {
 	if (controller != null) {
 	    theWorld.getEventHandler().addListener(controller);
 	}
+	clock.addListener(theWorld);
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha",

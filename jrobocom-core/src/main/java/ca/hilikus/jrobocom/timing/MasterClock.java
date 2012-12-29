@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom.timing;
 
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,7 +32,13 @@ public class MasterClock {
     private List<Integer> waitingList = new ArrayList<>();
 
     private Delayer delayer = new Delayer();
-    
+
+    private List<ClockListener> listeners = new ArrayList<>();
+
+    public interface ClockListener extends EventListener {
+	public void tick(long cycles);
+    }
+
     /**
      * Minimum clock period allowed
      */
@@ -138,6 +145,7 @@ public class MasterClock {
 
 	    delayer.tick();
 
+	    notifyListeners(cycles);
 	}
 
     }
@@ -150,7 +158,8 @@ public class MasterClock {
     }
 
     /**
-     * Changes the ticking period. If the value is too small, it will be overwritten by {@link #MIN_PERIOD}
+     * Changes the ticking period. If the value is too small, it will be overwritten by
+     * {@link #MIN_PERIOD}
      * 
      * @param pPeriod new period in ms.
      */
@@ -191,4 +200,32 @@ public class MasterClock {
 
     }
 
+    private void notifyListeners(long cycles) {
+	for (ClockListener listener : listeners) {
+	    listener.tick(cycles);
+	}
+
+    }
+    
+    public void addListener(ClockListener listener) {
+	if (listener == null) {
+	    throw new IllegalArgumentException("Listener can't be null");
+	}
+	if (listeners.contains(listener)) {
+	    log.warn("[addListener] Listener is already registered");
+	} else {
+	    listeners.add(listener);
+	}
+    }
+    
+    public void removeListener(ClockListener listener) {
+	if (listener == null) {
+	    throw new IllegalArgumentException("Listener can't be null");
+	}
+	if (!listeners.contains(listener)) {
+	    log.warn("[addListener] Unknown listener");
+	} else {
+	    listeners.remove(listener);
+	}
+    }
 }

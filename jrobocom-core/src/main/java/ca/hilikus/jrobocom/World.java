@@ -18,6 +18,7 @@ import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.MasterClock.ClockListener;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -28,7 +29,7 @@ import com.google.common.collect.HashBiMap;
  * @author hilikus
  * 
  */
-public class World {
+public class World implements ClockListener {
 
     private BiMap<Robot, Point> robotsPosition = HashBiMap.create();
 
@@ -73,6 +74,7 @@ public class World {
 	 */
 	public void update(ResultEvent result);
     }
+
 
     /**
      * Common random number generator
@@ -371,6 +373,32 @@ public class World {
 	}
 
 	generator = newGen;
+    }
+
+    /**
+     * Called in every clock tick
+     * 
+     * @param cycles
+     */
+    @Override
+    public void tick(long cycles) {
+	checkRobotsAge();
+	
+	if (cycles >= GameSettings.MAX_WORLD_AGE) {
+	    // game over
+	    log.info("[tick] Maximum age of the world reached. Declaring a draw");
+	    declareDraw();
+	}
+
+    }
+
+    private void checkRobotsAge() {
+	for (Robot robot : robotsPosition.keySet()) {
+	    if (robot.getData().getAge() > GameSettings.MAX_AGE) {
+		robot.die("Too old to fight");
+	    }
+	}
+
     }
 
 }

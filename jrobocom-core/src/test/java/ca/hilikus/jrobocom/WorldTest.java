@@ -1,7 +1,9 @@
 package ca.hilikus.jrobocom;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -142,7 +144,7 @@ public class WorldTest extends AbstractTest {
 	when(mock2.getData().getGeneration()).thenReturn(1);
 	assertTrue(TU.add(mockRobot, mock2), "Successfull add");
     }
-    
+
     /**
      * Tests that adding a robot to an occupied field fails
      */
@@ -152,18 +154,18 @@ public class WorldTest extends AbstractTest {
 	World.setRandGenerator(rand);
 	int x = 5;
 	int y = 8;
-	when(rand.nextInt(anyInt())).thenReturn(x).thenReturn(y).thenReturn(x+1).thenReturn(y);
-	
+	when(rand.nextInt(anyInt())).thenReturn(x).thenReturn(y).thenReturn(x + 1).thenReturn(y);
+
 	Robot mockRobot = createRobotMockup(311, 0);
 	when(mockRobot.getData().getGeneration()).thenReturn(0);
-	when(mockRobot.getData().getFacing()).thenReturn(Direction.EAST); 
-	
+	when(mockRobot.getData().getFacing()).thenReturn(Direction.EAST);
+
 	TU.addFirst(mockRobot);
-	
+
 	Robot mockRobot2 = createRobotMockup(312, 1);
 	when(mockRobot2.getData().getGeneration()).thenReturn(0);
 	TU.addFirst(mockRobot2);
-	
+
 	Robot mockRobotChild = createRobotMockup(311, 2);
 	when(mockRobotChild.getData().getGeneration()).thenReturn(1);
 	assertFalse(TU.add(mockRobot, mockRobotChild), "Added robot into occupied field");
@@ -352,13 +354,6 @@ public class WorldTest extends AbstractTest {
     public void moveNormal() {
 	Robot mockRobot = createRobotMockup(311, 0);
 
-	/*	RobotStatusLocal data = new RobotStatusLocalAdapter() {
-		    @Override
-		    public Direction getFacing() {
-		        return Direction.NORTH;
-		    }
-		};*/
-
 	when(mockRobot.getData().getFacing()).thenReturn(Direction.NORTH);
 	when(mockRobot.getData().isMobile()).thenReturn(true);
 
@@ -373,11 +368,12 @@ public class WorldTest extends AbstractTest {
 
 	TU.addFirst(mockRobot);
 
-	TU.move(mockRobot); //should wrap around
+	TU.move(mockRobot); // should wrap around
 
 	assertNotNull(listener.getMoved(), "Check we got message");
 	assertEquals(listener.getMoved().getOldPosition(), new Point(x, y), "Check old position in event");
-	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.BOARD_SIZE-1), "Check new position in event");
+	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.BOARD_SIZE - 1),
+		"Check new position in event");
 
     }
 
@@ -472,6 +468,27 @@ public class WorldTest extends AbstractTest {
 
 	TU.remove(mockRobot2);
 	assertNull(listener.getResult(), "No results were generated");
+    }
+
+    /**
+     * Checks the effects of ticking the clock on robots and on the world
+     */
+    @Test
+    public void endOfTheWorld() {
+	Robot mockRobot = createRobotMockup(311, 0);
+	when(mockRobot.getData().getAge()).thenReturn(GameSettings.MAX_AGE + 2);
+	TU.addFirst(mockRobot);
+
+	Robot mockRobot2 = createRobotMockup(311, 1); // same team
+	when(mockRobot2.getData().getGeneration()).thenReturn(1);
+	TU.add(mockRobot, mockRobot2);
+
+	TU.tick(1);
+	verify(mockRobot).die(anyString());
+
+	TU.tick(GameSettings.MAX_WORLD_AGE + 2);
+	assertNotNull(listener.getResult(), "Draw event was not generated");
+	assertEquals(listener.getResult().getResult(), Result.DRAW, "Event was not of type draw");
     }
 
 }
