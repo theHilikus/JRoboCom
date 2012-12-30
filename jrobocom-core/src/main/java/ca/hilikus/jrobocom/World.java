@@ -39,8 +39,6 @@ public class World implements ClockListener {
 
     private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
 
-    private int teams = 0;
-
     /**
      * Notification interface to be implemented by listeners of World events
      * 
@@ -67,14 +65,7 @@ public class World implements ClockListener {
 	 */
 	public void update(RobotMovedEvent mov);
 
-	/**
-	 * Called when a game ends
-	 * 
-	 * @param result info about the result
-	 */
-	public void update(ResultEvent result);
     }
-
 
     /**
      * Common random number generator
@@ -126,7 +117,6 @@ public class World implements ClockListener {
 	    throw new IllegalArgumentException(
 		    "Provided robot is not the first from its team. Use add(Robot, Robot) instead");
 	}
-	teams++;
 	Point newPosition;
 	do {
 	    // TODO: check this, looks biased
@@ -156,9 +146,8 @@ public class World implements ClockListener {
      * event {@link ResultEvent} is fired with the details
      * 
      * @param robot the robot to remove from the board
-     * @return true if the game is over due to this remove
      */
-    public boolean remove(Robot robot) {
+    public void remove(Robot robot) {
 	if (!robotsPosition.containsKey(robot)) {
 	    throw new IllegalArgumentException("Robot doesn't exist");
 	}
@@ -168,52 +157,13 @@ public class World implements ClockListener {
 	clock.removeListener(robot.getSerialNumber());
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
-	boolean end = false;
-	if (teams > 1) { // if there were more than 1 at the beginning, otherwise it is "practice"
-	    if (robotsPosition.size() > 0) {
-		Robot someRobot = robotsPosition.keySet().iterator().next();
-		if (checkWinner(someRobot.getData().getTeamId())) {
-		    declareWinner(someRobot.getOwner());
-		    end = true;
-		}
-	    } else {
-		// no winner
-		declareDraw();
-		end = true;
-	    }
-	} else if (robotsPosition.size() <= 0) {
-	    // last robot in practice died
-	    stop();
-	    end = true;
-	}
-
-	return end;
-    }
-
-    private void declareDraw() {
-	log.info("[declareDraw] No robots left. The game is a draw :S");
-	eventDispatcher.fireEvent(new ResultEvent(this));
-	stop();
-    }
-
-    private void stop() {
-	clock.stop();
-	eventDispatcher.removeListeners();
-    }
-
-    private void declareWinner(Player winner) {
-	log.info("[declareWinner] Found winner! {}", winner);
-	eventDispatcher.fireEvent(new ResultEvent(this, winner));
-	stop();
     }
 
     /**
-     * 
-     * @return true if there is a winner
+     * Called to dispose of the world
      */
-    private boolean checkWinner(int someTeamId) {
-	return getBotsCount(someTeamId, true) == 0;
-
+    public void clean() {
+	eventDispatcher.removeListeners();
     }
 
     /**
@@ -383,12 +333,6 @@ public class World implements ClockListener {
     @Override
     public void tick(long cycles) {
 	checkRobotsAge();
-	
-	if (cycles >= GameSettings.getInstance().MAX_WORLD_AGE) {
-	    // game over
-	    log.info("[tick] Maximum age of the world reached. Declaring a draw");
-	    declareDraw();
-	}
 
     }
 

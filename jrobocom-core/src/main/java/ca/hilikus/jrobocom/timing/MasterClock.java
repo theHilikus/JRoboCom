@@ -259,4 +259,23 @@ public class MasterClock {
 	}
 
     }
+
+    /**
+     * Stops and cleans the clock
+     */
+    public void clean() {
+	if (isRunning()) {
+	    stop();
+	}
+	if (listeners != null) {
+	    listeners.clear();
+	}
+	if (registered != null) {
+	    registered.clear();
+	}
+	if (waitingList != null) {
+	    waitingList.clear();
+	}
+
+    }
 }

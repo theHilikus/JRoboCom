@@ -27,17 +27,26 @@ public class ResultEvent extends EventObject {
 	/**
 	 * No winner
 	 */
-	DRAW
+	DRAW,
+	/**
+	 * End of a game without competition
+	 */
+	END
     }
 
     /**
      * Constructs an event for a draw
      * 
      * @param source event creator
+     * @param draw true if the result was a draw. false if it was just the end of the game
      */
-    public ResultEvent(Object source) {
+    public ResultEvent(Object source, boolean draw) {
 	super(source);
-	result = Result.DRAW;
+	if (draw) {
+	    result = Result.DRAW;
+	} else {
+	    result = Result.END;
+	}
     }
 
     /**

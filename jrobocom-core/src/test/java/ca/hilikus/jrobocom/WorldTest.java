@@ -19,8 +19,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.World.WorldListener;
-import ca.hilikus.jrobocom.events.ResultEvent;
-import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -44,14 +42,8 @@ public class WorldTest extends AbstractTest {
      */
     public final class EventReceiver implements WorldListener {
 	private RobotAddedEvent added;
-	private ResultEvent result;
 	private RobotMovedEvent moved;
 	private RobotRemovedEvent removed;
-
-	@Override
-	public void update(ResultEvent pResult) {
-	    this.result = pResult;
-	}
 
 	@Override
 	public void update(RobotMovedEvent mov) {
@@ -74,13 +66,6 @@ public class WorldTest extends AbstractTest {
 	 */
 	public RobotAddedEvent getAdded() {
 	    return added;
-	}
-
-	/**
-	 * @return the result
-	 */
-	public ResultEvent getResult() {
-	    return result;
 	}
 
 	/**
@@ -433,48 +418,10 @@ public class WorldTest extends AbstractTest {
     }
 
     /**
-     * Tests if a winner is declared when a second team completely dies
-     */
-    @Test(dependsOnMethods = { "addFirst", "remove" })
-    public void declareWinner() {
-	Robot mockRobot = createRobotMockup(311, 0);
-	Player player = mock(Player.class);
-	when(mockRobot.getOwner()).thenReturn(player);
-
-	TU.addFirst(mockRobot);
-
-	Robot mockRobot2 = createRobotMockup(312, 1);
-	TU.addFirst(mockRobot2);
-
-	TU.remove(mockRobot2);
-
-	assertNotNull(listener.getResult(), "Check end of game event was generated");
-	assertEquals(listener.getResult().getResult(), Result.WIN, "Check result was a win");
-	assertEquals(listener.getResult().getWinner(), player, "Check winner is the correct one");
-    }
-
-    /**
-     * Verifies that if only one team is added, practice mode is detected
-     */
-    @Test(dependsOnMethods = { "addFirst", "remove" })
-    public void detectPractice() {
-	Robot mockRobot = createRobotMockup(311, 0);
-	TU.addFirst(mockRobot);
-	when(mockRobot.getData().getGeneration()).thenReturn(0);
-
-	Robot mockRobot2 = createRobotMockup(311, 1); // same team
-	when(mockRobot2.getData().getGeneration()).thenReturn(1);
-	TU.add(mockRobot, mockRobot2);
-
-	TU.remove(mockRobot2);
-	assertNull(listener.getResult(), "No results were generated");
-    }
-
-    /**
-     * Checks the effects of ticking the clock on robots and on the world
+     * Checks the effects of ticking the clock on robots
      */
     @Test
-    public void endOfTheWorld() {
+    public void detectOldRobots() {
 	Robot mockRobot = createRobotMockup(311, 0);
 	when(mockRobot.getData().getAge()).thenReturn(GameSettings.getInstance().MAX_AGE + 2);
 	TU.addFirst(mockRobot);
@@ -486,9 +433,6 @@ public class WorldTest extends AbstractTest {
 	TU.tick(1);
 	verify(mockRobot).die(anyString());
 
-	TU.tick(GameSettings.getInstance().MAX_WORLD_AGE + 2);
-	assertNotNull(listener.getResult(), "Draw event was not generated");
-	assertEquals(listener.getResult().getResult(), Result.DRAW, "Event was not of type draw");
     }
 
 }

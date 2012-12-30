@@ -5,7 +5,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
 import ca.hilikus.jrobocom.events.GameListener;
+import ca.hilikus.jrobocom.events.LeaderChangedEvent;
+import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GameSecurityManager;
 import ca.hilikus.jrobocom.timing.MasterClock;
@@ -19,6 +22,7 @@ import ca.hilikus.jrobocom.timing.MasterClock;
 public class Session {
     private MasterClock clock = new MasterClock();
     private World theWorld;
+    private GameTracker tracker = new GameTracker();
     private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
@@ -28,21 +32,43 @@ public class Session {
     }
 
     /**
+     * Receives events about the game
+     * 
+     */
+    public class EventHandler implements GameStatusListener {
+
+	@Override
+	public void update(ResultEvent result) {
+	    cleanComponents();
+	}
+
+	@Override
+	public void update(LeaderChangedEvent event) {
+	    // do nothing
+
+	}
+
+    }
+
+    /**
      * Creates a new session with a list of player whose code is to be loaded
      * 
      * @param pPlayers list of player whose code is to be loaded
      * @param controller receiver of game events. Can be null
      */
     public Session(List<Player> pPlayers, GameListener controller) {
+	if (pPlayers == null) {
+	    throw new IllegalArgumentException("List of players can't be null");
+	}
 	theWorld = new World(clock);
 	if (controller != null) {
 	    theWorld.getEventHandler().addListener(controller);
 	}
+	theWorld.getEventHandler().addListener(tracker.getEventsReceiver());
 	clock.addListener(theWorld);
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
-	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha",
-		    onePlayer);
+	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
 	    eve.getEventHandler().addListener(controller);
 	    Robot.setInheritableListener(controller);
 	    theWorld.addFirst(eve);
@@ -69,7 +95,7 @@ public class Session {
     }
 
     /**
-     * Stops the clock for this session
+     * Stops the clock temporarily for this session
      */
     public void stop() {
 	log.info("[stop] Stopping session");
@@ -119,6 +145,19 @@ public class Session {
      */
     public int getClockPeriod() {
 	return clock.getPeriod();
+    }
+
+    /**
+     * @return the list of players in the session
+     */
+    public List<Player> getPlayers() {
+	return players;
+    }
+
+    private void cleanComponents() {
+	clock.clean();
+	theWorld.clean();
+	tracker.clean();
     }
 
 }

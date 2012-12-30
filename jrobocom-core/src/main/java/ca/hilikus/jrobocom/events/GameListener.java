@@ -1,5 +1,6 @@
 package ca.hilikus.jrobocom.events;
 
+import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
 import ca.hilikus.jrobocom.World.WorldListener;
 import ca.hilikus.jrobocom.robot.Robot.RobotListener;
 
@@ -8,6 +9,6 @@ import ca.hilikus.jrobocom.robot.Robot.RobotListener;
  * 
  * @author hilikus
  */
-public interface GameListener extends WorldListener, RobotListener {
+public interface GameListener extends WorldListener, RobotListener, GameStatusListener {
 
 }
