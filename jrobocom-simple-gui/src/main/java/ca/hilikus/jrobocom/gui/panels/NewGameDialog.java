@@ -49,14 +49,19 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
     private static final Logger log = LoggerFactory.getLogger(NewGameDialog.class);
     private JTextField statusField;
     private JButton btnRemoveTeam;
-    
+
     private JList<Player> selectedTeams;
     private Map<Integer, Color> teamsColours = new HashMap<>();
 
     private static int currentColour = 0;
-    private static Color[] palette = new Color[] { new Color(0x2F91D8), new Color(0xE57875),
-	    new Color(0xFFDE1A), new Color(0xFF7A00), new Color(0x9A61B7), new Color(0xE0332F),
-	    new Color(0x8BB1AC), new Color(0x683917) };
+    private static Color[] palette = new Color[] { new Color(0x2F91D8), new Color(0xE57875), new Color(0xFFDE1A),
+	    new Color(0xFF7A00), new Color(0x9A61B7), new Color(0xE0332F), new Color(0x8BB1AC), new Color(0x683917) };
+
+    /*
+     * for (int i = 0; i < 10; i++) {
+    colors[i] = HSV(fmod(i * 0.618033988749895, 1.0), 0.5, 1.0);
+    }
+     */
 
     private class Controller implements ActionListener, ListSelectionListener, MouseListener {
 
@@ -111,8 +116,7 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 			    } catch (IOException exc) {
 				log.error("[actionPerformed] error saving last path", exc);
 			    }
-			    log.info("[actionPerformed] Successfully added robot {}",
-				    chooser.getSelectedFile());
+			    log.info("[actionPerformed] Successfully added robot {}", chooser.getSelectedFile());
 			} catch (PlayerException exc) {
 			    log.error("[actionPerformed] Error creating player", exc);
 			    changeStatus(exc.getMessage());
@@ -214,40 +218,52 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	statusField.setEditable(false);
 	statusField.setColumns(10);
 	GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
-	gl_contentPanel.setHorizontalGroup(
-		gl_contentPanel.createParallelGroup(Alignment.LEADING)
-			.addGroup(gl_contentPanel.createSequentialGroup()
-				.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
-					.addGroup(gl_contentPanel.createSequentialGroup()
-						.addGap(25)
-						.addComponent(btnAddTeam, GroupLayout.PREFERRED_SIZE, 76, GroupLayout.PREFERRED_SIZE)
-						.addGap(29)
-						.addComponent(btnRemoveTeam))
-					.addGroup(gl_contentPanel.createSequentialGroup()
-						.addGap(66)
-						.addComponent(lblSelectedTeams))
-					.addGroup(gl_contentPanel.createSequentialGroup()
-						.addGap(6)
-						.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING, false)
-							.addComponent(selectedTeams, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addComponent(statusField, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE))))
-				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-	);
-	gl_contentPanel.setVerticalGroup(
-		gl_contentPanel.createParallelGroup(Alignment.LEADING)
-			.addGroup(gl_contentPanel.createSequentialGroup()
-				.addContainerGap()
-				.addGroup(gl_contentPanel.createParallelGroup(Alignment.BASELINE)
-					.addComponent(btnAddTeam)
+	gl_contentPanel.setHorizontalGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING).addGroup(
+		gl_contentPanel
+			.createSequentialGroup()
+			.addGroup(
+				gl_contentPanel
+					.createParallelGroup(Alignment.LEADING)
+					.addGroup(
+						gl_contentPanel
+							.createSequentialGroup()
+							.addGap(25)
+							.addComponent(btnAddTeam, GroupLayout.PREFERRED_SIZE, 76,
+								GroupLayout.PREFERRED_SIZE).addGap(29)
+							.addComponent(btnRemoveTeam))
+					.addGroup(
+						gl_contentPanel.createSequentialGroup().addGap(66)
+							.addComponent(lblSelectedTeams))
+					.addGroup(
+						gl_contentPanel
+							.createSequentialGroup()
+							.addGap(6)
+							.addGroup(
+								gl_contentPanel
+									.createParallelGroup(Alignment.LEADING, false)
+									.addComponent(selectedTeams,
+										Alignment.TRAILING,
+										GroupLayout.DEFAULT_SIZE,
+										GroupLayout.DEFAULT_SIZE,
+										Short.MAX_VALUE)
+									.addComponent(statusField, Alignment.TRAILING,
+										GroupLayout.DEFAULT_SIZE, 237,
+										Short.MAX_VALUE))))
+			.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+	gl_contentPanel.setVerticalGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING).addGroup(
+		gl_contentPanel
+			.createSequentialGroup()
+			.addContainerGap()
+			.addGroup(
+				gl_contentPanel.createParallelGroup(Alignment.BASELINE).addComponent(btnAddTeam)
 					.addComponent(btnRemoveTeam))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(lblSelectedTeams)
-				.addGap(7)
-				.addComponent(selectedTeams, GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
-				.addGap(18)
-				.addComponent(statusField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addContainerGap())
-	);
+			.addPreferredGap(ComponentPlacement.RELATED)
+			.addComponent(lblSelectedTeams)
+			.addGap(7)
+			.addComponent(selectedTeams, GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE)
+			.addGap(18)
+			.addComponent(statusField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+				GroupLayout.PREFERRED_SIZE).addContainerGap()));
 	contentPanel.setLayout(gl_contentPanel);
 	{
 	    JPanel buttonPane = new JPanel();
