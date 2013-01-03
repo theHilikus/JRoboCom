@@ -13,20 +13,21 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.Session;
 import ca.hilikus.jrobocom.events.GameListener;
+import ca.hilikus.jrobocom.events.LeaderChangedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
@@ -52,15 +53,11 @@ public class GUI implements ColourInfoProvider {
 
     private JSlider speedSlider;
 
-    private DefaultListModel<Player> playersModel;
-
     private BoardPanel board;
 
     private Map<Integer, Color> teamsColours;
 
     private Session session;
-
-    private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(GUI.class);
 
@@ -69,6 +66,11 @@ public class GUI implements ColourInfoProvider {
     private UIAction stepAction;
 
     private UIAction reloadAction;
+    private JTable table;
+
+    private DefaultTableModel tableModel;
+
+    private TeamsTableRenderer teamsTableRenderer;
 
     /**
      * Event handler in charge of updating the UI
@@ -85,7 +87,9 @@ public class GUI implements ColourInfoProvider {
 		@Override
 		public void run() {
 		    board.addItem(evt.getCoordinates(), new DrawableRobot(source));
+		    changeCount(source.getOwner(), 1);
 		}
+
 	    });
 
 	    if (robots == null) { // lazy init
@@ -101,6 +105,7 @@ public class GUI implements ColourInfoProvider {
 		@Override
 		public void run() {
 		    board.removeItem(evt.getCoordinates());
+		    changeCount(evt.getSource().getOwner(), -1);
 		}
 	    });
 
@@ -147,6 +152,12 @@ public class GUI implements ColourInfoProvider {
 	    if (!source.getValueIsAdjusting()) {
 		session.setClockPeriod(source.getValue());
 	    }
+
+	}
+
+	@Override
+	public void update(LeaderChangedEvent event) {
+	    // TODO Auto-generated method stub
 
 	}
 
@@ -292,7 +303,7 @@ public class GUI implements ColourInfoProvider {
      */
     private void initialize(String title) {
 	frame = new JFrame(title);
-	frame.setBounds(100, 100, 773, 669);
+	frame.setBounds(100, 100, 814, 669);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -309,8 +320,7 @@ public class GUI implements ColourInfoProvider {
 
 	reloadAction = new UIAction(ActionNames.RELOAD);
 	JButton btnReload = new JButton(reloadAction);
-	btnReload.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F5"),
-		ActionNames.RELOAD);
+	btnReload.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F5"), ActionNames.RELOAD);
 	btnReload.getActionMap().put(ActionNames.RELOAD, reloadAction);
 
 	toolBar.add(btnReload);
@@ -331,8 +341,7 @@ public class GUI implements ColourInfoProvider {
 
 	stepAction = new UIAction(ActionNames.STEP);
 	JButton btnStep = new JButton(stepAction);
-	btnStep.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F10"),
-		ActionNames.STEP);
+	btnStep.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F10"), ActionNames.STEP);
 	btnStep.getActionMap().put(ActionNames.STEP, stepAction);
 	toolBar.add(btnStep);
 
@@ -342,44 +351,30 @@ public class GUI implements ColourInfoProvider {
 
 	board = new BoardPanel(this);
 	mainPanel.add(board);
-	board.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), new BevelBorder(
-		BevelBorder.RAISED, null, null, null, null)));
+	board.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 0), new BevelBorder(BevelBorder.RAISED, null,
+		null, null, null)));
 
 	JPanel rightPanel = new JPanel();
-	rightPanel.setPreferredSize(new Dimension(155, 10));
+	rightPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+	rightPanel.setPreferredSize(new Dimension(196, 32767));
 	rightPanel.setMinimumSize(new Dimension(300, 300));
-	rightPanel.setBorder(new EmptyBorder(10, 0, 10, 0));
-	rightPanel.setMaximumSize(new Dimension(300, 32767));
+	rightPanel.setMaximumSize(new Dimension(500, 32767));
 	mainPanel.add(rightPanel);
-
-	JList<Player> list = new JList<>();
-	list.setAlignmentY(Component.TOP_ALIGNMENT);
-	list.setBackground(Color.WHITE);
-	list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-	list.setMaximumSize(new Dimension(300, 100));
-	list.setMinimumSize(new Dimension(300, 100));
-	list.setCellRenderer(new ColouredCellRenderer(this));
-	playersModel = new DefaultListModel<>();
-	list.setModel(playersModel);
+	rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.PAGE_AXIS));
 
 	JLabel lblTeams = new JLabel("Teams");
-	GroupLayout gl_rightPanel = new GroupLayout(rightPanel);
-	gl_rightPanel.setHorizontalGroup(gl_rightPanel
-		.createParallelGroup(Alignment.LEADING)
-		.addGroup(
-			gl_rightPanel.createSequentialGroup()
-				.addComponent(list, GroupLayout.PREFERRED_SIZE, 144, Short.MAX_VALUE)
-				.addGap(12))
-		.addGroup(
-			gl_rightPanel.createSequentialGroup().addGap(48)
-				.addComponent(lblTeams, GroupLayout.PREFERRED_SIZE, 34, Short.MAX_VALUE)
-				.addGap(62)));
-	gl_rightPanel.setVerticalGroup(gl_rightPanel.createParallelGroup(Alignment.LEADING).addGroup(
-		gl_rightPanel.createSequentialGroup().addGap(9).addComponent(lblTeams)
-			.addPreferredGap(ComponentPlacement.RELATED)
-			.addComponent(list, GroupLayout.PREFERRED_SIZE, 195, GroupLayout.PREFERRED_SIZE)
-			.addContainerGap(364, Short.MAX_VALUE)));
-	rightPanel.setLayout(gl_rightPanel);
+	lblTeams.setAlignmentX(Component.CENTER_ALIGNMENT);
+	rightPanel.add(lblTeams);
+
+	table = new JTable();
+	teamsTableRenderer = new TeamsTableRenderer(this);
+	teamsTableRenderer.setDisableSelection(true);
+	table.setDefaultRenderer(Object.class, teamsTableRenderer);
+	tableModel = new DefaultTableModel(0, 2);
+	table.setModel(tableModel);
+	table.getColumnModel().getColumn(1).setMaxWidth(30);
+	table.setShowVerticalLines(false);
+	rightPanel.add(table);
     }
 
     private static void assertEDT() {
@@ -415,31 +410,35 @@ public class GUI implements ColourInfoProvider {
 	    // user pressed ok
 	    assert newGameDialog.getSelectedTeams() != null;
 	    board.clear();
-	    players = newGameDialog.getSelectedTeams();
+	    List<Player> players = newGameDialog.getSelectedTeams();
 	    teamsColours = newGameDialog.getColourMappings();
 	    session = new Session(players, controller);
 
 	    sessionReady(newGameDialog.getSelectedTeams().size() > 0);
-	    playersModel.clear();
+	    // playersModel.clear();
+	    tableModel.setRowCount(0);
 	    for (Player player : players) {
-		playersModel.addElement(player);
+		// playersModel.addElement(player);
+		tableModel.addRow(new Object[] { player, 0 });
 	    }
 
 	}
     }
 
     private void reloadSession() {
-	assert players != null && players.size() > 0 : "Players undefined, UI should not allow this action yet";
+	assert session.getPlayers() != null && session.getPlayers().size() > 0 : "Players undefined, UI should not allow this action yet";
 	SwingUtilities.invokeLater(new Runnable() {
 
 	    @Override
 	    public void run() {
 		board.clear();
+		for (Player player : session.getPlayers()) {
+		    changeCount(player, -GameSettings.getInstance().BOARD_SIZE*2);
+		}
 	    }
 	});
 
-	session = new Session(players, controller);
-
+	session = new Session(session.getPlayers(), controller);
     }
 
     private void displayResult(ResultEvent result) {
@@ -452,8 +451,7 @@ public class GUI implements ColourInfoProvider {
 	    icon = loadIcon("/images/cup.jpg");
 	} else {
 	    title = "And the Winner is...";
-	    msg = "The winner is " + result.getWinner().getAuthor() + " with "
-		    + result.getWinner().getTeamName();
+	    msg = "The winner is " + result.getWinner().getAuthor() + " with " + result.getWinner().getTeamName();
 	    icon = loadIcon("/images/cup.jpg");
 	}
 
@@ -467,6 +465,16 @@ public class GUI implements ColourInfoProvider {
 	} else {
 	    log.warn("[loadIcon] Could not load icon from {}", path);
 	    return null;
+	}
+    }
+
+    private void changeCount(Player team, int delta) {
+	for (int row = 0; row < tableModel.getRowCount(); row++) {
+	    if (tableModel.getValueAt(row, 0) == team) {
+		Integer currVal = (Integer) tableModel.getValueAt(row, 1);
+		tableModel.setValueAt(Math.max(currVal + delta, 0), row, 1);
+		break;
+	    }
 	}
     }
 
