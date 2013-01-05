@@ -13,5 +13,6 @@
 	<modules>
 		<module>4Lunch</module>
     <module>black-jacks</module>
-  </modules>
+    <module>bank-jumper</module>
+	</modules>
 </project>
