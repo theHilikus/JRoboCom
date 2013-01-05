@@ -51,6 +51,8 @@ public class Player {
     private final int teamId;
 
     private static Set<Integer> teamIds = new HashSet<>();
+    
+    private boolean leader = false;
 
     /**
      * The common parent of all player thread-groups
@@ -243,6 +245,20 @@ public class Player {
 		log.error("[clean] Problem closing class loader of " + this, exc);
 	    }
 	}
+    }
+
+    /**
+     * @return the leader
+     */
+    public boolean isLeader() {
+        return leader;
+    }
+
+    /**
+     * @param leader true if the player is one of the leaders now
+     */
+    public void setLeader(boolean leader) {
+        this.leader = leader;
     }
 
 }
