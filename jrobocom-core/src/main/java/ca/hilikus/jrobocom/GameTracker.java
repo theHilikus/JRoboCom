@@ -76,6 +76,7 @@ public class GameTracker {
 		int old = robotsCount.get(owner);
 		robotsCount.put(owner, old + 1);
 	    }
+	    findLeader();
 
 	}
 
@@ -132,6 +133,7 @@ public class GameTracker {
 	    if (entry.getValue() > max) {
 		leader.clear();
 		leader.add(entry.getKey());
+		max = entry.getValue();
 	    } else if (entry.getValue() == max) {
 		leader.add(entry.getKey());
 	    }
