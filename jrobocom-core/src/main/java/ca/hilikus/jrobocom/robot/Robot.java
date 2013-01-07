@@ -13,6 +13,7 @@ import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.events.EventDispatcher;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
+import ca.hilikus.jrobocom.exceptions.BankInterruptedException;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
@@ -56,6 +57,8 @@ public class Robot implements RobotAction, Runnable {
     private final Player owner;
 
     private GenericEventDispatcher<RobotListener> eventDispatcher = new GenericEventDispatcher<>();
+
+    private volatile boolean interrupted = false;
 
     /**
      * Events interface
@@ -219,7 +222,12 @@ public class Robot implements RobotAction, Runnable {
 			eventDispatcher.fireEvent(new RobotChangedEvent(this));
 		    }
 		    oldRunningBank = runningBank;
-		    banks[runningBank].run();
+		    try {
+			banks[runningBank].run();
+		    } catch (BankInterruptedException exc) {
+			interrupted = false; //reset flag
+			log.debug("[run] Bank on {} interrupted with reason ", this, exc.getMessage());
+		    }
 
 		    if (!pendingBankChange) {
 			reboot("End of bank");
@@ -295,6 +303,10 @@ public class Robot implements RobotAction, Runnable {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
 		banks[localBankIndex] = bank;
+		if (localBankIndex == runningBank) {
+		    log.debug("[setBank] Changed running bank");
+		    interrupted = true;
+		}
 	    } else {
 		banks[localBankIndex] = null;
 	    }
@@ -350,16 +362,27 @@ public class Robot implements RobotAction, Runnable {
 	 * Blocks the robot
 	 * 
 	 * @param turns the number of turns to block
+	 * @throws BankInterruptedException if the execution is interrupted while waiting
 	 */
-	public void waitTurns(int turns) {
+	public void waitTurns(int turns) throws BankInterruptedException {
+	    checkIfInterrupt();
 	    blockIfDisabled();
 	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
 	    } else {
 		clock.waitFor(serialNumber, turns);
 		turnsCounter += turns;
+		checkIfInterrupt();
+		blockIfDisabled();
 	    }
-	    blockIfDisabled();
+
+	}
+
+	private void checkIfInterrupt() throws BankInterruptedException {
+	    if (interrupted) {
+		throw new BankInterruptedException();
+	    }
+
 	}
 
 	private void blockIfDisabled() {
@@ -442,8 +465,9 @@ public class Robot implements RobotAction, Runnable {
     public void move() {
 	if (!data.isMobile()) {
 	    die("Robot is not mobile but tried to move");
+	} else {
+	    world.move(this);
 	}
-	world.move(this);
     }
 
     @Override
