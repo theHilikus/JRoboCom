@@ -5,7 +5,7 @@ package ca.hilikus.jrobocom.exceptions;
  * 
  * @author hilikus
  */
-public class PlayerException extends Exception {
+public class PlayerException extends GameException {
 
     private static final long serialVersionUID = 6067224319127113718L;
 

@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom.player;
 
 import ca.hilikus.jrobocom.WorldInfo;
+import ca.hilikus.jrobocom.exceptions.BankInterruptedException;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatus;
 import ca.hilikus.jrobocom.security.GamePermission;
@@ -34,8 +35,10 @@ public abstract class Bank {
     /**
      * the method that will be executed once the bank becomes active. This is where the player's
      * code is defined
+     * 
+     * @throws BankInterruptedException If the bank's execution is stopped prematurely
      */
-    public abstract void run();
+    public abstract void run() throws BankInterruptedException;
 
     /**
      * Constructs a bank

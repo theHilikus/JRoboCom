@@ -44,7 +44,17 @@ public class Session {
 
 	@Override
 	public void update(LeaderChangedEvent event) {
-	    // do nothing
+	    List<Player> leaders = event.getLeaders();
+	    for (Player player : players) {
+		boolean found = false;
+		for (Player leader : leaders) {
+		    if (player.equals(leader)) {
+			found = true;
+			break;
+		    }
+		}
+		player.setLeader(found);
+	    }
 
 	}
 
@@ -54,7 +64,7 @@ public class Session {
      * Creates a new session with a list of player whose code is to be loaded
      * 
      * @param pPlayers list of player whose code is to be loaded
-     * @param controller receiver of game events. Can be null
+     * @param controller receiver of <u>all</u> game events. Can be null
      */
     public Session(List<Player> pPlayers, GameListener controller) {
 	if (pPlayers == null) {
@@ -63,8 +73,10 @@ public class Session {
 	theWorld = new World(clock);
 	if (controller != null) {
 	    theWorld.getEventHandler().addListener(controller);
+	    tracker.getEventHandler().addListener(controller);
 	}
 	theWorld.getEventHandler().addListener(tracker.getEventsReceiver());
+	tracker.getEventHandler().addListener(new EventHandler());
 	clock.addListener(theWorld);
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
