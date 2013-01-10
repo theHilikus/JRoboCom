@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import ca.hilikus.jrobocom.events.EventDispatcher;
 import ca.hilikus.jrobocom.events.GenericEventDispatcher;
-import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -142,8 +141,7 @@ public class World implements ClockListener {
     }
 
     /**
-     * Removes a robot from the world and then determines if the game is over; in which case and
-     * event {@link ResultEvent} is fired with the details
+     * Removes a robot from the world and triggers a {@link RobotRemovedEvent}
      * 
      * @param robot the robot to remove from the board
      */

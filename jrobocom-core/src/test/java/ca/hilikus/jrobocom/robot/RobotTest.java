@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom.robot;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -9,16 +10,24 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.AbstractTest;
+import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
+import ca.hilikus.jrobocom.events.RobotChangedEvent;
+import ca.hilikus.jrobocom.exceptions.BankInterruptedException;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
+import ca.hilikus.jrobocom.player.ScanResult;
+import ca.hilikus.jrobocom.player.ScanResult.Found;
+import ca.hilikus.jrobocom.robot.Robot.RobotListener;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
@@ -31,7 +40,55 @@ import ca.hilikus.jrobocom.timing.MasterClock;
 public class RobotTest extends AbstractTest {
 
     /**
+     * Used to test changing a bank
      * 
+     */
+    public static final class ChangerBank extends Bank {
+	/**
+	 * controls the clock's ticking
+	 */
+	public boolean ticking = true;
+
+	/**
+	 * @param pTeamId
+	 */
+	public ChangerBank(int pTeamId) {
+	    super(pTeamId);
+	}
+
+	@Override
+	public void run() throws BankInterruptedException {
+	    control.transfer(1, 0);
+	    control.turn(true);
+	    ticking = false;
+	}
+    }
+
+    /**
+     * Bank to kill a robot
+     * 
+     * @author hilikus
+     */
+    public static class Killer extends Bank {
+
+	/**
+	 * @param pTeamId
+	 */
+	public Killer(int pTeamId) {
+	    super(pTeamId);
+	}
+
+	@Override
+	public void run() throws BankInterruptedException {
+	    control.turn(true);
+	    control.die("normal death");
+
+	}
+
+    }
+
+    /**
+     * Main constructor
      */
     public RobotTest() {
 	super(Robot.class);
@@ -165,5 +222,58 @@ public class RobotTest extends AbstractTest {
 
 	assertNull(child.scan(3), "Should have been null");
 	assertFalse(child.isAlive(), "Should have died due to scan");
+    }
+
+    /**
+     * Tests whether overriding a running bank creates an interruption and starts on the same bank
+     * 
+     * @throws InterruptedException
+     */
+    @Test
+    public void testModifyRunningBank() throws InterruptedException {
+	Bank initial = new Bank(123) {
+
+	    @Override
+	    public void run() throws BankInterruptedException {
+		control.scan(3);
+		control.scan(3);
+		control.scan(3);
+		fail("Should have changed bank");
+	    }
+	};
+
+	World mockWorld = mock(World.class);
+	when(mockWorld.scan(any(Robot.class), anyInt())).thenReturn(new ScanResult(Found.EMPTY, 1));
+
+	Player mockPlayer = mock(Player.class);
+	MasterClock clock = new MasterClock();
+	Robot TU = new Robot(mockWorld, clock, new Bank[] { initial }, "Unit test robot", mockPlayer);
+	clock.addListener(TU.getSerialNumber());
+	Direction original = TU.getData().getFacing();
+	TU.getData().setActiveState(1);
+
+	RobotListener TUListener = mock(RobotListener.class);
+	TU.getEventHandler().addListener(TUListener);
+	ChangerBank otherBank = new ChangerBank(311);
+
+	Player mockPlayer2 = mock(Player.class);
+	Robot other = new Robot(mockWorld, clock, new Bank[] { otherBank, new Killer(311) }, "Helping robot",
+		mockPlayer2);
+	clock.addListener(other.getSerialNumber());
+	other.getData().setActiveState(1);
+
+	when(mockWorld.getNeighbour(other)).thenReturn(TU).thenReturn(null);
+
+	Thread firstThread = new Thread(TU);
+	firstThread.start();
+	Thread secondThread = new Thread(other);
+	secondThread.start();
+
+	while (otherBank.ticking) {
+	    clock.step();
+	}
+	firstThread.join();
+	assertNotEquals(original, TU.getData().getFacing(), "Overwriten bank didn't execute");
+	verify(TUListener).update(any(RobotChangedEvent.class));
     }
 }

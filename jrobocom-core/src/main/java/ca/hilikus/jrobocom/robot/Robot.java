@@ -226,10 +226,11 @@ public class Robot implements RobotAction, Runnable {
 			banks[runningBank].run();
 		    } catch (BankInterruptedException exc) {
 			interrupted = false; //reset flag
-			log.debug("[run] Bank on {} interrupted with reason ", this, exc.getMessage());
+			log.debug("[run] Bank on {} was interrupted ", this);
+			pendingBankChange = true; //to start again on the new bank
 		    }
 
-		    if (!pendingBankChange) {
+		    if (!pendingBankChange && alive) {
 			reboot("End of bank");
 		    } else {
 			pendingBankChange = false;
@@ -303,8 +304,8 @@ public class Robot implements RobotAction, Runnable {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
 		banks[localBankIndex] = bank;
-		if (localBankIndex == runningBank) {
-		    log.debug("[setBank] Changed running bank");
+		if (localBankIndex == runningBank && alive) {
+		    log.debug("[setBank] Changed running bank of {}", this);
 		    interrupted = true;
 		}
 	    } else {
