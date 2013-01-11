@@ -303,11 +303,11 @@ public class Robot implements RobotAction, Runnable {
 	    if (bank != null) {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
-		banks[localBankIndex] = bank;
-		if (localBankIndex == runningBank && alive) {
+		if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
 		    log.debug("[setBank] Changed running bank of {}", this);
 		    interrupted = true;
 		}
+		banks[localBankIndex] = bank;
 	    } else {
 		banks[localBankIndex] = null;
 	    }

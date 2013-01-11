@@ -157,7 +157,7 @@ public class GUI implements ColourInfoProvider {
 
 	@Override
 	public void update(LeaderChangedEvent event) {
-	    // TODO Auto-generated method stub
+	    table.repaint(50);
 
 	}
 
