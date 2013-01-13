@@ -234,7 +234,7 @@ public class Player {
     }
 
     /**
-     * Called when all the robots of the player are finished
+     * Releases the player resources
      */
     public void clean() {
 	log.info("[clean] Cleaning player {}", this);

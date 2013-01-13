@@ -57,6 +57,13 @@ public class GameTracker {
 	 * @param event info about the leaders
 	 */
 	public void update(LeaderChangedEvent event);
+
+	/**
+	 * Called when a player lost all of their robots
+	 * 
+	 * @param event details about the elimination
+	 */
+	public void update(PlayerEliminatedEvent event);
     }
 
     /**
@@ -92,7 +99,7 @@ public class GameTracker {
 		if (old == 1) {
 		    ended = playerDied(owner);
 		}
-		
+
 	    }
 	    if (!ended) {
 		findLeader();
@@ -216,7 +223,7 @@ public class GameTracker {
     public void clean() {
 	eventDispatcher.removeListeners();
     }
-    
+
     /**
      * @return the object in charge of events
      */

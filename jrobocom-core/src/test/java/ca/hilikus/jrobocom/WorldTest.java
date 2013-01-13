@@ -2,6 +2,7 @@ package ca.hilikus.jrobocom;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,8 @@ import static org.testng.Assert.fail;
 import java.awt.Point;
 import java.util.Random;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -435,4 +438,37 @@ public class WorldTest extends AbstractTest {
 
     }
 
+    /**
+     * Tests the cleanup procedure
+     */
+    @Test(dependsOnMethods = { "addFirst" })
+    public void clean() {
+	final Robot mockRobot = createRobotMockup(311, 0);
+	Robot mockRobot2 = createRobotMockup(312, 1);
+	Robot mockRobot3 = createRobotMockup(311, 2);
+	
+	doAnswer(new Answer<Void>() {
+
+	    @Override
+	    public Void answer(InvocationOnMock invocation) throws Throwable {
+		TU.remove(mockRobot);
+		return null;
+	    }}).when(mockRobot).die(anyString());
+	
+
+	TU.addFirst(mockRobot);
+	TU.addFirst(mockRobot2);
+
+	when(mockRobot3.getData().getGeneration()).thenReturn(1);
+	TU.add(mockRobot, mockRobot3);
+	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), false), 2, "Robots not added");
+	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), true), 1, "Robots not added");
+
+	TU.clean();
+	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), false), 0, "Robots left in world");
+	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), true), 0, "Robots left in world");
+	verify(mockRobot).die(anyString());
+	verify(mockRobot2).die(anyString());
+	verify(mockRobot3).die(anyString());
+    }
 }

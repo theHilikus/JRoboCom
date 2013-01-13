@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
 import ca.hilikus.jrobocom.events.GameListener;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
+import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GameSecurityManager;
@@ -39,7 +40,7 @@ public class Session {
 
 	@Override
 	public void update(ResultEvent result) {
-	    cleanComponents();
+	    clean();
 	}
 
 	@Override
@@ -56,6 +57,11 @@ public class Session {
 		player.setLeader(found);
 	    }
 
+	}
+
+	@Override
+	public void update(PlayerEliminatedEvent event) {
+	    event.getEliminatedPlayer().clean();
 	}
 
     }
@@ -166,10 +172,14 @@ public class Session {
 	return players;
     }
 
-    private void cleanComponents() {
+    /**
+     * Cleans each component of the session
+     */
+    public void clean() {
+	log.debug("[clean] Cleaning session {}", this);
+
 	clock.clean();
 	theWorld.clean();
 	tracker.clean();
     }
-
 }

@@ -60,6 +60,7 @@ public class RobotTest extends AbstractTest {
 	public void run() throws BankInterruptedException {
 	    control.transfer(1, 0);
 	    control.turn(true);
+	    control.die();
 	    ticking = false;
 	}
     }
@@ -203,7 +204,6 @@ public class RobotTest extends AbstractTest {
 
 	assertFalse(TU.isAlive(), "Robot didn't die");
 	verify(mockWorld).remove(TU);
-	verify(pla).clean(); // make sure the player was cleaned since it was its last robot
     }
 
     /**
@@ -229,7 +229,7 @@ public class RobotTest extends AbstractTest {
      * 
      * @throws InterruptedException
      */
-    @Test
+    @Test(timeOut = 1000)
     public void testModifyRunningBank() throws InterruptedException {
 	Bank initial = new Bank(123) {
 
@@ -275,5 +275,31 @@ public class RobotTest extends AbstractTest {
 	firstThread.join();
 	assertNotEquals(original, TU.getData().getFacing(), "Overwriten bank didn't execute");
 	verify(TUListener).update(any(RobotChangedEvent.class));
+    }
+
+    /**
+     * Tests whether a robot's thread ends when a robot dies
+     * 
+     * @throws InterruptedException
+     */
+    @Test(timeOut = 1000)
+    public void testRobotClean() throws InterruptedException {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	MasterClock clock = new MasterClock();
+	ChangerBank bank = new ChangerBank(311);
+	Robot TU = new Robot(mockWorld, clock, new Bank[] { bank, null }, "Test Robot", mockPlayer);
+
+	clock.addListener(TU.getSerialNumber());
+	TU.getData().setActiveState(1);
+
+	Thread thread = new Thread(TU);
+	thread.start();
+	
+	while (bank.ticking) {
+	    clock.step();
+	}
+
+	thread.join();
     }
 }

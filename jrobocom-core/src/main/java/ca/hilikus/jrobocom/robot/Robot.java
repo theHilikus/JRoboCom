@@ -225,9 +225,9 @@ public class Robot implements RobotAction, Runnable {
 		    try {
 			banks[runningBank].run();
 		    } catch (BankInterruptedException exc) {
-			interrupted = false; //reset flag
+			interrupted = false; // reset flag
 			log.debug("[run] Bank on {} was interrupted ", this);
-			pendingBankChange = true; //to start again on the new bank
+			pendingBankChange = true; // to start again on the new bank
 		    }
 
 		    if (!pendingBankChange && alive) {
@@ -238,6 +238,8 @@ public class Robot implements RobotAction, Runnable {
 		}
 
 	    }
+
+	    log.debug("[run] Robot terminated gracefully");
 	} catch (Exception | Error all) {
 	    log.error("[run] Problem running robot " + this, all);
 	    die("Execution Error -- " + all);
@@ -267,12 +269,10 @@ public class Robot implements RobotAction, Runnable {
 	log.info("[die] Robot {} died with reason: {}", serialNumber, reason);
 	if (alive) { // if not alive it means it was killed at creation
 	    alive = false;
+	    interrupted = true; // to speed up death
 	    world.remove(Robot.this);
 	}
-	if (world.getBotsCount(data.getTeamId(), false) <= 0) {
-	    // last bot of this team
-	    owner.clean();
-	}
+
 	eventDispatcher.removeListeners();
     }
 

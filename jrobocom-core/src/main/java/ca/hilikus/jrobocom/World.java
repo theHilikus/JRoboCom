@@ -79,7 +79,8 @@ public class World implements ClockListener {
     }
 
     /**
-     * Adds a new robot to the world in the reference field of the parent
+     * Adds a new robot to the world in the reference field of the parent. The child becomes owned
+     * by <i>this</i> object
      * 
      * @param parent the creating robot
      * @param child the newly created robot
@@ -101,7 +102,7 @@ public class World implements ClockListener {
     }
 
     /**
-     * Adds the first robot of a team
+     * Adds the first robot of a team. The robot becomes owned by <i>this</i> object
      * 
      * @param eve the first robot of the player
      * @throws IllegalArgumentException if the robot is not the first from its team or it exists
@@ -161,7 +162,14 @@ public class World implements ClockListener {
      * Called to dispose of the world
      */
     public void clean() {
-	eventDispatcher.removeListeners();
+	log.debug("[clean] Cleaning world");
+
+	eventDispatcher.removeListeners(); // do it first thing to spare listeners from misleading
+					   // events
+	for (Robot bot : robotsPosition.keySet()) {
+	    bot.die("World cleanup");
+	}
+
     }
 
     /**

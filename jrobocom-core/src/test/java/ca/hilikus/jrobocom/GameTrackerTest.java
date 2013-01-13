@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
+import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
@@ -30,10 +31,16 @@ public class GameTrackerTest extends AbstractTest {
 
     private EventReceiver listener;
 
+    /**
+     * Unit test event receiver
+     * 
+     */
     public class EventReceiver implements GameStatusListener {
 	private ResultEvent result;
 
 	private LeaderChangedEvent leaderChange;
+
+	private PlayerEliminatedEvent eliminated;
 
 	@Override
 	public void update(ResultEvent pResult) {
@@ -44,6 +51,12 @@ public class GameTrackerTest extends AbstractTest {
 	@Override
 	public void update(LeaderChangedEvent event) {
 	    leaderChange = event;
+	}
+
+	@Override
+	public void update(PlayerEliminatedEvent event) {
+	    eliminated = event;
+
 	}
 
     }
@@ -103,7 +116,7 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot2, new Point()));
 	assertNull(listener.result, "Result was generated");
-	
+
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot, new Point()));
 	assertNotNull(listener.result, "Result was not generated");
 	assertEquals(listener.result.getResult(), Result.END);
@@ -120,12 +133,12 @@ public class GameTrackerTest extends AbstractTest {
 	assertNotNull(listener.result, "Draw event was not generated");
 	assertEquals(listener.result.getResult(), Result.DRAW, "Event was not of type draw");
     }
-    
+
     public void detectNewSingleLeader() {
-	
+	// TODO: implement
     }
-    
+
     public void detectNewTieForLeader() {
-	
+	// TODO: implement
     }
 }
