@@ -28,6 +28,7 @@ import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.Session;
 import ca.hilikus.jrobocom.events.GameListener;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
+import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
@@ -159,6 +160,12 @@ public class GUI implements ColourInfoProvider {
 	public void update(LeaderChangedEvent event) {
 	    table.repaint(50);
 
+	}
+
+	@Override
+	public void update(PlayerEliminatedEvent event) {
+	    // TODO Auto-generated method stub
+	    
 	}
 
     }
@@ -426,6 +433,7 @@ public class GUI implements ColourInfoProvider {
     }
 
     private void reloadSession() {
+	assert session != null;
 	assert session.getPlayers() != null && session.getPlayers().size() > 0 : "Players undefined, UI should not allow this action yet";
 	SwingUtilities.invokeLater(new Runnable() {
 
@@ -438,6 +446,7 @@ public class GUI implements ColourInfoProvider {
 	    }
 	});
 
+	session.clean();
 	session = new Session(session.getPlayers(), controller);
     }
 
