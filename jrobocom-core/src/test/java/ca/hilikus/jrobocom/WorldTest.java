@@ -18,6 +18,7 @@ import java.util.Random;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -104,6 +105,14 @@ public class WorldTest extends AbstractTest {
 	TU = new World(new MasterClock());
 	listener = new EventReceiver();
 	TU.getEventHandler().addListener(listener);
+	
+    }
+    
+    /**
+     * cleans testing resources
+     */
+    @AfterMethod
+    public void bringDown() {
 	World.setRandGenerator(new Random()); // reset it in case one of the tests changed it
     }
 
@@ -465,7 +474,7 @@ public class WorldTest extends AbstractTest {
 	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), true), 1, "Robots not added");
 
 	TU.clean();
-	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), false), 0, "Robots left in world");
+	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), false), 0, "Robots left in team");
 	assertEquals(TU.getBotsCount(mockRobot.getData().getTeamId(), true), 0, "Robots left in world");
 	verify(mockRobot).die(anyString());
 	verify(mockRobot2).die(anyString());

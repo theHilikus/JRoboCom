@@ -31,7 +31,7 @@ public enum Direction {
 
     public static Direction fromInt(int position) {
 	if (position > COUNT) {
-	    throw new IllegalArgumentException("Invalid index for Direction");
+	    throw new IllegalArgumentException("Invalid index for Direction: " + position);
 	}
 	return values()[position];
     }

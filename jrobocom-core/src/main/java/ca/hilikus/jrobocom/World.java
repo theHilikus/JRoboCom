@@ -2,7 +2,10 @@ package ca.hilikus.jrobocom;
 
 import java.awt.Point;
 import java.util.EventListener;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +33,7 @@ import com.google.common.collect.HashBiMap;
  */
 public class World implements ClockListener {
 
-    private BiMap<Robot, Point> robotsPosition = HashBiMap.create();
+    private Map<Robot, Point> robotsPosition = new ConcurrentHashMap<>();
 
     private MasterClock clock;
 
@@ -166,8 +169,13 @@ public class World implements ClockListener {
 
 	eventDispatcher.removeListeners(); // do it first thing to spare listeners from misleading
 					   // events
+	
 	for (Robot bot : robotsPosition.keySet()) {
 	    bot.die("World cleanup");
+	    if (robotsPosition.containsKey(bot)) {
+		log.warn("[clean] Robot did not unregister itself. Removing it");
+		remove(bot);
+	    }
 	}
 
     }
@@ -188,7 +196,7 @@ public class World implements ClockListener {
 	Point newPosition = getReferenceField(robot, 1);
 	if (!isOccupied(newPosition)) {
 	    Point oldPosition = robotsPosition.get(robot);
-	    robotsPosition.forcePut(robot, newPosition);
+	    robotsPosition.put(robot, newPosition);
 	    eventDispatcher.fireEvent(new RobotMovedEvent(robot, oldPosition, newPosition));
 	}
 
@@ -243,8 +251,18 @@ public class World implements ClockListener {
      */
     public Robot getNeighbour(Robot robot) {
 	Point neighbourPos = getReferenceField(robot, 1);
-	return robotsPosition.inverse().get(neighbourPos);
+	return getRobotAt(neighbourPos);
 
+    }
+    
+    private Robot getRobotAt(Point position) {
+	for (Entry<Robot, Point> robotInfo : robotsPosition.entrySet()) {
+	    if (robotInfo.getValue().equals(position)) {
+		return robotInfo.getKey();
+	    }
+	}
+	//nothing found
+	return null;
     }
 
     /**
@@ -258,7 +276,7 @@ public class World implements ClockListener {
      */
     public ScanResult scan(Robot robot, int dist) {
 	Point space = getReferenceField(robot, dist);
-	Robot inPosition = robotsPosition.inverse().get(space);
+	Robot inPosition = getRobotAt(space);
 	ScanResult ret = null;
 	if (inPosition == null) {
 	    ret = new ScanResult(Found.EMPTY, dist);
