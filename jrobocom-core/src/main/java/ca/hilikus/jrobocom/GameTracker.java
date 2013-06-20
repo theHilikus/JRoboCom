@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.events.event_manager.api.EventDispatcher;
+import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.World.WorldListener;
-import ca.hilikus.jrobocom.events.EventDispatcher;
-import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
 import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
@@ -20,16 +20,14 @@ import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
 import ca.hilikus.jrobocom.security.GamePermission;
-import ca.hilikus.jrobocom.timing.MasterClock.ClockListener;
+import ca.hilikus.jrobocom.timing.ClockListener;
 
 /**
  * Keeps track of the statistics of the game
  * 
  * @author hilikus
  */
-public class GameTracker {
-
-    private GenericEventDispatcher<GameStatusListener> eventDispatcher = new GenericEventDispatcher<>();
+public class GameTracker implements EventPublisher {
 
     private Map<Player, Integer> robotsCount = new HashMap<>();
 
@@ -38,6 +36,8 @@ public class GameTracker {
     private List<Player> currentLeaders = new ArrayList<>();
 
     private EventsHandler eventHandler = new EventsHandler();
+
+    private EventDispatcher eventDispatcher;
 
     /**
      * Interface to receive events about the status of the game
@@ -217,21 +217,10 @@ public class GameTracker {
 	return eventHandler;
     }
 
-    /**
-     * Cleans the tracker
-     */
-    public void clean() {
-	eventDispatcher.removeListeners();
+    @Override
+    public void setEventDispatcher(EventDispatcher dispatcher) {
+	eventDispatcher = dispatcher;
+	
     }
 
-    /**
-     * @return the object in charge of events
-     */
-    public EventDispatcher<GameStatusListener> getEventHandler() {
-	SecurityManager sm = System.getSecurityManager();
-	if (sm != null) {
-	    sm.checkPermission(new GamePermission("eventsListener"));
-	}
-	return eventDispatcher;
-    }
 }

@@ -3,12 +3,13 @@ package ca.hilikus.jrobocom.robot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.events.event_manager.GenericEventDispatcher;
+import ca.hilikus.events.event_manager.api.EventDispatcher;
+import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.Direction;
-import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.robot.Robot.RobotListener;
-import ca.hilikus.jrobocom.robot.Robot.TurnManager;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 
 /**
@@ -16,7 +17,7 @@ import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
  * should be in the robot itself
  * 
  */
-public class RobotData implements RobotStatusLocal {
+public class RobotData implements RobotStatusLocal, EventPublisher {
     private final boolean mobile;
     private int activeState;
     private final InstructionSet set;
@@ -27,7 +28,7 @@ public class RobotData implements RobotStatusLocal {
     private final int banksCount;
     private final int cyclesAtCreation;
 
-    private final GenericEventDispatcher<RobotListener> eventDispatcher;
+    private EventDispatcher eventDispatcher;
     private final Robot owner;
     
     private static final Logger log = LoggerFactory.getLogger(RobotData.class);
@@ -53,7 +54,7 @@ public class RobotData implements RobotStatusLocal {
 	banksCount = pOwner.getBanksCount();
 	facing = direction;
 	owner = pOwner;
-	eventDispatcher = (GenericEventDispatcher<RobotListener>) pOwner.getEventHandler();
+	eventDispatcher = pOwner.getEventDispatcher();
 
 	cyclesAtCreation = pOwner.getTurnsControl().getTurnsCount();
 
@@ -125,6 +126,12 @@ public class RobotData implements RobotStatusLocal {
     void setFacing(Direction newDirection) {
 	facing = newDirection;
 
+    }
+
+    @Override
+    public void setEventDispatcher(EventDispatcher dispatcher) {
+	eventDispatcher = dispatcher;
+	
     }
 
 }

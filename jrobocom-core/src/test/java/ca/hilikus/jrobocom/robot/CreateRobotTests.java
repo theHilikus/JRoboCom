@@ -1,9 +1,9 @@
 package ca.hilikus.jrobocom.robot;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,7 +24,7 @@ import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * Tests many use-cases for {@link Robot#createRobot(String, InstructionSet, int, boolean)}
@@ -35,7 +35,7 @@ public class CreateRobotTests extends AbstractTest {
 
     private Robot TU;
     private World mockWorld;
-    private MasterClock mockClock;
+    private Delayer mockDelayer;
     private Bank[] banks;
     private Player mockPlayer;
 
@@ -52,12 +52,12 @@ public class CreateRobotTests extends AbstractTest {
     @BeforeMethod
     public void setUp() {
 	mockWorld = mock(World.class);
-	mockClock = mock(MasterClock.class);
+	mockDelayer = mock(Delayer.class);
 	banks = new Bank[3];
 	mockPlayer = mock(Player.class);
 
-	TU = new Robot(mockWorld, mockClock, banks, "Unity", mockPlayer);
-	when(mockWorld.add(any(Robot.class), any(Robot.class))).thenReturn(true);
+	TU = new Robot(mockWorld, mockDelayer, banks, "Unity", mockPlayer);
+	when(mockWorld.add(isA(Robot.class), isA(Robot.class))).thenReturn(true);
     }
 
     /**
@@ -132,10 +132,10 @@ public class CreateRobotTests extends AbstractTest {
 	when(mockWorld.getBotsCount(anyInt(), anyBoolean())).thenReturn(0).thenReturn(
 		GameSettings.getInstance().MAX_BOTS + 3);
 	TU.createRobot("son", InstructionSet.BASIC, 1, false);
-	verify(mockWorld, times(1)).add(eq(TU), any(Robot.class));
+	verify(mockWorld, times(1)).add(eq(TU), isA(Robot.class));
 
 	TU.createRobot("son", InstructionSet.BASIC, 1, false);
-	verify(mockWorld, times(1)).add(eq(TU), any(Robot.class)); // interactions should remain the
+	verify(mockWorld, times(1)).add(eq(TU), isA(Robot.class)); // interactions should remain the
 								   // same
 
     }

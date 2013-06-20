@@ -1,13 +1,12 @@
 package ca.hilikus.jrobocom.robot;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.AfterMethod;
@@ -20,7 +19,7 @@ import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
-import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * Tests the two transfer actions {@link RobotAction#transfer(int, int)} and
@@ -31,7 +30,7 @@ import ca.hilikus.jrobocom.timing.MasterClock;
 public class TransferTests extends AbstractTest {
 
     private World mockWorld;
-    private MasterClock mockClock;
+    private Delayer mockDelayer;
     private Bank[] banks;
     private Player mockPlayer;
     private Robot TU;
@@ -67,13 +66,13 @@ public class TransferTests extends AbstractTest {
     @BeforeMethod
     public void setUp() {
 	mockWorld = mock(World.class);
-	mockClock = mock(MasterClock.class);
+	mockDelayer = mock(Delayer.class);
 	banks = new Bank[] { new DummyBank(1), new DummyBank(2), null };
 	banks2 = new Bank[] { new DummyBank(8), new DummyBank(9), null };
 	mockPlayer = mock(Player.class);
 
-	TU = new Robot(mockWorld, mockClock, banks, "Unity-src", mockPlayer);
-	dest = new Robot(mockWorld, mockClock, banks2, "Unity-dest", mockPlayer);
+	TU = new Robot(mockWorld, mockDelayer, banks, "Unity-src", mockPlayer);
+	dest = new Robot(mockWorld, mockDelayer, banks2, "Unity-dest", mockPlayer);
     }
 
     /**
@@ -162,7 +161,7 @@ public class TransferTests extends AbstractTest {
      */
     @Test
     public void transferBadInstructionSet() {
-	when(mockWorld.add(eq(TU), any(Robot.class))).thenReturn(true);
+	when(mockWorld.add(eq(TU), isA(Robot.class))).thenReturn(true);
 	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
 	Robot child = CreateRobotTests.getChild(mockWorld, TU);
 

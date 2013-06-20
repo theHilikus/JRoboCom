@@ -10,7 +10,7 @@ import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
 import ca.hilikus.jrobocom.WorldTest;
 import ca.hilikus.jrobocom.player.Bank;
-import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * Tests the action of moving a robot. Note however that most of the actual moving logic is in
@@ -35,7 +35,7 @@ public class MoveTests extends AbstractTest {
 	World mockWorld = mock(World.class);
 	Bank[] dummyBanks = new Bank[3];
 	Player pla = mock(Player.class);
-	MasterClock clock = mock(MasterClock.class);
+	Delayer clock = mock(Delayer.class);
 
 	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Unit test robot", pla);
 

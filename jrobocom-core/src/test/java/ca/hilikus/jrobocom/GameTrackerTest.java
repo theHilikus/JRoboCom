@@ -1,19 +1,20 @@
 package ca.hilikus.jrobocom;
 
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.awt.Point;
 
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
-import ca.hilikus.jrobocom.events.LeaderChangedEvent;
-import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
+import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.ResultEvent.Result;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
@@ -28,38 +29,8 @@ import ca.hilikus.jrobocom.robot.Robot;
 public class GameTrackerTest extends AbstractTest {
 
     private GameTracker TU;
-
-    private EventReceiver listener;
-
-    /**
-     * Unit test event receiver
-     * 
-     */
-    public class EventReceiver implements GameStatusListener {
-	private ResultEvent result;
-
-	private LeaderChangedEvent leaderChange;
-
-	private PlayerEliminatedEvent eliminated;
-
-	@Override
-	public void update(ResultEvent pResult) {
-	    result = pResult;
-
-	}
-
-	@Override
-	public void update(LeaderChangedEvent event) {
-	    leaderChange = event;
-	}
-
-	@Override
-	public void update(PlayerEliminatedEvent event) {
-	    eliminated = event;
-
-	}
-
-    }
+    private EventDispatcher dispatcher;
+    private ArgumentCaptor<ResultEvent> event;
 
     /**
      * 
@@ -74,8 +45,9 @@ public class GameTrackerTest extends AbstractTest {
     @BeforeMethod
     public void setUp() {
 	TU = new GameTracker();
-	listener = new EventReceiver();
-	TU.getEventHandler().addListener(listener);
+	dispatcher = mock(EventDispatcher.class);
+	TU.setEventDispatcher(dispatcher);
+	event = ArgumentCaptor.forClass(ResultEvent.class);
     }
 
     /**
@@ -95,9 +67,9 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot2, new Point()));
 
-	assertNotNull(listener.result, "Check end of game event was generated");
-	assertEquals(listener.result.getResult(), Result.WIN, "Check result was a win");
-	assertEquals(listener.result.getWinner(), mockPlayer, "Check winner is the correct one");
+	verify(dispatcher, times(3)).fireEvent(event.capture());
+	assertEquals(event.getValue().getResult(), Result.WIN, "Check result was a win");
+	assertEquals(event.getValue().getWinner(), mockPlayer, "Check winner is the correct one");
     }
 
     /**
@@ -115,11 +87,12 @@ public class GameTrackerTest extends AbstractTest {
 	TU.getEventsReceiver().update(new RobotAddedEvent(mockRobot2, new Point()));
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot2, new Point()));
-	assertNull(listener.result, "Result was generated");
+	verify(dispatcher, never()).fireEvent(isA(ResultEvent.class));
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot, new Point()));
-	assertNotNull(listener.result, "Result was not generated");
-	assertEquals(listener.result.getResult(), Result.END);
+	verify(dispatcher, times(2)).fireEvent(event.capture());
+	
+	assertEquals(event.getValue().getResult(), Result.END);
     }
 
     /**
@@ -130,8 +103,8 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().tick(GameSettings.getInstance().MAX_WORLD_AGE + 2);
 
-	assertNotNull(listener.result, "Draw event was not generated");
-	assertEquals(listener.result.getResult(), Result.DRAW, "Event was not of type draw");
+	verify(dispatcher).fireEvent(event.capture());
+	assertEquals(event.getValue().getResult(), Result.DRAW, "Event was not of type draw");
     }
 
     public void detectNewSingleLeader() {

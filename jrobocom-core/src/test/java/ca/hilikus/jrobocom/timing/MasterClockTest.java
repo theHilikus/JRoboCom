@@ -54,83 +54,6 @@ public class MasterClockTest extends AbstractTest {
     }
 
     /**
-     * Multiple users at the same time
-     * 
-     * @throws Throwable
-     */
-    @Test(dependsOnMethods = { "ca.hilikus.jrobocom.timing.DelayerTest.blockMe" })
-    public void testMultipleWaits() throws Throwable {
-	TU.start();
-	TU.addListener(332);
-
-	Callable<Boolean> second = new Callable<Boolean>() {
-
-	    @Override
-	    public Boolean call() throws Exception {
-		TU.addListener(333);
-		TU.waitFor(333, 4);
-
-		return true;
-	    }
-
-	};
-
-	FutureTask<Boolean> secondTask = new FutureTask<>(second);
-	new Thread(secondTask, "Fake second robot").start();
-
-	TU.waitFor(332, 2);
-
-	assertFalse(secondTask.isDone(), "Second robot is still waiting");
-	boolean finished = false;
-	try {
-	    finished = secondTask.get();
-	} catch (ExecutionException exc) {
-	    throw exc.getCause();
-	}
-	assertTrue(finished, "Second thread finished");
-    }
-
-    /**
-     * Test the same robot trying to wait twice (not allowed in single thread mode)
-     * 
-     * @throws Throwable
-     */
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testMutipleWaitsSameRobot() throws Throwable {
-	TU.start(true);
-
-	TU.addListener(332);
-
-	Callable<Boolean> second = new Callable<Boolean>() {
-
-	    @Override
-	    public Boolean call() throws Exception {
-		TU.waitFor(332, 4);
-		return true;
-	    }
-	};
-
-	FutureTask<Boolean> secondTask = new FutureTask<>(second);
-	new Thread(secondTask, "Fake second robot").start();
-
-	TU.waitFor(332, 2);
-	try {
-	    secondTask.get();
-	} catch (ExecutionException exc) {
-	    throw exc.getCause();
-	}
-	fail("Should throw exception");
-    }
-
-    /**
-     * Tests signalling a robot that's not registered
-     */
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testNotRegisteredSignal() {
-	TU.waitFor(123, 3);
-    }
-
-    /**
      * Tests starting of the clock
      */
     public void testStartStop() {
@@ -146,37 +69,11 @@ public class MasterClockTest extends AbstractTest {
     }
 
     /**
-     * Tests whether changing the period after clients are waiting is done smoothly
+     * Tests changing the period
      * 
-     * @throws ExecutionException
-     * 
-     * @throws InterruptedException
      */
-    @Test(dependsOnMethods = { "testStartStop" })
-    public void testChangePeriod() throws InterruptedException, ExecutionException {
-	TU.addListener(332);
-
-	Callable<Boolean> second = new Callable<Boolean>() {
-
-	    @Override
-	    public Boolean call() throws Exception {
-		TU.addListener(333);
-		TU.waitFor(333, 4);
-
-		return true;
-	    }
-
-	};
-
-	FutureTask<Boolean> secondTask = new FutureTask<>(second);
-	new Thread(secondTask, "Fake second robot").start();
-
-	TU.start(true);
-	TU.waitFor(332, 2);
-	TU.setPeriod(100);
-
-	assertTrue(secondTask.get());
-	TU.stop();
-	assertEquals(TU.getCycles(), 4);
+    @Test
+    public void testChangePeriod() {
+	//TODO:
     }
 }

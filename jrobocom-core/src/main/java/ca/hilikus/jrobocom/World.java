@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.hilikus.jrobocom.events.EventDispatcher;
-import ca.hilikus.jrobocom.events.GenericEventDispatcher;
+import ca.hilikus.events.event_manager.api.EventDispatcher;
+import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -19,11 +19,9 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GamePermission;
-import ca.hilikus.jrobocom.timing.MasterClock;
-import ca.hilikus.jrobocom.timing.MasterClock.ClockListener;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import ca.hilikus.jrobocom.timing.Clock;
+import ca.hilikus.jrobocom.timing.ClockListener;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * The game board
@@ -31,15 +29,17 @@ import com.google.common.collect.HashBiMap;
  * @author hilikus
  * 
  */
-public class World implements ClockListener {
+public class World implements ClockListener, EventPublisher {
 
     private Map<Robot, Point> robotsPosition = new ConcurrentHashMap<>();
 
-    private MasterClock clock;
+    private Clock clock;
+    
+    private Delayer delayer;
 
     private static final Logger log = LoggerFactory.getLogger(World.class);
 
-    private GenericEventDispatcher<WorldListener> eventDispatcher = new GenericEventDispatcher<>();
+    private EventDispatcher eventDispatcher;
 
     /**
      * Notification interface to be implemented by listeners of World events
@@ -76,9 +76,11 @@ public class World implements ClockListener {
 
     /**
      * @param pClock the world clock
+     * @param pDelayer in charge of synchronization
      */
-    public World(MasterClock pClock) {
+    public World(Clock pClock, Delayer pDelayer) {
 	clock = pClock;
+	delayer = pDelayer;
     }
 
     /**
@@ -138,7 +140,7 @@ public class World implements ClockListener {
 	}
 
 	robotsPosition.put(newRobot, newPosition);
-	clock.addListener(newRobot.getSerialNumber());
+	delayer.addListener(newRobot.getSerialNumber());
 	eventDispatcher.fireEvent(new RobotAddedEvent(newRobot, newPosition));
 	log.trace("[addFirst] Added robot {}", newRobot);
 
@@ -156,7 +158,7 @@ public class World implements ClockListener {
 
 	Point lastPosition = robotsPosition.get(robot);
 	robotsPosition.remove(robot);
-	clock.removeListener(robot.getSerialNumber());
+	delayer.removeListener(robot.getSerialNumber());
 	eventDispatcher.fireEvent(new RobotRemovedEvent(robot, lastPosition));
 
     }
@@ -166,9 +168,6 @@ public class World implements ClockListener {
      */
     public void clean() {
 	log.debug("[clean] Cleaning world");
-
-	eventDispatcher.removeListeners(); // do it first thing to spare listeners from misleading
-					   // events
 	
 	for (Robot bot : robotsPosition.keySet()) {
 	    bot.die("World cleanup");
@@ -322,16 +321,6 @@ public class World implements ClockListener {
 	return (int) clock.getCycles();
     }
 
-    /**
-     * @return the object in charge of events
-     */
-    public EventDispatcher<WorldListener> getEventHandler() {
-	SecurityManager sm = System.getSecurityManager();
-	if (sm != null) {
-	    sm.checkPermission(new GamePermission("eventsListener"));
-	}
-	return eventDispatcher;
-    }
 
     /**
      * @return the generator
@@ -367,6 +356,12 @@ public class World implements ClockListener {
 	    }
 	}
 
+    }
+
+    @Override
+    public void setEventDispatcher(EventDispatcher dispatcher) {
+	eventDispatcher = dispatcher;
+	
     }
 
 }

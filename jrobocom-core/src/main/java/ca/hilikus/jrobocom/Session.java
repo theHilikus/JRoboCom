@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.events.event_manager.SubscriptionManager;
+import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.GameTracker.GameStatusListener;
 import ca.hilikus.jrobocom.events.GameListener;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
@@ -12,6 +14,8 @@ import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GameSecurityManager;
+import ca.hilikus.jrobocom.timing.Clock;
+import ca.hilikus.jrobocom.timing.Delayer;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
@@ -21,9 +25,11 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  * 
  */
 public class Session {
-    private MasterClock clock = new MasterClock();
+    private Clock clock = new MasterClock();
+    private Delayer delayer = new Delayer();
     private World theWorld;
     private GameTracker tracker = new GameTracker();
+    private SubscriptionManager subscriptions = new SubscriptionManager();
     private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);
@@ -76,19 +82,23 @@ public class Session {
 	if (pPlayers == null) {
 	    throw new IllegalArgumentException("List of players can't be null");
 	}
-	theWorld = new World(clock);
+	theWorld = new World(clock, delayer);
+	theWorld.setEventDispatcher(subscriptions.getEventDispatcher(theWorld));
+	tracker.setEventDispatcher(subscriptions.getEventDispatcher(tracker));
+	
 	if (controller != null) {
-	    theWorld.getEventHandler().addListener(controller);
-	    tracker.getEventHandler().addListener(controller);
+	    subscriptions.subscribe(theWorld, controller);
+	    subscriptions.subscribe(tracker, controller);
 	}
-	theWorld.getEventHandler().addListener(tracker.getEventsReceiver());
-	tracker.getEventHandler().addListener(new EventHandler());
-	clock.addListener(theWorld);
+	subscriptions.subscribe(theWorld, tracker.getEventsReceiver());
+	subscriptions.subscribe(tracker, new EventHandler());
+	subscriptions.subscribe((EventPublisher)clock, theWorld); //TODO: fix this, don't assume that clock impl is event publisher
+	
+	
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
-	    Robot eve = new Robot(theWorld, clock, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
-	    eve.getEventHandler().addListener(controller);
-	    Robot.setInheritableListener(controller);
+	    Robot eve = new Robot(theWorld, delayer, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
+	    subscriptions.subscribe(eve, controller);
 	    theWorld.addFirst(eve);
 	    onePlayer.startRobot(eve);
 
@@ -180,6 +190,6 @@ public class Session {
 
 	clock.clean();
 	theWorld.clean();
-	tracker.clean();
+
     }
 }

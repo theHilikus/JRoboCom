@@ -6,8 +6,8 @@ import java.security.Permission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.events.event_manager.GenericEventDispatcher;
 import ca.hilikus.jrobocom.Player;
-import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.player.Bank;
 
 /**

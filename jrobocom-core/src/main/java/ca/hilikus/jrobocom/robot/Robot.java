@@ -6,12 +6,12 @@ import java.util.EventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.hilikus.events.event_manager.api.EventDispatcher;
+import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.GameSettings;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
-import ca.hilikus.jrobocom.events.EventDispatcher;
-import ca.hilikus.jrobocom.events.GenericEventDispatcher;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.exceptions.BankInterruptedException;
 import ca.hilikus.jrobocom.player.Bank;
@@ -19,8 +19,8 @@ import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
-import ca.hilikus.jrobocom.security.GamePermission;
-import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.Clock;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * Keeps the state of each robot in the board
@@ -28,11 +28,9 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  * @author hilikus
  * 
  */
-public class Robot implements RobotAction, Runnable {
+public class Robot implements RobotAction, Runnable, EventPublisher {
 
     private static int lastSerial = 0;
-
-    private static RobotListener inheritedListener;
 
     private final TurnManager turnsControl;
 
@@ -40,7 +38,7 @@ public class Robot implements RobotAction, Runnable {
 
     private Logger log = LoggerFactory.getLogger(Robot.class);
 
-    private RobotStatusLocal data;
+    private RobotData data;
 
     private boolean alive;
 
@@ -56,7 +54,7 @@ public class Robot implements RobotAction, Runnable {
 
     private final Player owner;
 
-    private GenericEventDispatcher<RobotListener> eventDispatcher = new GenericEventDispatcher<>();
+    private EventDispatcher eventDispatcher;
 
     private volatile boolean interrupted = false;
 
@@ -75,17 +73,17 @@ public class Robot implements RobotAction, Runnable {
      * Common constructor for all robots
      * 
      * @param theWorld the world the robots lives in
-     * @param clock the clock that controls the robot turns
+     * @param delayer the instance that blocks turns
      * @param banksCount number of banks
      */
-    private Robot(World theWorld, MasterClock clock, int banksCount, String pName, Player pOwner) {
-	if (theWorld == null || clock == null || pOwner == null) {
+    private Robot(World theWorld, Delayer delayer, int banksCount, String pName, Player pOwner) {
+	if (theWorld == null || delayer == null || pOwner == null) {
 	    throw new IllegalArgumentException("Arguments cannot be null");
 	}
 	serialNumber = Robot.getNextSerialNumber();
 
 	world = theWorld;
-	turnsControl = new TurnManager(clock);
+	turnsControl = new TurnManager(delayer);
 	banks = new Bank[banksCount];
 	owner = pOwner;
 	name = pName;
@@ -96,13 +94,13 @@ public class Robot implements RobotAction, Runnable {
      * thread
      * 
      * @param theWorld the environment of the robot
-     * @param clock the ticker to control turns
+     * @param delayer the ticker to control turns
      * @param allBanks the code to execute
      * @param name this robot's name
      * @param pOwner the player that created this robot
      */
-    public Robot(World theWorld, MasterClock clock, Bank[] allBanks, String name, Player pOwner) {
-	this(theWorld, clock, allBanks.length, name, pOwner);
+    public Robot(World theWorld, Delayer delayer, Bank[] allBanks, String name, Player pOwner) {
+	this(theWorld, delayer, allBanks.length, name, pOwner);
 
 	Direction randomDir = Direction.fromInt(World.getRandGenerator().nextInt(Direction.COUNT));
 	data = new RobotData(this, InstructionSet.SUPER, false, 0, randomDir);
@@ -124,7 +122,7 @@ public class Robot implements RobotAction, Runnable {
      * @param name a name of this single robot
      */
     private Robot(InstructionSet pSet, int banksCount, boolean pMobile, Robot parent, String name) {
-	this(parent.world, parent.getTurnsControl().clock, banksCount, name, parent.owner);
+	this(parent.world, parent.getTurnsControl().delayer, banksCount, name, parent.owner);
 
 	if (banksCount > GameSettings.getInstance().MAX_BANKS) {
 	    throw new IllegalArgumentException("Too many banks");
@@ -273,7 +271,6 @@ public class Robot implements RobotAction, Runnable {
 	    world.remove(Robot.this);
 	}
 
-	eventDispatcher.removeListeners();
     }
 
     @Override
@@ -348,15 +345,15 @@ public class Robot implements RobotAction, Runnable {
 
 	private int turnsCounter = 0;
 
-	private MasterClock clock;
+	private Delayer delayer;
 
 	private final Object syncObj = new Object();
 
 	/**
 	 * @param pClock master clock used to schedule tasks
 	 */
-	public TurnManager(MasterClock pClock) {
-	    clock = pClock;
+	public TurnManager(Delayer pClock) {
+	    delayer = pClock;
 	}
 
 	/**
@@ -371,7 +368,7 @@ public class Robot implements RobotAction, Runnable {
 	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
 	    } else {
-		clock.waitFor(serialNumber, turns);
+		delayer.waitFor(serialNumber, turns);
 		turnsCounter += turns;
 		checkIfInterrupt();
 		blockIfDisabled();
@@ -427,9 +424,9 @@ public class Robot implements RobotAction, Runnable {
     @Override
     public void turn(boolean right) {
 	if (right) {
-	    ((RobotData) data).setFacing(data.getFacing().right());
+	    data.setFacing(data.getFacing().right());
 	} else {
-	    ((RobotData) data).setFacing(data.getFacing().left());
+	    data.setFacing(data.getFacing().left());
 	}
 	eventDispatcher.fireEvent(new RobotChangedEvent(this));
     }
@@ -447,9 +444,8 @@ public class Robot implements RobotAction, Runnable {
 		    && robotsCount < GameSettings.getInstance().MAX_BOTS) {
 		Robot child = new Robot(pSet, banksCount, pMobile, this, pName);
 
-		if (inheritedListener != null) {
-		    child.eventDispatcher.addListener(inheritedListener);
-		}
+		child.setEventDispatcher(eventDispatcher);
+
 		if (world.add(this, child)) { // world does further verification so add is not
 					      // guaranteed yet
 		    // all verifications passed
@@ -567,31 +563,21 @@ public class Robot implements RobotAction, Runnable {
     }
 
     /**
-     * @return the object in charge of events
-     */
-    public EventDispatcher<RobotListener> getEventHandler() {
-	SecurityManager sm = System.getSecurityManager();
-	if (sm != null) {
-	    sm.checkPermission(new GamePermission("eventsListener"));
-	}
-	return eventDispatcher;
-    }
-
-    /**
-     * Sets a special listener that gets passed to robots created by robots
-     * 
-     * @param listener
-     */
-    public static void setInheritableListener(RobotListener listener) {
-	inheritedListener = listener;
-    }
-
-    /**
      * called when a robot has been activated externally
      */
     void activated() {
 	turnsControl.activated();
 
+    }
+
+    @Override
+    public void setEventDispatcher(EventDispatcher dispatcher) {
+	eventDispatcher = dispatcher;
+	data.setEventDispatcher(dispatcher);
+    }
+
+    EventDispatcher getEventDispatcher() {
+	return eventDispatcher;
     }
 
 }

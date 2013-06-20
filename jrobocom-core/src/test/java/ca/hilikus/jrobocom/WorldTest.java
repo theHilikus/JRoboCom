@@ -1,7 +1,9 @@
 package ca.hilikus.jrobocom;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -16,12 +18,15 @@ import static org.testng.Assert.fail;
 import java.awt.Point;
 import java.util.Random;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import ca.hilikus.events.event_manager.SubscriptionManager;
+import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.jrobocom.World.WorldListener;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
@@ -30,6 +35,7 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
+import ca.hilikus.jrobocom.timing.Delayer;
 import ca.hilikus.jrobocom.timing.MasterClock;
 
 /**
@@ -39,56 +45,8 @@ import ca.hilikus.jrobocom.timing.MasterClock;
  */
 public class WorldTest extends AbstractTest {
 
-    /**
-     * an event receiver to test methods
-     * 
-     * @author hilikus
-     */
-    public final class EventReceiver implements WorldListener {
-	private RobotAddedEvent added;
-	private RobotMovedEvent moved;
-	private RobotRemovedEvent removed;
-
-	@Override
-	public void update(RobotMovedEvent mov) {
-	    moved = mov;
-
-	}
-
-	@Override
-	public void update(RobotRemovedEvent rem) {
-	    removed = rem;
-	}
-
-	@Override
-	public void update(RobotAddedEvent add) {
-	    added = add;
-	}
-
-	/**
-	 * @return the added
-	 */
-	public RobotAddedEvent getAdded() {
-	    return added;
-	}
-
-	/**
-	 * @return the moved
-	 */
-	public RobotMovedEvent getMoved() {
-	    return moved;
-	}
-
-	/**
-	 * @return the removed
-	 */
-	public RobotRemovedEvent getRemoved() {
-	    return removed;
-	}
-    }
-
     private World TU;
-    private EventReceiver listener;
+    private EventDispatcher dispatcher;
 
     /**
      * 
@@ -102,12 +60,12 @@ public class WorldTest extends AbstractTest {
      */
     @BeforeMethod
     public void setUp() {
-	TU = new World(new MasterClock());
-	listener = new EventReceiver();
-	TU.getEventHandler().addListener(listener);
-	
+	TU = new World(new MasterClock(), new Delayer());
+	dispatcher = mock(EventDispatcher.class);
+	TU.setEventDispatcher(dispatcher);
+
     }
-    
+
     /**
      * cleans testing resources
      */
@@ -221,8 +179,11 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot);
 	assertEquals(TU.getBotsCount(-1, true), 1, "Successful add");
 
-	assertNotNull(listener.getAdded(), "Check we got message");
-	assertEquals(listener.getAdded().getCoordinates(), pos, "Check position added is as expected");
+	// assertNotNull(listener.getAdded(), "Check we got message");
+	ArgumentCaptor<RobotAddedEvent> addEvent = ArgumentCaptor.forClass(RobotAddedEvent.class);
+
+	verify(dispatcher).fireEvent(addEvent.capture());
+	assertEquals(addEvent.getValue().getCoordinates(), pos, "Check position added is as expected");
 
 	TU.addFirst(mock2);
 	assertEquals(TU.getBotsCount(-1, true), 2, "Successful second add");
@@ -301,7 +262,9 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot);
 	assertEquals(TU.getBotsCount(311, false), 1);
 	TU.remove(mockRobot);
-	assertNotNull(listener.getRemoved(), "Check we got message");
+	
+	verify(dispatcher).fireEvent(isA(RobotRemovedEvent.class));
+	// assertNotNull(listener.getRemoved(), "Check we got message");
 	assertEquals(TU.getBotsCount(311, false), 0);
     }
 
@@ -367,9 +330,11 @@ public class WorldTest extends AbstractTest {
 
 	TU.move(mockRobot); // should wrap around
 
-	assertNotNull(listener.getMoved(), "Check we got message");
-	assertEquals(listener.getMoved().getOldPosition(), new Point(x, y), "Check old position in event");
-	assertEquals(listener.getMoved().getNewPosition(), new Point(x, GameSettings.getInstance().BOARD_SIZE - 1),
+	ArgumentCaptor<RobotMovedEvent> movedEvent = ArgumentCaptor.forClass(RobotMovedEvent.class);
+	verify(dispatcher).fireEvent(movedEvent.capture());
+	// assertNotNull(listener.getMoved(), "Check we got message");
+	assertEquals(movedEvent.getValue().getOldPosition(), new Point(x, y), "Check old position in event");
+	assertEquals(movedEvent.getValue().getNewPosition(), new Point(x, GameSettings.getInstance().BOARD_SIZE - 1),
 		"Check new position in event");
 
     }
@@ -455,15 +420,15 @@ public class WorldTest extends AbstractTest {
 	final Robot mockRobot = createRobotMockup(311, 0);
 	Robot mockRobot2 = createRobotMockup(312, 1);
 	Robot mockRobot3 = createRobotMockup(311, 2);
-	
+
 	doAnswer(new Answer<Void>() {
 
 	    @Override
 	    public Void answer(InvocationOnMock invocation) throws Throwable {
 		TU.remove(mockRobot);
 		return null;
-	    }}).when(mockRobot).die(anyString());
-	
+	    }
+	}).when(mockRobot).die(anyString());
 
 	TU.addFirst(mockRobot);
 	TU.addFirst(mockRobot2);
