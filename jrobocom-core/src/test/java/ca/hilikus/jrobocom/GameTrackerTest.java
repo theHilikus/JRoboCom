@@ -1,6 +1,7 @@
 package ca.hilikus.jrobocom;
 
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -67,7 +68,8 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot2, new Point()));
 
-	verify(dispatcher, times(3)).fireEvent(event.capture());
+	verify(dispatcher, atLeastOnce()).fireEvent(event.capture()); //just capture it
+	verify(dispatcher).fireEvent(isA(ResultEvent.class)); //called once
 	assertEquals(event.getValue().getResult(), Result.WIN, "Check result was a win");
 	assertEquals(event.getValue().getWinner(), mockPlayer, "Check winner is the correct one");
     }
@@ -90,7 +92,9 @@ public class GameTrackerTest extends AbstractTest {
 	verify(dispatcher, never()).fireEvent(isA(ResultEvent.class));
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot, new Point()));
-	verify(dispatcher, times(2)).fireEvent(event.capture());
+	
+	verify(dispatcher, atLeastOnce()).fireEvent(event.capture()); //just capture it
+	verify(dispatcher).fireEvent(isA(ResultEvent.class)); //called once
 	
 	assertEquals(event.getValue().getResult(), Result.END);
     }
