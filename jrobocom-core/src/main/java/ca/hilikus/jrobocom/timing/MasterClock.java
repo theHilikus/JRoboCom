@@ -10,6 +10,7 @@ import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.events.TickEvent;
 import ca.hilikus.jrobocom.security.GamePermission;
+import ca.hilikus.jrobocom.timing.api.Clock;
 
 /**
  * Time keeper

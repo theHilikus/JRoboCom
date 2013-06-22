@@ -19,8 +19,8 @@ import ca.hilikus.jrobocom.player.InstructionSet;
 import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
-import ca.hilikus.jrobocom.timing.Clock;
 import ca.hilikus.jrobocom.timing.Delayer;
+import ca.hilikus.jrobocom.timing.api.Clock;
 
 /**
  * Keeps the state of each robot in the board
@@ -289,7 +289,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	return banks.length;
     }
 
-    private boolean setBank(Bank bank, int localBankIndex, boolean remoteInvoked) {
+    boolean setBank(Bank bank, int localBankIndex, boolean remoteInvoked) {
 	if (localBankIndex < 0 || localBankIndex >= banks.length) {
 	    if (!remoteInvoked) {
 		die("Invalid local bank position attempted");

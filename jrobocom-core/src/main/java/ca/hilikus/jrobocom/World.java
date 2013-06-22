@@ -19,9 +19,9 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.player.ScanResult.Found;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GamePermission;
-import ca.hilikus.jrobocom.timing.Clock;
-import ca.hilikus.jrobocom.timing.ClockListener;
 import ca.hilikus.jrobocom.timing.Delayer;
+import ca.hilikus.jrobocom.timing.api.Clock;
+import ca.hilikus.jrobocom.timing.api.ClockListener;
 
 /**
  * The game board

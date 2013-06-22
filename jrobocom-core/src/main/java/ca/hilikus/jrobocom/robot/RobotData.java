@@ -3,13 +3,11 @@ package ca.hilikus.jrobocom.robot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.hilikus.events.event_manager.GenericEventDispatcher;
 import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.robot.Robot.RobotListener;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 
 /**

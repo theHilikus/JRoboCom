@@ -14,9 +14,9 @@ import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GameSecurityManager;
-import ca.hilikus.jrobocom.timing.Clock;
 import ca.hilikus.jrobocom.timing.Delayer;
 import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.api.Clock;
 
 /**
  * A game session. It groups all the players, settings and world of a single session

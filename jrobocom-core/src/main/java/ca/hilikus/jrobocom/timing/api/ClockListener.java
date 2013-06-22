@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.timing;
+package ca.hilikus.jrobocom.timing.api;
 
 import java.util.EventListener;
 

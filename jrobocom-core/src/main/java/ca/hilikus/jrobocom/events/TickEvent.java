@@ -2,7 +2,7 @@ package ca.hilikus.jrobocom.events;
 
 import java.util.EventObject;
 
-import ca.hilikus.jrobocom.timing.Clock;
+import ca.hilikus.jrobocom.timing.api.Clock;
 
 public class TickEvent extends EventObject {
 

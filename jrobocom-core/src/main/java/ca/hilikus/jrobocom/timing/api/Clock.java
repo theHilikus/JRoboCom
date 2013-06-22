@@ -1,4 +1,4 @@
-package ca.hilikus.jrobocom.timing;
+package ca.hilikus.jrobocom.timing.api;
 
 /**
  * A central unit to control turns and time
