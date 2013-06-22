@@ -106,9 +106,9 @@ public class Delayer {
 
 	// we are in the robot's thread
 
-	log.trace("[signalAfter] Blocking {} for {} turns", clientId, turns);
+	log.trace("[waitFor] Blocking {} for {} turns", clientId, turns);
 	blockMe(turns);
-	log.trace("[signalAfter] Unblocked {}", clientId);
+	log.trace("[waitFor] Unblocked {}", clientId);
 
 	synchronized (waitingList) {
 	    waitingList.remove(clientId);
@@ -116,6 +116,9 @@ public class Delayer {
 
     }
 
+    /**
+     * cleans all the registered listeners and waiting clients
+     */
     public void clean() {
 	if (registered != null) {
 	    registered.clear();
