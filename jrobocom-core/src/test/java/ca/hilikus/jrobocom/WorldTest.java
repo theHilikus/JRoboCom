@@ -1,8 +1,8 @@
 package ca.hilikus.jrobocom;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -18,16 +17,16 @@ import static org.testng.Assert.fail;
 import java.awt.Point;
 import java.util.Random;
 
-import org.mockito.ArgumentCaptor;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.internal.matchers.TypeSafeMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import ca.hilikus.events.event_manager.SubscriptionManager;
 import ca.hilikus.events.event_manager.api.EventDispatcher;
-import ca.hilikus.jrobocom.World.WorldListener;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
@@ -180,14 +179,28 @@ public class WorldTest extends AbstractTest {
 	assertEquals(TU.getBotsCount(-1, true), 1, "Successful add");
 
 	// assertNotNull(listener.getAdded(), "Check we got message");
-	ArgumentCaptor<RobotAddedEvent> addEvent = ArgumentCaptor.forClass(RobotAddedEvent.class);
 
-	verify(dispatcher).fireEvent(addEvent.capture());
-	assertEquals(addEvent.getValue().getCoordinates(), pos, "Check position added is as expected");
+	verify(dispatcher).fireEvent(argThat(isAddedAt(pos)));
 
 	TU.addFirst(mock2);
 	assertEquals(TU.getBotsCount(-1, true), 2, "Successful second add");
 
+    }
+
+    private static TypeSafeMatcher<RobotAddedEvent> isAddedAt(final Point addedPosition) {
+
+	return new TypeSafeMatcher<RobotAddedEvent>() {
+
+	    @Override
+	    public void describeTo(Description description) {
+		description.appendText("Check position added is as expected");
+	    }
+
+	    @Override
+	    public boolean matchesSafely(RobotAddedEvent event) {
+		return event.getCoordinates().equals(addedPosition);
+	    }
+	};
     }
 
     /**
@@ -262,7 +275,7 @@ public class WorldTest extends AbstractTest {
 	TU.addFirst(mockRobot);
 	assertEquals(TU.getBotsCount(311, false), 1);
 	TU.remove(mockRobot);
-	
+
 	verify(dispatcher).fireEvent(isA(RobotRemovedEvent.class));
 	// assertNotNull(listener.getRemoved(), "Check we got message");
 	assertEquals(TU.getBotsCount(311, false), 0);
@@ -330,12 +343,23 @@ public class WorldTest extends AbstractTest {
 
 	TU.move(mockRobot); // should wrap around
 
-	ArgumentCaptor<RobotMovedEvent> movedEvent = ArgumentCaptor.forClass(RobotMovedEvent.class);
-	verify(dispatcher).fireEvent(movedEvent.capture());
-	// assertNotNull(listener.getMoved(), "Check we got message");
-	assertEquals(movedEvent.getValue().getOldPosition(), new Point(x, y), "Check old position in event");
-	assertEquals(movedEvent.getValue().getNewPosition(), new Point(x, GameSettings.getInstance().BOARD_SIZE - 1),
-		"Check new position in event");
+	verify(dispatcher).fireEvent(argThat(fromTo(new Point(x, y), new Point(x, GameSettings.getInstance().BOARD_SIZE - 1))));
+
+    }
+
+    private static Matcher<RobotMovedEvent> fromTo(final Point origin, final Point dest) {
+	return new TypeSafeMatcher<RobotMovedEvent>() {
+
+	    @Override
+	    public void describeTo(Description description) {
+		description.appendText("Moved correctly");
+	    }
+
+	    @Override
+	    public boolean matchesSafely(RobotMovedEvent event) {
+		return event.getOldPosition().equals(origin) && event.getNewPosition().equals(dest);
+	    }
+	};
 
     }
 

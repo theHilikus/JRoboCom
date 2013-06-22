@@ -1,16 +1,19 @@
 package ca.hilikus.jrobocom;
 
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.awt.Point;
 
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.internal.matchers.TypeSafeMatcher;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,7 +34,6 @@ public class GameTrackerTest extends AbstractTest {
 
     private GameTracker TU;
     private EventDispatcher dispatcher;
-    private ArgumentCaptor<ResultEvent> event;
 
     /**
      * 
@@ -48,7 +50,6 @@ public class GameTrackerTest extends AbstractTest {
 	TU = new GameTracker();
 	dispatcher = mock(EventDispatcher.class);
 	TU.setEventDispatcher(dispatcher);
-	event = ArgumentCaptor.forClass(ResultEvent.class);
     }
 
     /**
@@ -68,10 +69,39 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot2, new Point()));
 
-	verify(dispatcher, atLeastOnce()).fireEvent(event.capture()); //just capture it
-	verify(dispatcher).fireEvent(isA(ResultEvent.class)); //called once
-	assertEquals(event.getValue().getResult(), Result.WIN, "Check result was a win");
-	assertEquals(event.getValue().getWinner(), mockPlayer, "Check winner is the correct one");
+	verify(dispatcher, atLeastOnce()).fireEvent(argThat(isOfType(Result.WIN)));
+	verify(dispatcher, atLeastOnce()).fireEvent(argThat(isPlayer(mockPlayer)));
+	verify(dispatcher).fireEvent(isA(ResultEvent.class)); // called once
+    }
+
+    private static TypeSafeMatcher<ResultEvent> isPlayer(final Player mockPlayer) {
+	return new TypeSafeMatcher<ResultEvent>() {
+
+	    @Override
+	    public void describeTo(Description description) {
+		description.appendText("Check winner is the correct one");
+	    }
+
+	    @Override
+	    public boolean matchesSafely(ResultEvent event) {
+		return event.getWinner().equals(mockPlayer);
+	    }
+	};
+    }
+
+    private static TypeSafeMatcher<ResultEvent> isOfType(final Result expected) {
+	return new TypeSafeMatcher<ResultEvent>() {
+
+	    @Override
+	    public void describeTo(Description description) {
+		description.appendText("Check result was a " + expected);
+	    }
+
+	    @Override
+	    public boolean matchesSafely(ResultEvent event) {
+		return event.getResult() == expected;
+	    }
+	};
     }
 
     /**
@@ -92,11 +122,8 @@ public class GameTrackerTest extends AbstractTest {
 	verify(dispatcher, never()).fireEvent(isA(ResultEvent.class));
 
 	TU.getEventsReceiver().update(new RobotRemovedEvent(mockRobot, new Point()));
-	
-	verify(dispatcher, atLeastOnce()).fireEvent(event.capture()); //just capture it
-	verify(dispatcher).fireEvent(isA(ResultEvent.class)); //called once
-	
-	assertEquals(event.getValue().getResult(), Result.END);
+
+	verify(dispatcher, atLeastOnce()).fireEvent(argThat(isOfType(Result.END)));
     }
 
     /**
@@ -107,8 +134,7 @@ public class GameTrackerTest extends AbstractTest {
 
 	TU.getEventsReceiver().tick(GameSettings.getInstance().MAX_WORLD_AGE + 2);
 
-	verify(dispatcher).fireEvent(event.capture());
-	assertEquals(event.getValue().getResult(), Result.DRAW, "Event was not of type draw");
+	verify(dispatcher).fireEvent(argThat(isOfType(Result.DRAW)));
     }
 
     public void detectNewSingleLeader() {
