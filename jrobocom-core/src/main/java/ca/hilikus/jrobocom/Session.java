@@ -12,6 +12,7 @@ import ca.hilikus.jrobocom.events.GameListener;
 import ca.hilikus.jrobocom.events.LeaderChangedEvent;
 import ca.hilikus.jrobocom.events.PlayerEliminatedEvent;
 import ca.hilikus.jrobocom.events.ResultEvent;
+import ca.hilikus.jrobocom.events.SecureSubscriptionManager;
 import ca.hilikus.jrobocom.robot.Robot;
 import ca.hilikus.jrobocom.security.GameSecurityManager;
 import ca.hilikus.jrobocom.timing.Delayer;
@@ -29,7 +30,7 @@ public class Session {
     private Delayer delayer = new Delayer();
     private World theWorld;
     private GameTracker tracker = new GameTracker();
-    private SubscriptionManager subscriptions = new SubscriptionManager();
+    private SubscriptionManager subscriptions = new SecureSubscriptionManager();
     private List<Player> players;
 
     private static final Logger log = LoggerFactory.getLogger(Session.class);

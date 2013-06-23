@@ -20,7 +20,6 @@ import ca.hilikus.jrobocom.player.ScanResult;
 import ca.hilikus.jrobocom.robot.api.RobotAction;
 import ca.hilikus.jrobocom.robot.api.RobotStatusLocal;
 import ca.hilikus.jrobocom.timing.Delayer;
-import ca.hilikus.jrobocom.timing.api.Clock;
 
 /**
  * Keeps the state of each robot in the board

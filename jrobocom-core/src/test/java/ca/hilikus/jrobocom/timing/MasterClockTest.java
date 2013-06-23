@@ -3,11 +3,6 @@ package ca.hilikus.jrobocom.timing;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

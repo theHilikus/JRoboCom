@@ -9,7 +9,7 @@ import org.testng.annotations.BeforeMethod;
 import ch.qos.logback.classic.Level;
 
 /**
- * Common class for all tests
+ * Common class for all tests using TestNG
  *
  * @author hilikus
  */

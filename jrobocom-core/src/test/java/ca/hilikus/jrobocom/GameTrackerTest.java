@@ -7,14 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 import java.awt.Point;
 
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
-import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

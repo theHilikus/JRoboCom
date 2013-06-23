@@ -19,7 +19,6 @@ import ca.hilikus.jrobocom.events.ResultEvent;
 import ca.hilikus.jrobocom.events.RobotAddedEvent;
 import ca.hilikus.jrobocom.events.RobotMovedEvent;
 import ca.hilikus.jrobocom.events.RobotRemovedEvent;
-import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.api.ClockListener;
 
 /**

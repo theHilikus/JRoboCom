@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.events.event_manager.api.EventPublisher;
 import ca.hilikus.jrobocom.events.TickEvent;
-import ca.hilikus.jrobocom.security.GamePermission;
 import ca.hilikus.jrobocom.timing.api.Clock;
 
 /**
@@ -134,14 +133,6 @@ public class MasterClock implements Clock, EventPublisher {
     @Override
     public void start() {
 	start(true);
-
-    }
-
-    private static void checkPermission() {
-	SecurityManager sm = System.getSecurityManager();
-	if (sm != null) {
-	    sm.checkPermission(new GamePermission("eventsListener"));
-	}
 
     }
 
