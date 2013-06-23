@@ -11,6 +11,10 @@ public class JumpBank extends Bank {
     
     private static int currentBank = 0;
 
+    /**
+     * Main constructor 
+     * @param pTeamId team id assigned by the game
+     */
     public JumpBank(int pTeamId) {
 	super(pTeamId);
     }

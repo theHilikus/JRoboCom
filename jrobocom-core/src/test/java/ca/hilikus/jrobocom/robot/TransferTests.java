@@ -44,6 +44,10 @@ public class TransferTests extends AbstractTest {
      */
     public static class DummyBank extends Bank {
 
+	/**
+	 * Dummy bank
+	 * @param pTeamId
+	 */
 	public DummyBank(int pTeamId) {
 	    super(pTeamId);
 	}
