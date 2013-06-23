@@ -1,8 +1,9 @@
 package ca.hilikus.jrobocom.robot;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -15,20 +16,21 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.concurrent.Semaphore;
+
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
 
+import ca.hilikus.events.event_manager.api.EventDispatcher;
 import ca.hilikus.jrobocom.AbstractTest;
 import ca.hilikus.jrobocom.Direction;
 import ca.hilikus.jrobocom.Player;
 import ca.hilikus.jrobocom.World;
-import ca.hilikus.jrobocom.events.RobotChangedEvent;
 import ca.hilikus.jrobocom.exceptions.BankInterruptedException;
 import ca.hilikus.jrobocom.player.Bank;
 import ca.hilikus.jrobocom.player.InstructionSet;
-import ca.hilikus.jrobocom.player.ScanResult;
-import ca.hilikus.jrobocom.player.ScanResult.Found;
-import ca.hilikus.jrobocom.robot.Robot.RobotListener;
-import ca.hilikus.jrobocom.timing.MasterClock;
+import ca.hilikus.jrobocom.timing.Delayer;
 
 /**
  * Tests the robots, but not the control class
@@ -73,6 +75,11 @@ public class RobotTest extends AbstractTest {
     public static class Killer extends Bank {
 
 	/**
+	 * controls the clock's ticking
+	 */
+	public boolean ticking = true;
+	
+	/**
 	 * @param pTeamId
 	 */
 	public Killer(int pTeamId) {
@@ -82,8 +89,9 @@ public class RobotTest extends AbstractTest {
 	@Override
 	public void run() throws BankInterruptedException {
 	    control.turn(true);
+	    ticking = false;
 	    control.die("normal death");
-
+	    
 	}
 
     }
@@ -105,7 +113,7 @@ public class RobotTest extends AbstractTest {
 	final int BANK_COUNT = 3;
 	Bank[] dummyBanks = new Bank[BANK_COUNT];
 	Player pla = mock(Player.class);
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", pla);
+	Robot TU = new Robot(mockWorld, new Delayer(), dummyBanks, "Test Robot", pla);
 
 	// check generation and serial #?
 
@@ -124,9 +132,8 @@ public class RobotTest extends AbstractTest {
     @Test(dependsOnMethods = { "testFirstRobotCreation" })
     public void testReboot() {
 	World mockWorld = mock(World.class);
-	MasterClock mockClock = mock(MasterClock.class);
+	Delayer mockDelayer = mock(Delayer.class);
 
-	mockClock.start(true);
 
 	Bank[] dummyBanks = new Bank[3];
 	Bank first = new Bank(311) {
@@ -147,13 +154,13 @@ public class RobotTest extends AbstractTest {
 	first = spy(first);
 	dummyBanks[0] = first;
 
-	Bank second = mock(Bank.class);
+	Bank second = mock(Bank.class); //empty bank after which the robot jumps to bank 0
 	dummyBanks[2] = second;
 
 	Player pla = mock(Player.class);
-	Robot TU = new Robot(mockWorld, mockClock, dummyBanks, "Test Robot", pla);
+	Robot TU = new Robot(mockWorld, mockDelayer, dummyBanks, "Test Robot", pla);
+	TU.setEventDispatcher(mock(EventDispatcher.class));
 	TU.getData().setActiveState(1);
-	mockClock.addListener(TU.getSerialNumber());
 
 	TU.run();
 
@@ -176,13 +183,11 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 
 	Bank[] dummyBanks = new Bank[3];
-	MasterClock clock = new MasterClock();
+	Delayer delayer = mock(Delayer.class);
 	Player pla = mock(Player.class);
-	Robot TU = new Robot(mockWorld, clock, dummyBanks, "Test Robot", pla);
+	Robot TU = new Robot(mockWorld, delayer, dummyBanks, "Test Robot", pla);
+	TU.setEventDispatcher(mock(EventDispatcher.class));
 	TU.getData().setActiveState(1);
-
-	clock.addListener(TU.getSerialNumber());
-	clock.start();
 
 	TU.run();
 
@@ -198,7 +203,7 @@ public class RobotTest extends AbstractTest {
 
 	Bank[] dummyBanks = new Bank[3];
 	Player pla = mock(Player.class);
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", pla);
+	Robot TU = new Robot(mockWorld, new Delayer(), dummyBanks, "Test Robot", pla);
 
 	TU.die("test die");
 
@@ -214,9 +219,9 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
 	Bank[] dummyBanks = new Bank[3];
-	Robot TU = new Robot(mockWorld, new MasterClock(), dummyBanks, "Test Robot", mockPlayer);
+	Robot TU = new Robot(mockWorld, new Delayer(), dummyBanks, "Test Robot", mockPlayer);
 
-	when(mockWorld.add(eq(TU), any(Robot.class))).thenReturn(true);
+	when(mockWorld.add(eq(TU), isA(Robot.class))).thenReturn(true);
 	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
 	Robot child = CreateRobotTests.getChild(mockWorld, TU);
 
@@ -231,10 +236,13 @@ public class RobotTest extends AbstractTest {
      */
     @Test(timeOut = 1000)
     public void testModifyRunningBank() throws InterruptedException {
+	
+	final Semaphore robotToTest = new Semaphore(0); //the robot controls flow
 	Bank initial = new Bank(123) {
 
 	    @Override
 	    public void run() throws BankInterruptedException {
+		robotToTest.release();
 		control.scan(3);
 		control.scan(3);
 		control.scan(3);
@@ -243,38 +251,43 @@ public class RobotTest extends AbstractTest {
 	};
 
 	World mockWorld = mock(World.class);
-	when(mockWorld.scan(any(Robot.class), anyInt())).thenReturn(new ScanResult(Found.EMPTY, 1));
-
 	Player mockPlayer = mock(Player.class);
-	MasterClock clock = new MasterClock();
-	Robot TU = new Robot(mockWorld, clock, new Bank[] { initial }, "Unit test robot", mockPlayer);
-	clock.addListener(TU.getSerialNumber());
+	
+	final Semaphore testToRobot = new Semaphore(0); //the test controls flow
+	Delayer delayer = mock(Delayer.class);
+	doAnswer(new Answer<Void>() {
+	    @Override
+	    public Void answer(InvocationOnMock invocation) throws Throwable {
+		testToRobot.acquire(); //block until test decides
+		return null;
+	    }}).when(delayer).waitFor(anyInt(), anyInt());
+	
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { initial, initial }, "Unit test robot", mockPlayer);
+	TU.setEventDispatcher(mock(EventDispatcher.class));
 	Direction original = TU.getData().getFacing();
 	TU.getData().setActiveState(1);
-
-	RobotListener TUListener = mock(RobotListener.class);
-	TU.getEventHandler().addListener(TUListener);
-	ChangerBank otherBank = new ChangerBank(311);
-
-	Player mockPlayer2 = mock(Player.class);
-	Robot other = new Robot(mockWorld, clock, new Bank[] { otherBank, new Killer(311) }, "Helping robot",
-		mockPlayer2);
-	clock.addListener(other.getSerialNumber());
-	other.getData().setActiveState(1);
-
-	when(mockWorld.getNeighbour(other)).thenReturn(TU).thenReturn(null);
-
+	
 	Thread firstThread = new Thread(TU);
 	firstThread.start();
-	Thread secondThread = new Thread(other);
-	secondThread.start();
-
-	while (otherBank.ticking) {
-	    clock.step();
-	}
+	
+	
+	testToRobot.release();
+	
+	ChangerBank otherBank = new ChangerBank(311);
+	
+	robotToTest.acquire();
+	TU.setBank(otherBank, 0, true);
+	
+	
+	testToRobot.release();
+	testToRobot.release();
+	testToRobot.release();
+	
 	firstThread.join();
+	
 	assertNotEquals(original, TU.getData().getFacing(), "Overwriten bank didn't execute");
-	verify(TUListener).update(any(RobotChangedEvent.class));
+	
+	
     }
 
     /**
@@ -286,18 +299,19 @@ public class RobotTest extends AbstractTest {
     public void testRobotClean() throws InterruptedException {
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
-	MasterClock clock = new MasterClock();
+	Delayer delayer = mock(Delayer.class);
 	ChangerBank bank = new ChangerBank(311);
-	Robot TU = new Robot(mockWorld, clock, new Bank[] { bank, null }, "Test Robot", mockPlayer);
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Test Robot", mockPlayer);
+	TU.setEventDispatcher(mock(EventDispatcher.class));
 
-	clock.addListener(TU.getSerialNumber());
+	//clock.addListener(TU.getSerialNumber());
 	TU.getData().setActiveState(1);
 
 	Thread thread = new Thread(TU);
 	thread.start();
 	
 	while (bank.ticking) {
-	    clock.step();
+	    delayer.tick();
 	}
 
 	thread.join();

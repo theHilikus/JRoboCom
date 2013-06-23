@@ -21,8 +21,24 @@ import ca.hilikus.jrobocom.AbstractTest;
  * @author hilikus
  * 
  */
-@Test
+@Test(timeOut = 1000)
 public class DelayerTest extends AbstractTest {
+    private final class SimulatedRobot implements Callable<Boolean> {
+	int id;
+
+	public SimulatedRobot(int id) {
+	    this.id = id;
+	}
+
+	@Override
+	public Boolean call() throws Exception {
+
+	    TU.waitFor(id, 2);
+
+	    return true;
+	}
+    }
+
     /**
      * 
      */
@@ -52,14 +68,14 @@ public class DelayerTest extends AbstractTest {
     public void blockMe() throws InterruptedException, ExecutionException {
 
 	final int BLOCKED_ID = 311;
-	
+
 	Callable<Boolean> blocked = new Callable<Boolean>() {
 
 	    @Override
 	    public Boolean call() throws Exception {
 		try {
 		    TU.waitFor(BLOCKED_ID, 2);
-		} catch (Exception exc){
+		} catch (Exception exc) {
 		    return false;
 		}
 
@@ -80,34 +96,41 @@ public class DelayerTest extends AbstractTest {
 	TU.tick();
 	assertTrue(blockingTask.get(), "Blocking thread finished correctly");
     }
-    
+
     /**
      * Multiple users at the same time
      * 
      * @throws Throwable
      */
-    @Test(dependsOnMethods = { "ca.hilikus.jrobocom.timing.DelayerTest.blockMe" })
+    @Test(dependsOnMethods = { "ca.hilikus.jrobocom.timing.DelayerTest.blockMe" }, timeOut = 3000)
     public void testMultipleWaits() throws Throwable {
 	TU.addListener(332);
+	TU.addListener(333);
 
-	Callable<Boolean> second = new Callable<Boolean>() {
+	Callable<Boolean> first = new SimulatedRobot(332);
+	Callable<Boolean> second = new SimulatedRobot(333);
 
-	    @Override
-	    public Boolean call() throws Exception {
-		TU.addListener(333);
-		TU.waitFor(333, 4);
+	FutureTask<Boolean> firstTask = new FutureTask<>(first);
+	Thread firstThread = new Thread(firstTask, "Fake first robot");
+	firstThread.start();
 
-		return true;
-	    }
-
-	};
+	while (firstThread.getState() != State.WAITING) {
+	    Thread.yield();
+	}
+	assertFalse(firstTask.isDone(), "first robot is waiting");
 
 	FutureTask<Boolean> secondTask = new FutureTask<>(second);
-	new Thread(secondTask, "Fake second robot").start();
+	Thread secondThread = new Thread(secondTask, "Fake second robot");
+	secondThread.start();
 
-	TU.waitFor(332, 2);
+	while (secondThread.getState() != State.WAITING) {
+	    Thread.yield();
+	}
 
+	assertFalse(firstTask.isDone(), "first robot is still waiting");
 	assertFalse(secondTask.isDone(), "Second robot is still waiting");
+	TU.tick();
+	TU.tick();
 	boolean finished = false;
 	try {
 	    finished = secondTask.get();
@@ -116,13 +139,13 @@ public class DelayerTest extends AbstractTest {
 	}
 	assertTrue(finished, "Second thread finished");
     }
-    
+
     /**
      * Test the same robot trying to wait twice (not allowed in single thread mode)
      * 
      * @throws Throwable
      */
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class, timeOut = 3000)
     public void testMutipleWaitsSameRobot() throws Throwable {
 
 	TU.addListener(332);
@@ -137,9 +160,14 @@ public class DelayerTest extends AbstractTest {
 	};
 
 	FutureTask<Boolean> secondTask = new FutureTask<>(second);
-	new Thread(secondTask, "Fake second robot").start();
+	Thread secondThread = new Thread(secondTask, "Fake second robot");
+	secondThread.start();
 
-	TU.waitFor(332, 2);
+	while (secondThread.getState() != State.WAITING) {
+	    Thread.yield();
+	}
+
+	TU.waitFor(332, 2); // should fail since fake second should be blocked already
 	try {
 	    secondTask.get();
 	} catch (ExecutionException exc) {
@@ -147,7 +175,7 @@ public class DelayerTest extends AbstractTest {
 	}
 	fail("Should throw exception");
     }
-    
+
     /**
      * Tests signalling a robot that's not registered
      */
