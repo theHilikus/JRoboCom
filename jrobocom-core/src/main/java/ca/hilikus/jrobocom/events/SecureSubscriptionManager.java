@@ -48,9 +48,9 @@ public class SecureSubscriptionManager extends SubscriptionManager {
      * @see ca.hilikus.events.event_manager.SubscriptionManager#cleanPublisher(ca.hilikus.events.event_manager.api.EventPublisher)
      */
     @Override
-    public void cleanPublisher(EventPublisher source) {
+    public void unsubscribeAll(EventPublisher source) {
 	checkPermission();
-	super.cleanPublisher(source);
+	super.unsubscribeAll(source);
     }
 
     private static void checkPermission() {

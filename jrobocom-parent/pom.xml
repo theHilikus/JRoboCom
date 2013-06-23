@@ -48,6 +48,7 @@
 	<url>https://github.com/theHilikus/JRoboCom</url>
 	<issueManagement>
 		<url>https://github.com/theHilikus/JRoboCom/issues</url>
+		<system>Github Issues</system>
 	</issueManagement>
 
 	<developers>
@@ -73,4 +74,8 @@
 	<prerequisites>
 		<maven>2.2.1</maven>
 	</prerequisites>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>https://hilikus.ci.cloudbees.com/job/JRoboCom/</url>
+	</ciManagement>
 </project>
