@@ -4,19 +4,19 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>ca.hilikus.jrobocom</groupId>
+		<groupId>com.github.thehilikus.jrobocom</groupId>
 		<artifactId>jrobocom-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../jrobocom-parent/pom.xml</relativePath>
 	</parent>
-	<groupId>ca.hilikus.jrobocom</groupId>
+	<groupId>com.github.thehilikus.jrobocom</groupId>
 	<artifactId>jrobocom-simple-gui</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>JRoboCom UI</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>ca.hilikus.jrobocom</groupId>
+			<groupId>com.github.thehilikus.jrobocom</groupId>
 			<artifactId>jrobocom-core</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
