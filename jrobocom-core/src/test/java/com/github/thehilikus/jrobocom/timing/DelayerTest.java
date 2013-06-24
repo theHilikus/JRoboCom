@@ -65,7 +65,7 @@ public class DelayerTest extends AbstractTest {
      * @throws InterruptedException
      * @throws ExecutionException
      */
-    @Test(timeOut = 100)
+    @Test(timeOut = 1000)
     public void blockMe() throws InterruptedException, ExecutionException {
 
 	final int BLOCKED_ID = 311;
