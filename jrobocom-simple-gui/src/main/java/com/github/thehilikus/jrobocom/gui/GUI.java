@@ -118,11 +118,12 @@ public class GUI implements ColourInfoProvider {
 
 	@Override
 	public void update(final RobotChangedEvent evt) {
+	    final Point pos = robots.get(evt.getSource());
 	    SwingUtilities.invokeLater(new Runnable() {
 
 		@Override
 		public void run() {
-		    board.refresh(robots.get(evt.getSource()));
+		    board.refresh(pos);
 		}
 	    });
 

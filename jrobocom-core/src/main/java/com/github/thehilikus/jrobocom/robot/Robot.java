@@ -362,15 +362,15 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	 * @throws BankInterruptedException if the execution is interrupted while waiting
 	 */
 	public void waitTurns(int turns) throws BankInterruptedException {
-	    checkIfInterrupt();
 	    blockIfDisabled();
+	    checkIfInterrupt();
 	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
 	    } else {
 		delayer.waitFor(serialNumber, turns);
 		turnsCounter += turns;
-		checkIfInterrupt();
 		blockIfDisabled();
+		checkIfInterrupt();
 	    }
 
 	}
@@ -385,6 +385,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	private void blockIfDisabled() {
 	    synchronized (syncObj) {
 		while (!data.isEnabled()) {
+		    log.debug("[blockIfDisabled] Disabled robot executing. Blocking");
 		    try {
 			syncObj.wait();
 		    } catch (InterruptedException exc) {
@@ -578,5 +579,15 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     EventDispatcher getEventDispatcher() {
 	return eventDispatcher;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+	return '(' + name + ", s/n:" + serialNumber + ')';
+    }
+    
+    
 
 }
