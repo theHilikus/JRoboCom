@@ -19,6 +19,7 @@ import com.github.thehilikus.jrobocom.events.ResultEvent;
 import com.github.thehilikus.jrobocom.events.RobotAddedEvent;
 import com.github.thehilikus.jrobocom.events.RobotMovedEvent;
 import com.github.thehilikus.jrobocom.events.RobotRemovedEvent;
+import com.github.thehilikus.jrobocom.events.TickEvent;
 import com.github.thehilikus.jrobocom.timing.api.ClockListener;
 
 /**
@@ -111,8 +112,8 @@ public class GameTracker implements EventPublisher {
 	}
 
 	@Override
-	public void tick(long cycles) {
-	    if (cycles >= GameSettings.getInstance().MAX_WORLD_AGE) {
+	public void update(TickEvent event) {
+	    if (event.getCycles() >= GameSettings.getInstance().MAX_WORLD_AGE) {
 		// game over
 		log.info("[tick] Maximum age of the world reached. Declaring a draw");
 		declareDraw();

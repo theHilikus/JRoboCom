@@ -29,17 +29,19 @@ public class MasterClock implements Clock, EventPublisher {
 
     private Ticker currentTicker;
 
-    private Delayer delayer = new Delayer();
+    private Delayer delayer;
 
     private EventDispatcher eventDispatcher;
-
 
     /**
      * Minimum clock period allowed
      */
     public static final int MIN_PERIOD = 10;
 
-    
+    public MasterClock(Delayer pDelayer) {
+	delayer = pDelayer;
+    }
+
     @Override
     public void start(boolean reset) {
 	log.debug("Starting Master Clock. Period = {}, Reset = {}", period, reset);
@@ -85,7 +87,6 @@ public class MasterClock implements Clock, EventPublisher {
 
 	    delayer.tick();
 
-	    
 	    eventDispatcher.fireEvent(new TickEvent(MasterClock.this, cycles));
 	}
 
@@ -116,7 +117,6 @@ public class MasterClock implements Clock, EventPublisher {
 	}
     }
 
-    
     @Override
     public int getPeriod() {
 	return period;
@@ -150,7 +150,7 @@ public class MasterClock implements Clock, EventPublisher {
     @Override
     public void setEventDispatcher(EventDispatcher dispatcher) {
 	eventDispatcher = dispatcher;
-	
+
     }
 
 }

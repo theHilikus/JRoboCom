@@ -15,6 +15,7 @@ import com.github.thehilikus.events.event_manager.api.EventPublisher;
 import com.github.thehilikus.jrobocom.events.RobotAddedEvent;
 import com.github.thehilikus.jrobocom.events.RobotMovedEvent;
 import com.github.thehilikus.jrobocom.events.RobotRemovedEvent;
+import com.github.thehilikus.jrobocom.events.TickEvent;
 import com.github.thehilikus.jrobocom.player.ScanResult;
 import com.github.thehilikus.jrobocom.player.ScanResult.Found;
 import com.github.thehilikus.jrobocom.robot.Robot;
@@ -341,10 +342,10 @@ public class World implements ClockListener, EventPublisher {
     /**
      * Called in every clock tick
      * 
-     * @param cycles
+     * @param cyclesEvent info about the current pulse
      */
     @Override
-    public void tick(long cycles) {
+    public void update(TickEvent cyclesEvent) {
 	checkRobotsAge();
 
     }

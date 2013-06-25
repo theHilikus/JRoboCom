@@ -26,9 +26,9 @@ import com.github.thehilikus.jrobocom.timing.api.Clock;
  * 
  */
 public class Session {
-    private Clock clock = new MasterClock();
-    private Delayer delayer = new Delayer();
-    private World theWorld;
+    private final MasterClock clock;
+    private final Delayer delayer = new Delayer();
+    private final World theWorld;
     private GameTracker tracker = new GameTracker();
     private SubscriptionManager subscriptions = new SecureSubscriptionManager();
     private List<Player> players;
@@ -83,9 +83,11 @@ public class Session {
 	if (pPlayers == null) {
 	    throw new IllegalArgumentException("List of players can't be null");
 	}
+	clock = new MasterClock(delayer);
 	theWorld = new World(clock, delayer);
 	theWorld.setEventDispatcher(subscriptions.getEventDispatcher(theWorld));
 	tracker.setEventDispatcher(subscriptions.getEventDispatcher(tracker));
+	clock.setEventDispatcher(subscriptions.getEventDispatcher(clock));
 	
 	if (controller != null) {
 	    subscriptions.subscribe(theWorld, controller);
@@ -93,13 +95,14 @@ public class Session {
 	}
 	subscriptions.subscribe(theWorld, tracker.getEventsReceiver());
 	subscriptions.subscribe(tracker, new EventHandler());
-	subscriptions.subscribe((EventPublisher)clock, theWorld); //TODO: fix this, don't assume that clock impl is event publisher
+	subscriptions.subscribe(clock, theWorld); //TODO: fix this, don't assume that clock impl is event publisher
 	
 	
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, delayer, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
 	    subscriptions.subscribe(eve, controller);
+	    eve.setEventDispatcher(subscriptions.getEventDispatcher(eve));
 	    theWorld.addFirst(eve);
 	    onePlayer.startRobot(eve);
 

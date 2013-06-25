@@ -23,7 +23,9 @@ import com.github.thehilikus.jrobocom.events.ResultEvent;
 import com.github.thehilikus.jrobocom.events.ResultEvent.Result;
 import com.github.thehilikus.jrobocom.events.RobotAddedEvent;
 import com.github.thehilikus.jrobocom.events.RobotRemovedEvent;
+import com.github.thehilikus.jrobocom.events.TickEvent;
 import com.github.thehilikus.jrobocom.robot.Robot;
+import com.github.thehilikus.jrobocom.timing.api.Clock;
 
 /**
  * Tests for the tracker of the game's status
@@ -132,7 +134,7 @@ public class GameTrackerTest extends AbstractTest {
     @Test
     public void detectEndOfGame() {
 
-	TU.getEventsReceiver().tick(GameSettings.getInstance().MAX_WORLD_AGE + 2);
+	TU.getEventsReceiver().update(new TickEvent(mock(Clock.class), GameSettings.getInstance().MAX_WORLD_AGE + 2));
 
 	verify(dispatcher).fireEvent(argThat(isOfType(Result.DRAW)));
     }

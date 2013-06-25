@@ -1,5 +1,6 @@
 package com.github.thehilikus.jrobocom.timing;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -36,7 +37,7 @@ public class MasterClockTest extends AbstractTest {
      */
     @BeforeMethod
     public void setUpTU() {
-	TU = new MasterClock();
+	TU = new MasterClock(mock(Delayer.class));
 	TU.setPeriod(200);
 
     }

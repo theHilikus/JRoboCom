@@ -34,12 +34,14 @@ import com.github.thehilikus.jrobocom.World;
 import com.github.thehilikus.jrobocom.events.RobotAddedEvent;
 import com.github.thehilikus.jrobocom.events.RobotMovedEvent;
 import com.github.thehilikus.jrobocom.events.RobotRemovedEvent;
+import com.github.thehilikus.jrobocom.events.TickEvent;
 import com.github.thehilikus.jrobocom.player.ScanResult;
 import com.github.thehilikus.jrobocom.player.ScanResult.Found;
 import com.github.thehilikus.jrobocom.robot.Robot;
 import com.github.thehilikus.jrobocom.robot.api.RobotStatusLocal;
 import com.github.thehilikus.jrobocom.timing.Delayer;
 import com.github.thehilikus.jrobocom.timing.MasterClock;
+import com.github.thehilikus.jrobocom.timing.api.Clock;
 
 /**
  * Automatic tests for {@link World}
@@ -63,7 +65,7 @@ public class WorldTest extends AbstractTest {
      */
     @BeforeMethod
     public void setUp() {
-	TU = new World(new MasterClock(), new Delayer());
+	TU = new World(new MasterClock(mock(Delayer.class)), new Delayer());
 	dispatcher = mock(EventDispatcher.class);
 	TU.setEventDispatcher(dispatcher);
 
@@ -435,7 +437,7 @@ public class WorldTest extends AbstractTest {
 	when(mockRobot2.getData().getGeneration()).thenReturn(1);
 	TU.add(mockRobot, mockRobot2);
 
-	TU.tick(1);
+	TU.update(new TickEvent(mock(Clock.class), 1));
 	verify(mockRobot).die(anyString());
 
     }
