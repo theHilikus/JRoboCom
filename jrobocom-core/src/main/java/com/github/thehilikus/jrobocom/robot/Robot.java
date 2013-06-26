@@ -366,6 +366,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    checkIfInterrupt();
 	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
+		throw new BankInterruptedException("Execution interrupted due to old age");
 	    } else {
 		delayer.waitFor(serialNumber, turns);
 		turnsCounter += turns;
