@@ -139,10 +139,12 @@ public class GameTrackerTest extends AbstractTest {
 	verify(dispatcher).fireEvent(argThat(isOfType(Result.DRAW)));
     }
 
+    @SuppressWarnings("javadoc")
     public void detectNewSingleLeader() {
 	// TODO: implement
     }
 
+    @SuppressWarnings("javadoc")
     public void detectNewTieForLeader() {
 	// TODO: implement
     }

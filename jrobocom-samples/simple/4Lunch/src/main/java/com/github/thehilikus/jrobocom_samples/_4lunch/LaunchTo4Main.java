@@ -9,6 +9,9 @@ import com.github.thehilikus.jrobocom.player.Bank;
  */
 public class LaunchTo4Main extends Bank {
 
+    /**
+     * @param pTeamId id assigned by the game
+     */
     public LaunchTo4Main(int pTeamId) {
 	super(pTeamId);
     }

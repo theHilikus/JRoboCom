@@ -38,6 +38,11 @@ public class MasterClock implements Clock, EventPublisher {
      */
     public static final int MIN_PERIOD = 10;
 
+    /**
+     * Main constructor
+     * 
+     * @param pDelayer thread blocker object
+     */
     public MasterClock(Delayer pDelayer) {
 	delayer = pDelayer;
     }

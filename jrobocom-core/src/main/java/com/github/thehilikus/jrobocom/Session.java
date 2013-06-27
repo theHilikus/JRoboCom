@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.thehilikus.events.event_manager.SubscriptionManager;
-import com.github.thehilikus.events.event_manager.api.EventPublisher;
 import com.github.thehilikus.jrobocom.GameTracker.GameStatusListener;
 import com.github.thehilikus.jrobocom.events.GameListener;
 import com.github.thehilikus.jrobocom.events.LeaderChangedEvent;
@@ -17,7 +16,6 @@ import com.github.thehilikus.jrobocom.robot.Robot;
 import com.github.thehilikus.jrobocom.security.GameSecurityManager;
 import com.github.thehilikus.jrobocom.timing.Delayer;
 import com.github.thehilikus.jrobocom.timing.MasterClock;
-import com.github.thehilikus.jrobocom.timing.api.Clock;
 
 /**
  * A game session. It groups all the players, settings and world of a single session
