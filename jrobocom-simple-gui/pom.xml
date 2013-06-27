@@ -9,7 +9,6 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../jrobocom-parent/pom.xml</relativePath>
 	</parent>
-	<groupId>com.github.thehilikus.jrobocom</groupId>
 	<artifactId>jrobocom-simple-gui</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>JRoboCom UI</name>

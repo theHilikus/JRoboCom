@@ -3,10 +3,13 @@
   <parent>
     <groupId>com.github.thehilikus.jrobocom.samples.simple</groupId>
     <artifactId>simple</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   
   <artifactId>bank-jumper</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  
   <name>Bank-jumper</name>
   <description>Simple robot that jumps from bank to bank</description>
+  
 </project>
