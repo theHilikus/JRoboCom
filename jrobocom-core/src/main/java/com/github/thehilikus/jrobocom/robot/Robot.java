@@ -190,8 +190,12 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     @Override
     public void run() {
 	try {
+	    try {
 	    turnsControl.waitTurns(1); // block at the beginning so that all robots start at the
 				       // same time
+	    } catch (BankInterruptedException exc) {
+		log.trace("[run] Interrupted before starting");
+	    }
 	    int oldRunningBank = 0;
 	    assert getData().isEnabled() : "Robot is disabled";
 	    while (alive) {
