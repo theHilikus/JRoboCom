@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.github.thehilikus.jrobocom.samples</groupId>
 		<artifactId>jrobocom-samples</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
+
+	<groupId>com.github.thehilikus.jrobocom.samples.simple</groupId>
 	<artifactId>simple</artifactId>
+
 	<packaging>pom</packaging>
 	<description>Beginner robots to understand the game</description>
 	<name>Simple Robots</name>
+
 	<modules>
 		<module>4Lunch</module>
-    <module>black-jacks</module>
-    <module>bank-jumper</module>
+		<module>black-jacks</module>
+		<module>bank-jumper</module>
 	</modules>
 </project>
