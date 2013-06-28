@@ -39,8 +39,9 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public void changeBank(int newBank) {
-	log.trace("[changeBank] Waiting {} cycles to change to bank {}", Timing.getInstance().BANK_CHANGE, newBank);
-	turnsControl.waitTurns(Timing.getInstance().BANK_CHANGE);
+	int penalty = Timing.getInstance().BANK_CHANGE;
+	log.trace("[changeBank] Waiting {} cycles to change to bank {}", penalty, newBank);
+	turnsControl.waitTurns(penalty, "Change bank");
 	robot.changeBank(newBank);
 
     }
@@ -64,7 +65,7 @@ public final class RobotControlProxy implements RobotAction {
 
 	int totalWait = Math.min(turnsForBanks + turnsForSet, GameSettings.getInstance().MAX_CREATE_WAIT);
 	log.trace("[createRobot] Waiting {} cycles to create Robot {}", totalWait, name);
-	turnsControl.waitTurns(totalWait);
+	turnsControl.waitTurns(totalWait, "Create Robot");
 
 	robot.createRobot(name, pSet, banksCount, pMobile);
     }
@@ -90,8 +91,9 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public void move() {
-	log.trace("[move] Waiting {} cycles", Timing.getInstance().MOVE);
-	turnsControl.waitTurns(Timing.getInstance().MOVE);
+	int penalty = Timing.getInstance().MOVE;
+	log.trace("[move] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Move");
 
 	robot.move();
 
@@ -102,13 +104,13 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public int reverseTransfer(int remoteBankIndex, int localBankIndex) {
-	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}", Timing.getInstance().REMOTE_ACCESS_PENALTY
-		+ Timing.getInstance().TRANSFER_BASE, remoteBankIndex, localBankIndex);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY + Timing.getInstance().TRANSFER_BASE);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY + Timing.getInstance().TRANSFER_BASE;
+	log.trace("[reverseTransfer] Waiting {} cycles to start transfer from {} to {}", penalty, remoteBankIndex, localBankIndex);
+	turnsControl.waitTurns(penalty, "Reverse Transfer Wait 1/2");
 	int bankComplexity = robot.reverseTransfer(localBankIndex, remoteBankIndex);
 
 	log.trace("[reverseTransfer] Waiting {} cycles to complete transfer", Timing.getInstance().TRANSFER_SINGLE * bankComplexity);
-	turnsControl.waitTurns(Timing.getInstance().TRANSFER_SINGLE * bankComplexity);
+	turnsControl.waitTurns(Timing.getInstance().TRANSFER_SINGLE * bankComplexity, "Reverse Transfer Wait 2/2");
 
 	return bankComplexity;
     }
@@ -126,9 +128,9 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public ScanResult scan(int maxDist) {
-	log.trace("[scan] Waiting {} cycles to scan {} fields",
-		Timing.getInstance().SCAN_BASE + Timing.getInstance().SCAN_PER_DIST * (maxDist - 1), maxDist);
-	turnsControl.waitTurns(Timing.getInstance().SCAN_BASE + Timing.getInstance().SCAN_PER_DIST * (maxDist - 1));
+	int penalty = Timing.getInstance().SCAN_BASE + Timing.getInstance().SCAN_PER_DIST * (maxDist - 1);
+	log.trace("[scan] Waiting {} cycles to scan {} fields", penalty, maxDist);
+	turnsControl.waitTurns(penalty, "Scan");
 
 	return robot.scan(maxDist);
     }
@@ -138,13 +140,14 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public int transfer(int localBankIndex, int remoteBankIndex) {
-	log.trace("[transfer] Waiting {} cycles to start transfer from {} to {}", Timing.getInstance().REMOTE_ACCESS_PENALTY
-		+ Timing.getInstance().TRANSFER_BASE, localBankIndex, remoteBankIndex);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY + Timing.getInstance().TRANSFER_BASE);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY + Timing.getInstance().TRANSFER_BASE;
+	log.trace("[transfer] Waiting {} cycles to start transfer from {} to {}", penalty, localBankIndex, remoteBankIndex);
+	turnsControl.waitTurns(penalty, "Transfer Wait 1/2");
 	int bankComplexity = robot.transfer(localBankIndex, remoteBankIndex);
 
-	log.trace("[transfer] Waiting {} cycles to complete transfer", Timing.getInstance().TRANSFER_SINGLE * bankComplexity);
-	turnsControl.waitTurns(Timing.getInstance().TRANSFER_SINGLE * bankComplexity);
+	penalty = Timing.getInstance().TRANSFER_SINGLE * bankComplexity;
+	log.trace("[transfer] Waiting {} cycles to complete transfer", penalty);
+	turnsControl.waitTurns(penalty, "Transfer Wait 2/2");
 
 	return bankComplexity;
     }
@@ -154,8 +157,9 @@ public final class RobotControlProxy implements RobotAction {
      */
     @Override
     public void turn(boolean right) {
-	log.trace("[turn] Waiting {} cycles", Timing.getInstance().TURN);
-	turnsControl.waitTurns(Timing.getInstance().TURN);
+	int penalty = Timing.getInstance().TURN;
+	log.trace("[turn] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Turn");
 	robot.turn(right);
     }
 

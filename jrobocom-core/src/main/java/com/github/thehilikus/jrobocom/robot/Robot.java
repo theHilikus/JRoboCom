@@ -191,7 +191,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     public void run() {
 	try {
 	    try {
-	    turnsControl.waitTurns(1); // block at the beginning so that all robots start at the
+	    turnsControl.waitTurns(1, "Robot starting"); // block at the beginning so that all robots start at the
 				       // same time
 	    } catch (BankInterruptedException exc) {
 		log.trace("[run] Interrupted before starting");
@@ -363,16 +363,17 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	 * Blocks the robot
 	 * 
 	 * @param turns the number of turns to block
+	 * @param reason explanation for the wait
 	 * @throws BankInterruptedException if the execution is interrupted while waiting
 	 */
-	public void waitTurns(int turns) throws BankInterruptedException {
+	public void waitTurns(int turns, String reason) throws BankInterruptedException {
 	    blockIfDisabled();
 	    checkIfInterrupt();
 	    if (turnsCounter > GameSettings.getInstance().MAX_AGE) {
 		die("Old Age");
 		throw new BankInterruptedException("Execution interrupted due to old age");
 	    } else {
-		delayer.waitFor(serialNumber, turns);
+		delayer.waitFor(serialNumber, turns, reason);
 		turnsCounter += turns;
 		blockIfDisabled();
 		checkIfInterrupt();

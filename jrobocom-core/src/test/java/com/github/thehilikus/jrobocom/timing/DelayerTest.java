@@ -34,7 +34,7 @@ public class DelayerTest extends AbstractTest {
 	@Override
 	public Boolean call() throws Exception {
 
-	    TU.waitFor(id, 2);
+	    TU.waitFor(id, 2, "Simulated Robot");
 
 	    return true;
 	}
@@ -75,7 +75,7 @@ public class DelayerTest extends AbstractTest {
 	    @Override
 	    public Boolean call() throws Exception {
 		try {
-		    TU.waitFor(BLOCKED_ID, 2);
+		    TU.waitFor(BLOCKED_ID, 2, "blockMe test");
 		} catch (Exception exc) {
 		    return false;
 		}
@@ -155,7 +155,7 @@ public class DelayerTest extends AbstractTest {
 
 	    @Override
 	    public Boolean call() throws Exception {
-		TU.waitFor(332, 4);
+		TU.waitFor(332, 4, "testMutipleWaitsSameRobot-second");
 		return true;
 	    }
 	};
@@ -168,7 +168,7 @@ public class DelayerTest extends AbstractTest {
 	    Thread.yield();
 	}
 
-	TU.waitFor(332, 2); // should fail since fake second should be blocked already
+	TU.waitFor(332, 2, "testMutipleWaitsSameRobot"); // should fail since fake second should be blocked already
 	try {
 	    secondTask.get();
 	} catch (ExecutionException exc) {
@@ -182,6 +182,6 @@ public class DelayerTest extends AbstractTest {
      */
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testNotRegisteredSignal() {
-	TU.waitFor(123, 3);
+	TU.waitFor(123, 3, "testNotRegisteredSignal");
     }
 }

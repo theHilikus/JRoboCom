@@ -109,10 +109,11 @@ public class RobotData implements RobotStatusLocal, EventPublisher {
 	if (newState > 0) {
 	    owner.activated();
 	}
-
+	
 	if (oldState <= 0 && newState > 0 || oldState > 0 && newState <= 0) {
-	    eventDispatcher.fireEvent(new RobotChangedEvent(owner));
+	    eventDispatcher.fireEvent(new RobotChangedEvent(owner)); 
 	}
+	
 	log.trace("[setActiveState] Changed {} state from {} to {}", owner, oldState, newState);
     }
 

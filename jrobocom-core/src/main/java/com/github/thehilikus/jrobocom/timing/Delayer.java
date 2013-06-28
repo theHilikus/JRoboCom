@@ -87,8 +87,9 @@ public class Delayer {
      * 
      * @param clientId unique ID of the client.
      * @param turns the number of clock ticks to block
+     * @param reason explanation for the wait
      */
-    public void waitFor(Integer clientId, int turns) {
+    public void waitFor(Integer clientId, int turns, String reason) {
 	// for safety, check if we know the robot, otherwise fail
 	if (!registered.contains(clientId)) {
 	    throw new IllegalArgumentException("Unknown robot. All robots must first register with clock");
@@ -106,9 +107,9 @@ public class Delayer {
 
 	// we are in the robot's thread
 
-	log.trace("[waitFor] Blocking {} for {} turns", clientId, turns);
+	log.trace("[waitFor] Blocking {} for {} turns. Reason: {}", clientId, turns, reason);
 	blockMe(turns);
-	log.trace("[waitFor] Unblocked {}", clientId);
+	log.trace("[waitFor] Unblocked {} - {}", clientId, reason);
 
 	synchronized (waitingList) {
 	    waitingList.remove(clientId);

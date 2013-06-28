@@ -35,8 +35,9 @@ public class WorldPlayerProxy implements WorldInfo {
 
     @Override
     public int getBotsCount(int teamId, boolean invert) {
-	log.trace("[getBotsCount] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getBotsCount] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Robots count");
 
 	return world.getBotsCount(teamId, invert);
     }
@@ -46,8 +47,9 @@ public class WorldPlayerProxy implements WorldInfo {
      */
     @Override
     public int getWorldAge() {
-	log.trace("[getWorldAge] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getWorldAge] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get World's Age");
 
 	return world.getAge();
     }

@@ -1,6 +1,7 @@
 package com.github.thehilikus.jrobocom.robot;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
@@ -261,7 +262,7 @@ public class RobotTest extends AbstractTest {
 	    public Void answer(InvocationOnMock invocation) throws Throwable {
 		testToRobot.acquire(); //block until test decides
 		return null;
-	    }}).when(delayer).waitFor(anyInt(), anyInt());
+	    }}).when(delayer).waitFor(anyInt(), anyInt(), anyString());
 	
 	Robot TU = new Robot(mockWorld, delayer, new Bank[] { initial, initial }, "Unit test robot", mockPlayer);
 	TU.setEventDispatcher(mock(EventDispatcher.class));

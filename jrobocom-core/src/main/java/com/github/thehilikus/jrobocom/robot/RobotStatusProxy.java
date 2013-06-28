@@ -42,8 +42,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getActiveState() {
-	log.trace("[getActiveState] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getActiveState] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get State");
 	return this.robot.getData().getActiveState();
     }
 
@@ -52,8 +53,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getRemoteActiveState() {
-	log.trace("[getRemoteActiveState] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getRemoteActiveState] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Neighbour State");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().getActiveState();
@@ -65,8 +67,9 @@ public class RobotStatusProxy implements RobotStatus {
 
     @Override
     public void setRemoteActiveState(int pActiveState) {
-	log.trace("[setRemoteActiveState] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[setRemoteActiveState] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Set Neighbour State");
 	Robot neighbour = world.getNeighbour(robot);
 	if (neighbour != null) {
 	    neighbour.getData().setActiveState(pActiveState);
@@ -79,8 +82,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getGeneration() {
-	log.trace("[getGeneration] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getGeneration] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Generation");
 	return this.robot.getData().getGeneration();
     }
 
@@ -89,8 +93,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getBanksCount() {
-	log.trace("[getBanksCount] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getBanksCount] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Bank count");
 	return this.robot.getBanksCount();
     }
 
@@ -99,8 +104,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getRemoteBanksCount() {
-	log.trace("[getRemoteBanksCount] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getRemoteBanksCount] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Neighbour's Bank count");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getBanksCount();
@@ -115,8 +121,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public InstructionSet getInstructionSet() {
-	log.trace("[getInstructionSet] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getInstructionSet] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Instruction set");
 	return this.robot.getData().getInstructionSet();
     }
 
@@ -125,8 +132,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public InstructionSet getRemoteInstructionSet() {
-	log.trace("[getRemoteInstructionSet] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getRemoteInstructionSet] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Neighbour's Instruction set");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().getInstructionSet();
@@ -140,8 +148,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getTeamId() {
-	log.trace("[getTeamId] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getTeamId] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Team Id");
 	return this.robot.getData().getTeamId();
     }
 
@@ -150,8 +159,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getRemoteTeamId() {
-	log.trace("[getRemoteTeamId] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getRemoteTeamId] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Remote Team Id");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().getTeamId();
@@ -166,8 +176,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isEnabled() {
-	log.trace("[isEnabled] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[isEnabled] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get is enabled");
 	return robot.getData().getActiveState() > 0;
     }
 
@@ -176,8 +187,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isRemoteEnabled() {
-	log.trace("[isRemoteEnabled] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[isRemoteEnabled] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get is Neighbour enabled");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().getActiveState() > 0;
@@ -191,8 +203,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isMobile() {
-	log.trace("[isMobile] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[isMobile] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get is Mobile");
 	return this.robot.getData().isMobile();
     }
 
@@ -201,8 +214,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public boolean isRemoteMobile() {
-	log.trace("[isRemoteMobile] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[isRemoteMobile] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get is Neighbour Mobile");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().isMobile();
@@ -217,8 +231,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getAge() {
-	log.trace("[getAge] Waiting {} cycles", Timing.getInstance().LOCAL_READ);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_READ);
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getAge] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Age");
 	return this.robot.getData().getAge();
     }
 
@@ -227,8 +242,9 @@ public class RobotStatusProxy implements RobotStatus {
      */
     @Override
     public int getRemoteAge() {
-	log.trace("[getRemoteAge] Waiting {} cycles", Timing.getInstance().REMOTE_ACCESS_PENALTY);
-	turnsControl.waitTurns(Timing.getInstance().REMOTE_ACCESS_PENALTY);
+	int penalty = Timing.getInstance().REMOTE_ACCESS_PENALTY;
+	log.trace("[getRemoteAge] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Neighbour's Age");
 	Robot neighbour = world.getNeighbour(this.robot);
 	if (neighbour != null) {
 	    return neighbour.getData().getAge();
@@ -244,8 +260,9 @@ public class RobotStatusProxy implements RobotStatus {
 
     @Override
     public void setActiveState(int pActiveState) {
-	log.trace("[setActiveState] Waiting {} cycles", Timing.getInstance().LOCAL_WRITE);
-	turnsControl.waitTurns(Timing.getInstance().LOCAL_WRITE);
+	int penalty = Timing.getInstance().LOCAL_WRITE;
+	log.trace("[setActiveState] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Set State");
 	this.robot.getData().setActiveState(pActiveState);
 
     }
