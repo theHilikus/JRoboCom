@@ -119,13 +119,15 @@ public class GUI implements ColourInfoProvider {
 	@Override
 	public void update(final RobotChangedEvent evt) {
 	    final Point pos = robots.get(evt.getSource());
-	    SwingUtilities.invokeLater(new Runnable() {
+	    if (pos != null) { // since maybe the robot died
+		SwingUtilities.invokeLater(new Runnable() {
 
-		@Override
-		public void run() {
-		    board.refresh(pos);
-		}
-	    });
+		    @Override
+		    public void run() {
+			board.refresh(pos);
+		    }
+		});
+	    }
 
 	}
 
@@ -166,7 +168,7 @@ public class GUI implements ColourInfoProvider {
 	@Override
 	public void update(PlayerEliminatedEvent event) {
 	    // TODO Auto-generated method stub
-	    
+
 	}
 
     }
@@ -442,7 +444,7 @@ public class GUI implements ColourInfoProvider {
 	    public void run() {
 		board.clear();
 		for (Player player : session.getPlayers()) {
-		    changeCount(player, -GameSettings.getInstance().BOARD_SIZE*2);
+		    changeCount(player, -GameSettings.getInstance().BOARD_SIZE * 2);
 		}
 	    }
 	});
