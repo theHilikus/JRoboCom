@@ -12,7 +12,7 @@ public final class GameSettings {
 
     private static final String PROPERTY_PREFIX = "com.github.thehilikus.jrobocom.settings.";
 
-    private static final GameSettings instance = new GameSettings();
+    private static final GameSettings INSTANCE = new GameSettings();
 
     private GameSettings() {
 	// block instantiation
@@ -24,7 +24,7 @@ public final class GameSettings {
      */
     public final static class Timing {
 
-	private static final Timing theInstance = new Timing();
+	private static final Timing THE_INSTANCE = new Timing();
 
 	private Timing() {
 	    // block instantiation
@@ -38,7 +38,7 @@ public final class GameSettings {
 	    if (sm != null) {
 		sm.checkPermission(new GamePermission("readSettings"));
 	    }
-	    return theInstance;
+	    return THE_INSTANCE;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public final class GameSettings {
 	if (sm != null) {
 	    sm.checkPermission(new GamePermission("readSettings"));
 	}
-	return instance;
+	return INSTANCE;
     }
 
 }

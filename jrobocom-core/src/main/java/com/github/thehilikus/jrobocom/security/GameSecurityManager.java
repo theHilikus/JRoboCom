@@ -103,6 +103,7 @@ public class GameSecurityManager extends SecurityManager {
 
     }
 
+    @SuppressWarnings("unused")
     private boolean isPlayerThread() {
 	return Player.PLAYERS_GROUP.parentOf(getThreadGroup());
     }

@@ -74,6 +74,8 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
      * @param theWorld the world the robots lives in
      * @param delayer the instance that blocks turns
      * @param banksCount number of banks
+     * @param pName this robot's name
+     * @param pOwner the player that created this robot
      */
     private Robot(World theWorld, Delayer delayer, int banksCount, String pName, Player pOwner) {
 	if (theWorld == null || delayer == null || pOwner == null) {
@@ -161,9 +163,8 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	} else {
 	    Robot neighbour = world.getNeighbour(Robot.this);
 	    if (neighbour != null) {
-		Bank localBankCopy;
 		try {
-		    localBankCopy = getBankCopy(localSource, false);
+		    Bank localBankCopy = getBankCopy(localSource, false);
 
 		    if (localBankCopy != null) {
 			boolean success = neighbour.setBank(localBankCopy, remoteDestination, true);
@@ -191,59 +192,75 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     public void run() {
 	try {
 	    try {
-	    turnsControl.waitTurns(1, "Robot starting"); // block at the beginning so that all robots start at the
-				       // same time
+		turnsControl.waitTurns(1, "Robot starting"); // block at the beginning so that all
+							     // robots start at the
+		// same time
 	    } catch (BankInterruptedException exc) {
 		log.trace("[run] Interrupted before starting");
 	    }
-	    int oldRunningBank = 0;
+
 	    assert getData().isEnabled() : "Robot is disabled";
-	    while (alive) {
-		if (runningBank == 0) {
-		    if (banks[0] == null || banks[0].isEmpty()) {
-			die("Data Hunger");
-		    }
-		} else {
-		    if (runningBank > banks.length) {
-			if (runningBank >= GameSettings.getInstance().MAX_BANKS) {
-			    die("Impossible Bank number");
-			} else {
-			    reboot("Bank not found");
-			}
-		    } else if (banks[runningBank] == null || banks[runningBank].isEmpty()) {
-			// tried to execute empty bank, reboot
-			reboot("Tried to execute empty bank");
-		    }
-		}
 
-		// normal execution starts
-		if (alive) {
-		    if (runningBank != oldRunningBank
-			    && banks[runningBank].getTeamId() != banks[oldRunningBank].getTeamId()) {
-			eventDispatcher.fireEvent(new RobotChangedEvent(this));
-		    }
-		    oldRunningBank = runningBank;
-		    try {
-			banks[runningBank].run();
-		    } catch (BankInterruptedException exc) {
-			interrupted = false; // reset flag
-			log.debug("[run] Bank on {} was interrupted ", this);
-			pendingBankChange = true; // to start again on the new bank
-		    }
-
-		    if (!pendingBankChange && alive) {
-			reboot("End of bank");
-		    } else {
-			pendingBankChange = false;
-		    }
-		}
-
-	    }
+	    mainLoop();
 
 	    log.debug("[run] Robot terminated gracefully");
 	} catch (Exception | Error all) {
 	    log.error("[run] Problem running robot " + this, all);
 	    die("Execution Error -- " + all);
+	}
+    }
+
+    private void mainLoop() {
+	int oldRunningBank = 0;
+
+	while (alive) {
+	    if (runningBank == 0) {
+		if (banks[0] == null || banks[0].isEmpty()) {
+		    die("Data Hunger");
+		}
+	    } else {
+		prepareBankExecution();
+	    }
+
+	    // normal execution starts
+	    if (alive) {
+		if (runningBank != oldRunningBank
+			&& banks[runningBank].getTeamId() != banks[oldRunningBank].getTeamId()) {
+		    eventDispatcher.fireEvent(new RobotChangedEvent(this));
+		}
+		oldRunningBank = runningBank;
+		try {
+		    banks[runningBank].run();
+		} catch (BankInterruptedException exc) {
+		    interrupted = false; // reset flag
+		    log.debug("[run] Bank on {} was interrupted ", this);
+		    pendingBankChange = true; // to start again on the new bank
+		}
+
+		finalizeBankExecution();
+	    }
+
+	}
+    }
+
+    private void finalizeBankExecution() {
+	if (!pendingBankChange && alive) {
+	    reboot("End of bank");
+	} else {
+	    pendingBankChange = false;
+	}
+    }
+
+    private void prepareBankExecution() {
+	if (runningBank > banks.length) {
+	    if (runningBank >= GameSettings.getInstance().MAX_BANKS) {
+		die("Impossible Bank number");
+	    } else {
+		reboot("Bank not found");
+	    }
+	} else if (banks[runningBank] == null || banks[runningBank].isEmpty()) {
+	    // tried to execute empty bank, reboot
+	    reboot("Tried to execute empty bank");
 	}
     }
 
@@ -300,17 +317,17 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    return false;
 	} else {
 
-	    if (bank != null) {
+	if (bank != null) {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
-		if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
-		    log.debug("[setBank] Changed running bank of {}", this);
-		    interrupted = true;
-		}
-		banks[localBankIndex] = bank;
-	    } else {
-		banks[localBankIndex] = null;
+	    if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
+		log.debug("[setBank] Changed running bank of {}", this);
+		interrupted = true;
 	    }
+	    banks[localBankIndex] = bank;
+	} else {
+	    banks[localBankIndex] = null;
+	}
 	    return true;
 	}
     }
@@ -319,22 +336,21 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	if (banks == null) {
 	    throw new IllegalArgumentException("Bank doesn't exist");
 	}
+
 	if (localBankIndex >= banks.length || localBankIndex < 0) {
 	    if (!remoteInvoked) {
 		die("Invalid local bank position");
 	    }
-	} else {
-	    if (banks[localBankIndex] != null) {
-		try {
-		    return banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
-			    .newInstance(banks[localBankIndex].getTeamId());
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-			| InvocationTargetException | NoSuchMethodException | SecurityException exc) {
-		    log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);
-
-		}
+	} else if (banks[localBankIndex] != null) {
+	    try {
+		return banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
+			.newInstance(banks[localBankIndex].getTeamId());
+	    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+		    | InvocationTargetException | NoSuchMethodException | SecurityException exc) {
+		log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);
 	    }
 	}
+
 	return null;
     }
 
@@ -593,7 +609,5 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     public String toString() {
 	return '(' + name + ", s/n:" + serialNumber + ')';
     }
-    
-    
 
 }

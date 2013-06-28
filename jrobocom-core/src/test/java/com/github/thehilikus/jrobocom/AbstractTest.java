@@ -20,11 +20,11 @@ public abstract class AbstractTest {
      * 
      * Changes TU debug level to trace
      * 
-     * @param TUClass class of the testing unit
+     * @param testingUnitClass class of the testing unit
      */
-    public AbstractTest(Class<?> TUClass) {
+    public AbstractTest(Class<?> testingUnitClass) {
 	ch.qos.logback.classic.Logger TULog = (ch.qos.logback.classic.Logger) LoggerFactory
-		.getLogger(TUClass);
+		.getLogger(testingUnitClass);
 	TULog.setLevel(Level.TRACE);
     }
 

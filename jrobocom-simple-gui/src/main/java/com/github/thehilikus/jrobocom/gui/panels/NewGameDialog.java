@@ -41,6 +41,8 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 
     private static final String CANCEL = "Cancel";
     private static final String OK = "OK";
+    private static final String ADD = "Add";
+    private static final String REMOVE = "Remove";
     private static final long serialVersionUID = -4348279424477797139L;
     private final JPanel contentPanel = new JPanel();
     private Controller controller = new Controller();
@@ -65,6 +67,8 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 
     private class Controller implements ActionListener, ListSelectionListener, MouseListener {
 
+	
+	
 	private static final String LAST_DIR = "last_dir";
 
 	private final class RobotFilter extends FileFilter {
@@ -97,39 +101,43 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 		    NewGameDialog.this.setVisible(false);
 		    result = JOptionPane.CANCEL_OPTION;
 		    break;
-		case "Add":
-		    Preferences prefs = Preferences.userNodeForPackage(getClass());
-		    String lastDir = prefs.get(LAST_DIR, "");
-
-		    JFileChooser chooser = new JFileChooser(lastDir);
-		    chooser.setFileFilter(new RobotFilter());
-		    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		    chooser.setAccessory(new RobotDetailsPanel(chooser));
-		    if (chooser.showOpenDialog(NewGameDialog.this) == JFileChooser.APPROVE_OPTION) {
-			try {
-			    Player newPlayer = new Player(chooser.getSelectedFile());
-			    teamModel.addElement(newPlayer);
-			    teamsColours.put(newPlayer.getTeamId(), getNextColour());
-			    changeStatus("Added " + chooser.getSelectedFile() + " successfully");
-			    try {
-				prefs.put(LAST_DIR, chooser.getCurrentDirectory().getCanonicalPath());
-			    } catch (IOException exc) {
-				log.error("[actionPerformed] error saving last path", exc);
-			    }
-			    log.info("[actionPerformed] Successfully added robot {}", chooser.getSelectedFile());
-			} catch (PlayerException exc) {
-			    log.error("[actionPerformed] Error creating player", exc);
-			    changeStatus(exc.getMessage());
-			}
-		    }
+		case ADD:
+		    add();
 		    break;
-		case "Remove":
+		case REMOVE:
 		    if (selectedTeams.getSelectedIndex() != -1) {
 			teamModel.remove(selectedTeams.getSelectedIndex());
 		    }
 		    break;
 	    }
 
+	}
+
+	private void add() {
+	    Preferences prefs = Preferences.userNodeForPackage(getClass());
+	    String lastDir = prefs.get(LAST_DIR, "");
+
+	    JFileChooser chooser = new JFileChooser(lastDir);
+	    chooser.setFileFilter(new RobotFilter());
+	    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	    chooser.setAccessory(new RobotDetailsPanel(chooser));
+	    if (chooser.showOpenDialog(NewGameDialog.this) == JFileChooser.APPROVE_OPTION) {
+	    try {
+	        Player newPlayer = new Player(chooser.getSelectedFile());
+	        teamModel.addElement(newPlayer);
+	        teamsColours.put(newPlayer.getTeamId(), getNextColour());
+	        changeStatus("Added " + chooser.getSelectedFile() + " successfully");
+	        try {
+	    	prefs.put(LAST_DIR, chooser.getCurrentDirectory().getCanonicalPath());
+	        } catch (IOException exc) {
+	    	log.error("[actionPerformed] error saving last path", exc);
+	        }
+	        log.info("[actionPerformed] Successfully added robot {}", chooser.getSelectedFile());
+	    } catch (PlayerException exc) {
+	        log.error("[actionPerformed] Error creating player", exc);
+	        changeStatus(exc.getMessage());
+	    }
+	    }
 	}
 
 	@Override
@@ -195,10 +203,10 @@ public class NewGameDialog extends JDialog implements ColourInfoProvider {
 	getContentPane().add(contentPanel, BorderLayout.CENTER);
 
 	JButton btnAddTeam = new JButton("Add...");
-	btnAddTeam.setActionCommand("Add");
+	btnAddTeam.setActionCommand(ADD);
 	btnAddTeam.addActionListener(controller);
 
-	btnRemoveTeam = new JButton("Remove");
+	btnRemoveTeam = new JButton(REMOVE);
 	btnRemoveTeam.setEnabled(false);
 	btnRemoveTeam.addActionListener(controller);
 

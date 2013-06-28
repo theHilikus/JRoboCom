@@ -239,7 +239,7 @@ public class GUI implements ColourInfoProvider {
 
     }
 
-    private class ActionNames {
+    private static class ActionNames {
 	public static final String RELOAD = "Reload";
 	public static final String NEW_GAME = "New Game";
 	public static final String STEP = "Step";

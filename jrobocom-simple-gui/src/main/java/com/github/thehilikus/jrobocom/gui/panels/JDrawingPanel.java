@@ -10,6 +10,7 @@ import java.awt.geom.Ellipse2D;
 
 import javax.swing.JPanel;
 
+import com.github.thehilikus.jrobocom.Direction;
 import com.github.thehilikus.jrobocom.gui.ColourInfoProvider;
 import com.github.thehilikus.jrobocom.gui.visitor.Drawable;
 import com.github.thehilikus.jrobocom.gui.visitor.ModelDrawingVisitor;
@@ -45,26 +46,42 @@ public class JDrawingPanel extends JPanel {
 
     private class Drawer implements ModelDrawingVisitor {
 
+	private int OFFSET = 6;
+	
 	@Override
 	public void draw(Graphics2D g2, Robot robot) {
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-	    // draw body
-	    int OFFSET = 6;
 	    int availableSize = getWidth() - OFFSET;
+	    
+	    Color teamColour = colourProvider.getTeamColour(robot.getOwner().getTeamId());
+	    
+	    drawBody(g2, teamColour, availableSize);
+	    
+	    drawHead(g2, teamColour, robot.getData().getFacing(), availableSize);
+
+	    if (!robot.getData().isEnabled()) {
+		// robot disabled, draw an X
+		drawDisable(g2);
+	    }
+	}
+
+	private void drawBody(Graphics2D g2, Color colour, int availableSize) {
 	    Ellipse2D.Double visualRobot = new Ellipse2D.Double(OFFSET / 2, OFFSET / 2, availableSize,
 		    availableSize);
-	    g2.setColor(colourProvider.getTeamColour(robot.getOwner().getTeamId()));
+	    g2.setColor(colour);
 	    g2.fill(visualRobot);
 	    g2.setColor(Color.BLACK);
 	    g2.draw(visualRobot); // draw outline
+	}
+
+	private void drawHead(Graphics2D g2, Color colour, Direction facing, int availableSize) {
 	    int midPoint = availableSize / 2 + OFFSET / 2;
 	    int headBase = (int) Math.round(availableSize * 0.25);
 	    int baseStart = (int) Math.round(availableSize * 0.20);
 
-	    // draw head
 	    Polygon head = new Polygon();
-	    switch (robot.getData().getFacing()) {
+	    switch (facing) {
 		case NORTH:
 		    head.addPoint(midPoint - headBase / 2, midPoint - baseStart);
 		    head.addPoint(midPoint + headBase / 2, midPoint - baseStart);
@@ -87,21 +104,20 @@ public class JDrawingPanel extends JPanel {
 		    break;
 	    }
 
-	    g2.setColor(colourProvider.getTeamColour(robot.getRunningBankTeamId()));
+	    g2.setColor(colour);
 	    g2.fill(head);
 
 	    g2.setColor(Color.BLACK); // draw outline
 	    g2.draw(head);
+	}
 
-	    if (!robot.getData().isEnabled()) {
-		// robot disabled, draw an X
-		int xBorder = (int) Math.round(getWidth()/8.0);
-		float lineThickness = (float) (getWidth()/9.0);
-		g2.setColor(Color.LIGHT_GRAY);
-		g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		g2.drawLine(xBorder, xBorder, getWidth() - xBorder, getWidth() - xBorder);
-		g2.drawLine(getWidth() - xBorder, xBorder, xBorder, getWidth() - xBorder);
-	    }
+	private void drawDisable(Graphics2D g2) {
+	    int xBorder = (int) Math.round(getWidth()/8.0);
+	    float lineThickness = (float) (getWidth()/9.0);
+	    g2.setColor(Color.LIGHT_GRAY);
+	    g2.setStroke(new BasicStroke(lineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+	    g2.drawLine(xBorder, xBorder, getWidth() - xBorder, getWidth() - xBorder);
+	    g2.drawLine(getWidth() - xBorder, xBorder, xBorder, getWidth() - xBorder);
 	}
     }
 

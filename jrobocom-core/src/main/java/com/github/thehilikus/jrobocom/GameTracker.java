@@ -124,7 +124,7 @@ public class GameTracker implements EventPublisher {
     }
 
     private boolean playerDied(Player owner) {
-	boolean ended = checkEnd();
+	boolean ended = isEnd();
 	if (!ended) {
 	    // generate event
 	    eventDispatcher.fireEvent(new PlayerEliminatedEvent(this, owner));
@@ -171,7 +171,7 @@ public class GameTracker implements EventPublisher {
 	eventDispatcher.fireEvent(new ResultEvent(this, true));
     }
 
-    private boolean checkEnd() {
+    private boolean isEnd() {
 	boolean end = false;
 	if (robotsCount.size() > 1) { // if there are more than 1, otherwise it is "practice"
 	    Player sawOne = null;

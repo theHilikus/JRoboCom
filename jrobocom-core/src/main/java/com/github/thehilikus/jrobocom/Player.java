@@ -51,7 +51,7 @@ public class Player {
     private final int teamId;
 
     private static Set<Integer> teamIds = new HashSet<>();
-    
+
     private boolean leader = false;
 
     /**
@@ -99,8 +99,7 @@ public class Player {
 		String banksList = playerInfo.getProperty("Banks");
 
 		if (banksList == null) {
-		    throw new PlayerException(
-			    "Error loading configuration property: No banks definition found");
+		    throw new PlayerException("Error loading configuration property: No banks definition found");
 		}
 		String[] banksClasses = banksList.split(",");
 
@@ -109,22 +108,16 @@ public class Player {
 
 		banks = loadBanks(loader, banksClasses);
 
-		log.info("[Player] Successfully loaded Player: {}. Banks found = {}", this,
-			banksClasses.length);
+		log.info("[Player] Successfully loaded Player: {}. Banks found = {}", this, banksClasses.length);
 	    }
 
 	} catch (ClassCastException | IOException | ClassNotFoundException | InstantiationException
-		| IllegalAccessException | IllegalArgumentException | InvocationTargetException
-		| SecurityException exc) {
+		| IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException exc) {
 	    throw new PlayerException("Error loading player's code", exc);
 
 	} catch (PlayerException exc) {
 
-	    try {
-		loader.close();
-	    } catch (IOException exc1) {
-		log.error("[Player] problem closing loader", exc1);
-	    }
+	    closeClassLoader();
 	    throw exc;
 
 	}
@@ -152,16 +145,13 @@ public class Player {
 
 	Bank[] playerBanks = new Bank[banksClasses.length];
 	for (int pos = 0; pos < playerBanks.length; pos++) {
-	    Class<? extends Bank> bankClass = (Class<? extends Bank>) pLoader.loadClass(banksClasses[pos]
-		    .trim());
+	    Class<? extends Bank> bankClass = (Class<? extends Bank>) pLoader.loadClass(banksClasses[pos].trim());
 	    try {
 		playerBanks[pos] = bankClass.getDeclaredConstructor(int.class).newInstance(teamId);
 	    } catch (NoSuchMethodException exc) {
-		log.error(
-			"[loadBanks] Player banks need a constructor(int) to be able to assign a teamId to it",
+		log.error("[loadBanks] Player banks need a constructor(int) to be able to assign a teamId to it", exc);
+		throw new PlayerException("Player banks need a constructor(int) to be able to assign a teamId to it",
 			exc);
-		throw new PlayerException(
-			"Player banks need a constructor(int) to be able to assign a teamId to it", exc);
 	    }
 	}
 
@@ -238,6 +228,12 @@ public class Player {
      */
     public void clean() {
 	log.info("[clean] Cleaning player {}", this);
+
+	closeClassLoader();
+
+    }
+
+    private void closeClassLoader() {
 	if (loader != null) {
 	    try {
 		loader.close();
@@ -251,14 +247,14 @@ public class Player {
      * @return the leader
      */
     public boolean isLeader() {
-        return leader;
+	return leader;
     }
 
     /**
      * @param leader true if the player is one of the leaders now
      */
     public void setLeader(boolean leader) {
-        this.leader = leader;
+	this.leader = leader;
     }
 
 }

@@ -39,6 +39,7 @@ public class RobotData implements RobotStatusLocal, EventPublisher {
      * @param pSet instruction set
      * @param pMobile true if the robot is mobile
      * @param pGeneration the number of ancestors this robot has
+     * @param direction starting facing
      */
     RobotData(Robot pOwner, InstructionSet pSet, boolean pMobile, int pGeneration, Direction direction) {
 	if (pOwner == null || pSet == null || pGeneration < 0 || direction == null) {
