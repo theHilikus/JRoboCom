@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/jrobocom-simple-gui/src/main/java/ca/hilikus/jrobocom/gui/GUI.java"/>
+<listEntry value="/jrobocom-simple-gui/src/main/java/com/github/thehilikus/jrobocom/gui/GUI.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>

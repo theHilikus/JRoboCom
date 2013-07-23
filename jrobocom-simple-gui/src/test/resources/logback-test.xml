@@ -14,10 +14,5 @@
 	<root level="DEBUG">
 		<appender-ref ref="Console" />
 	</root>
-	
-	<logger name="com.github.thehilikus.jrobocom.robot.RobotData" level="TRACE"/>
-	<logger name="com.github.thehilikus.jrobocom.robot.Robot" level="TRACE"/>
-	<logger name="com.github.thehilikus.jrobocom.robot.RobotControlProxy" level="TRACE"/>
-	<logger name="com.github.thehilikus.jrobocom.timing.Delayer" level="TRACE"/>
 
 </configuration>
