@@ -3,42 +3,117 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>jrobocom-aggregator</artifactId>
-	<name>The overall aggregator</name>
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+		<relativePath />
+	</parent>
 
-	<packaging>pom</packaging>
+	<groupId>com.github.thehilikus.jrobocom</groupId>
+	<artifactId>jrobocom-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>Parent POM</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
 	<modules>
 		<module>jrobocom-core</module>
-		<module>jrobocom-parent</module>
 		<module>jrobocom-simple-gui</module>
 		<module>jrobocom-samples</module>
 	</modules>
-	<scm>
-		<connection>scm:git:git://github.com/theHilikus/JRoboCom.git</connection>
-		<url>https://github.com/theHilikus/JRoboCom</url>
-		<developerConnection>scm:git:https://github.com/theHilikus/JRoboCom.git</developerConnection>
-	</scm>
+
 	<build>
 		<plugins>
 			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.7</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
 				<configuration>
-					<skip>true</skip>
+					<source>1.7</source>
+					<target>1.7</target>
+					<showDeprecation>true</showDeprecation>
+					<showWarnings>true</showWarnings>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.15</version>
+				<configuration>
+					<forkedProcessTimeoutInSeconds>15</forkedProcessTimeoutInSeconds>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4.1</version><!--$NO-MVN-MAN-VER$ -->
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>1.5</version>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.4.1</version>
-			</plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${basedir}</directory>
+				<includes>
+					<include>LICENSE*</include>
+				</includes>
+			</resource>
+		</resources>
 	</build>
-	<groupId>com.github.thehilikus.jrobocom</groupId>
-	<version>1.0.0-SNAPSHOT</version>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.0.13</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<description>A Java reimplementation of the programming game RoboCom http://robocom.rrobek.de/</description>
+	<url>https://github.com/theHilikus/JRoboCom</url>
+	<issueManagement>
+		<url>https://github.com/theHilikus/JRoboCom/issues</url>
+		<system>Github Issues</system>
+	</issueManagement>
+
+	<developers>
+		<developer>
+			<name>Alejandro Endo</name>
+			<id>theHilikus</id>
+			<timezone>-5</timezone>
+			<email>theHilikus@gmail.com</email>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:git://github.com/theHilikus/JRoboCom.git</connection>
+		<url>https://github.com/theHilikus/JRoboCom</url>
+		<developerConnection>scm:git:https://github.com/theHilikus/JRoboCom.git</developerConnection>
+	</scm>
+	<inceptionYear>2012</inceptionYear>
+	<licenses>
+		<license>
+			<name>GNU General Public License v3.0 or later</name>
+			<url>http://www.spdx.org/licenses/GPL-3.0+</url>
+		</license>
+	</licenses>
+	<packaging>pom</packaging>
+	<prerequisites>
+		<maven>2.2.1</maven>
+	</prerequisites>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>https://hilikus.ci.cloudbees.com/job/JRoboCom/</url>
+	</ciManagement>
 </project>
