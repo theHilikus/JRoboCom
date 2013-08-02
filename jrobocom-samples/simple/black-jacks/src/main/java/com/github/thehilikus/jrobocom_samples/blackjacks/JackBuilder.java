@@ -10,13 +10,6 @@ import com.github.thehilikus.jrobocom.player.InstructionSet;
  */
 public class JackBuilder extends Bank {
 
-    /**
-     * @param pTeamId
-     */
-    public JackBuilder(int pTeamId) {
-	super(pTeamId);
-    }
-
     @Override
     public void run() {
 	while (true) {

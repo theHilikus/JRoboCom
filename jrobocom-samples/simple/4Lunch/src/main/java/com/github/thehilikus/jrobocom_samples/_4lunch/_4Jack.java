@@ -12,13 +12,6 @@ import com.github.thehilikus.jrobocom.player.ScanResult.Found;
  */
 public class _4Jack extends Bank {
 
-    /**
-     * @param pTeamId id assigned by the game
-     */
-    public _4Jack(int pTeamId) {
-	super(pTeamId);
-    }
-
     @Override
     public void run() {
 	control.turn(false);

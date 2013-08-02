@@ -9,13 +9,6 @@ import com.github.thehilikus.jrobocom.player.Bank;
  */
 public class JackMortal extends Bank {
 
-    /**
-     * @param pTeamId
-     */
-    public JackMortal(int pTeamId) {
-	super(pTeamId);
-    }
-
     @Override
     public void run() {
 	control.die("Black Bank");

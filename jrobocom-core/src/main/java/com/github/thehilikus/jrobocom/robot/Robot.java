@@ -343,8 +343,9 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    }
 	} else if (banks[localBankIndex] != null) {
 	    try {
-		return banks[localBankIndex].getClass().getDeclaredConstructor(int.class)
-			.newInstance(banks[localBankIndex].getTeamId());
+		Bank bankCopy = banks[localBankIndex].getClass().getDeclaredConstructor().newInstance();
+		bankCopy.setTeamId(banks[localBankIndex].getTeamId());
+		return bankCopy;
 	    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 		    | InvocationTargetException | NoSuchMethodException | SecurityException exc) {
 		log.error("[getBankCopy] Error instantiating copy of Bank to transfer", exc);

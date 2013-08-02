@@ -53,13 +53,6 @@ public class RobotTest extends AbstractTest {
 	 */
 	public boolean ticking = true;
 
-	/**
-	 * @param pTeamId
-	 */
-	public ChangerBank(int pTeamId) {
-	    super(pTeamId);
-	}
-
 	@Override
 	public void run() throws BankInterruptedException {
 	    control.transfer(1, 0);
@@ -81,13 +74,6 @@ public class RobotTest extends AbstractTest {
 	 */
 	public boolean ticking = true;
 	
-	/**
-	 * @param pTeamId
-	 */
-	public Killer(int pTeamId) {
-	    super(pTeamId);
-	}
-
 	@Override
 	public void run() throws BankInterruptedException {
 	    control.turn(true);
@@ -138,7 +124,7 @@ public class RobotTest extends AbstractTest {
 
 
 	Bank[] dummyBanks = new Bank[3];
-	Bank first = new Bank(311) {
+	Bank first = new Bank() {
 	    int repeat = 0;
 
 	    @Override
@@ -240,7 +226,7 @@ public class RobotTest extends AbstractTest {
     public void testModifyRunningBank() throws InterruptedException {
 	
 	final Semaphore robotToTest = new Semaphore(0); //the robot controls flow
-	Bank initial = new Bank(123) {
+	Bank initial = new Bank() {
 
 	    @Override
 	    public void run() throws BankInterruptedException {
@@ -251,6 +237,7 @@ public class RobotTest extends AbstractTest {
 		fail("Should have changed bank");
 	    }
 	};
+	initial.setTeamId(123);
 
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
@@ -275,7 +262,8 @@ public class RobotTest extends AbstractTest {
 	
 	testToRobot.release();
 	
-	ChangerBank otherBank = new ChangerBank(311);
+	ChangerBank otherBank = new ChangerBank();
+	otherBank.setTeamId(311);
 	
 	robotToTest.acquire();
 	TU.setBank(otherBank, 0, true);
@@ -302,7 +290,7 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
 	Delayer delayer = mock(Delayer.class);
-	ChangerBank bank = new ChangerBank(311);
+	ChangerBank bank = new ChangerBank();
 	Robot TU = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Test Robot", mockPlayer);
 	TU.setEventDispatcher(mock(EventDispatcher.class));
 

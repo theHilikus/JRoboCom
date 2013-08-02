@@ -12,13 +12,6 @@ import com.github.thehilikus.jrobocom.player.ScanResult.Found;
  */
 public class BlackJack extends Bank {
 
-    /**
-     * @param pTeamId
-     */
-    public BlackJack(int pTeamId) {
-	super(pTeamId);
-    }
-
     @Override
     public void run() {
 	while (true) {

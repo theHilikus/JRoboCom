@@ -45,14 +45,6 @@ public class TransferTests extends AbstractTest {
      */
     public static class DummyBank extends Bank {
 
-	/**
-	 * Dummy bank
-	 * @param pTeamId
-	 */
-	public DummyBank(int pTeamId) {
-	    super(pTeamId);
-	}
-
 	@Override
 	public void run() {
 	}
@@ -72,8 +64,16 @@ public class TransferTests extends AbstractTest {
     public void setUp() {
 	mockWorld = mock(World.class);
 	mockDelayer = mock(Delayer.class);
-	banks = new Bank[] { new DummyBank(1), new DummyBank(2), null };
-	banks2 = new Bank[] { new DummyBank(8), new DummyBank(9), null };
+	DummyBank dummyBank = new DummyBank();
+	dummyBank.setTeamId(1);
+	DummyBank dummyBank2 = new DummyBank();
+	dummyBank2.setTeamId(2);
+	DummyBank dummyBank8 = new DummyBank();
+	dummyBank8.setTeamId(8);
+	DummyBank dummyBank9 = new DummyBank();
+	dummyBank9.setTeamId(9);
+	banks = new Bank[] { dummyBank, dummyBank2, null };
+	banks2 = new Bank[] { dummyBank8, dummyBank9, null };
 	mockPlayer = mock(Player.class);
 
 	TU = new Robot(mockWorld, mockDelayer, banks, "Unity-src", mockPlayer);

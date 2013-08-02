@@ -10,13 +10,6 @@ import com.github.thehilikus.jrobocom.player.InstructionSet;
  */
 public class _4Main extends Bank {
 
-    /**
-     * @param pTeamId id assigned by the game
-     */
-    public _4Main(int pTeamId) {
-	super(pTeamId);
-    }
-
     @Override
     public void run() {
 	while (true) {

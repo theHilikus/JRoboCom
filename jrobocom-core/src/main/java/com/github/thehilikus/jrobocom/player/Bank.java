@@ -30,7 +30,7 @@ public abstract class Bank {
     /**
      * the id of the author of the bank
      */
-    private final int teamId;
+    private int teamId = -1;
 
     /**
      * the method that will be executed once the bank becomes active. This is where the player's
@@ -40,16 +40,6 @@ public abstract class Bank {
      */
     public abstract void run() throws BankInterruptedException;
 
-    /**
-     * Constructs a bank
-     * 
-     * @param pTeamId the team ID must be a parameter in the players' banks. This number comes from
-     *            the game and should <u>not</u> be hardcoded by the player. In other words, it
-     *            should be left as a parameter in the constructor of the player's bank
-     */
-    public Bank(int pTeamId) {
-	teamId = pTeamId;
-    }
 
     /**
      * @return the relative cost of a bank's logic
@@ -97,7 +87,24 @@ public abstract class Bank {
      * @return the id of the player that created the bank
      */
     final public int getTeamId() {
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("getTeamId"));
+	}
 	return teamId;
+    }
+
+    /**
+     * Sets the team id. Can only be called once, otherwise it will throw an exception
+     * 
+     * @param newId the team id of the bank
+     */
+    final public void setTeamId(int newId) {
+	if (teamId != -1) {
+	    throw new IllegalStateException("Team Id cannot be modified");
+	}
+	
+	teamId = newId;
     }
 
 }
