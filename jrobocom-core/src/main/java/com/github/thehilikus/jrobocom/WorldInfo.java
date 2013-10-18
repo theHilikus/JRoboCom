@@ -1,7 +1,7 @@
 package com.github.thehilikus.jrobocom;
 
 /**
- * Provides information about the worl
+ * Provides information about the world
  * 
  * @author hilikus
  * 

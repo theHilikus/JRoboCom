@@ -21,7 +21,7 @@ public interface RobotAction {
     public void changeBank(int newBank);
 
     /**
-     * Creates a new, empty robot in the adjacent field in the robot's current direction
+     * Creates a new, empty robot in the adjacent field in the robot's facing direction
      * 
      * @param name robot's friendly name
      * @param pSet the instruction set of the new robot
@@ -31,7 +31,7 @@ public interface RobotAction {
     public void createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile);
 
     /**
-     * kills the robot
+     * Kills the robot
      * 
      * @param reason an optional description of the death
      * @see #die()
@@ -39,7 +39,7 @@ public interface RobotAction {
     public void die(String reason);
 
     /**
-     * Kill the robot with an unspecified reason
+     * Kills the robot with an unspecified reason
      * 
      * @see Robot#die(String)
      */
@@ -51,7 +51,7 @@ public interface RobotAction {
     public void move();
 
     /**
-     * Uploads a local bank and overrides with it what was in the remote bank
+     * Uploads a local bank and overrides with it what is in the remote bank
      * 
      * @param localSource 0-based index of the local bank to upload
      * @param remoteDestination 0-based index of remote bank space to use
@@ -61,11 +61,11 @@ public interface RobotAction {
     public int transfer(int localSource, int remoteDestination);
 
     /**
-     * Downloads a remote bank and overrides with it what was in the local bank
+     * Downloads a remote bank and overrides with it what is in the local bank
      * 
      * @param remoteSource 0-based index of remote bank to download
      * @param localDestination 0-based index of the local bank space to use
-     * @return the complexity of the downloaded bank. 0 if download failed or the transferre bank
+     * @return the complexity of the downloaded bank. 0 if download failed or the transferred bank
      *         was empty
      */
     public int reverseTransfer(int remoteSource, int localDestination);
