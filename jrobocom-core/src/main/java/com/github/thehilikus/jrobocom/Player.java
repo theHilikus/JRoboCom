@@ -113,13 +113,12 @@ public class Player {
 
 	} catch (ClassCastException | IOException | ClassNotFoundException | InstantiationException
 		| IllegalAccessException | IllegalArgumentException | InvocationTargetException | SecurityException exc) {
+	    closeClassLoader();
 	    throw new PlayerException("Error loading player's code", exc);
 
 	} catch (PlayerException exc) {
-
 	    closeClassLoader();
 	    throw exc;
-
 	}
 
     }
@@ -147,12 +146,10 @@ public class Player {
 	for (int pos = 0; pos < playerBanks.length; pos++) {
 	    Class<? extends Bank> bankClass = (Class<? extends Bank>) pLoader.loadClass(banksClasses[pos].trim());
 	    try {
-		playerBanks[pos] = bankClass.getDeclaredConstructor(int.class).newInstance();
+		playerBanks[pos] = bankClass.getDeclaredConstructor().newInstance();
 		playerBanks[pos].setTeamId(teamId);
 	    } catch (NoSuchMethodException exc) {
-		log.error("[loadBanks] Player banks need a constructor(int) to be able to assign a teamId to it", exc);
-		throw new PlayerException("Player banks need a constructor(int) to be able to assign a teamId to it",
-			exc);
+		throw new PlayerException("Player banks need a no-arg constructor", exc);
 	    }
 	}
 

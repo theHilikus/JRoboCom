@@ -79,7 +79,7 @@ public class RobotDetailsPanel extends JPanel implements PropertyChangeListener 
 	    teamDetailsModel.add(2, "Banks count:\t " + potential.getCode().length);
 	    potential.clean(); // since it's for previewing only
 	} catch (PlayerException exc) {
-	    log.debug("[showDetails] Selected file is not a valid player's code");
+	    log.debug("[showDetails] Selected file is not a valid player's code", exc);
 
 	}
 
