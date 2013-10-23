@@ -14,11 +14,13 @@ public enum InstructionSet {
      */
     BASIC, /**
      * The first + second level of instructions:<br>
-     * BASIC + {@link RobotAction#scan(int)}, {@link RobotAction#reverseTransfer(int, int)}
+     * BASIC + {@link RobotAction#scan(int)}, {@link RobotAction#transfer(int, int)},
+     * {@link RobotAction#reverseTransfer(int, int)}
      */
     ADVANCED, /**
      * The complete set of instructions:<br>
-     * BASIC + ADVANCED + {@link RobotAction#createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile)}
+     * BASIC + ADVANCED +
+     * {@link RobotAction#createRobot(String name, InstructionSet pSet, int banksCount, boolean pMobile)}
      */
     SUPER;
 

@@ -44,6 +44,21 @@ public class ScanResult {
     public boolean isEmpty() {
 	return result == Found.EMPTY;
     }
+    
+    /**
+     * @return true if the scan found an enemy
+     */
+    public boolean isEnemy() {
+	return result == Found.ENEMY;
+    }
+    
+    
+    /**
+     * @return true if the scan found a friend
+     */
+    public boolean isFriend() {
+	return result == Found.FRIEND;
+    }
 
     /**
      * @return the distance

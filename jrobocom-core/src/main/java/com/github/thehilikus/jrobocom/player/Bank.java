@@ -103,6 +103,10 @@ public abstract class Bank {
 	if (teamId != -1) {
 	    throw new IllegalStateException("Team Id cannot be modified");
 	}
+	SecurityManager sm = System.getSecurityManager();
+	if (sm != null) {
+	    sm.checkPermission(new GamePermission("setTeamId"));
+	}
 	
 	teamId = newId;
     }
