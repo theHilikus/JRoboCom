@@ -143,12 +143,14 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    Robot neighbour = world.getNeighbour(this);
 	    if (neighbour != null) {
 		Bank remoteBank = neighbour.getBankCopy(remoteSource, true);
-		if (remoteBank != null) {
-		    boolean success = setBank(remoteBank, localDestination, false);
-		    if (success) {
+
+		boolean success = setBank(remoteBank, localDestination, false);
+		if (success) {
+		    if (remoteBank != null) {
 			return remoteBank.getCost();
-		    }
+		    } 
 		}
+
 	    }
 	}
 	return 0;
@@ -166,12 +168,13 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 		try {
 		    Bank localBankCopy = getBankCopy(localSource, false);
 
-		    if (localBankCopy != null) {
-			boolean success = neighbour.setBank(localBankCopy, remoteDestination, true);
-			if (success) {
+		    boolean success = neighbour.setBank(localBankCopy, remoteDestination, true);
+		    if (success) {
+			if (localBankCopy != null) {
 			    return localBankCopy.getCost();
-			}
+			} 
 		    }
+
 		} catch (IllegalArgumentException | SecurityException exc) {
 		    log.error("[transfer] Error instantiating Bank for transfer", exc);
 		}
@@ -309,6 +312,20 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	return banks.length;
     }
 
+    /**
+     * used only for unit testing
+     * 
+     * @param localBankIndex 0-based position of bank to return
+     * @return the bank at the position specified
+     */
+    Bank getBank(int localBankIndex) {
+	if (banks != null) {
+	    return banks[localBankIndex];
+	} else {
+	    return null;
+	}
+    }
+
     boolean setBank(Bank bank, int localBankIndex, boolean remoteInvoked) {
 	if (localBankIndex < 0 || localBankIndex >= banks.length) {
 	    if (!remoteInvoked) {
@@ -317,17 +334,17 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    return false;
 	} else {
 
-	if (bank != null) {
+	    if (bank != null) {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
-	    if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
-		log.debug("[setBank] Changed running bank of {}", this);
-		interrupted = true;
+		if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
+		    log.debug("[setBank] Changed running bank of {}", this);
+		    interrupted = true;
+		}
+
 	    }
-	    banks[localBankIndex] = bank;
-	} else {
-	    banks[localBankIndex] = null;
-	}
+	    banks[localBankIndex] = bank; // it's ok if bank is null
+
 	    return true;
 	}
     }

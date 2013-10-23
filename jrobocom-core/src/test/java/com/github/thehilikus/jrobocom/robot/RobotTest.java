@@ -73,13 +73,13 @@ public class RobotTest extends AbstractTest {
 	 * controls the clock's ticking
 	 */
 	public boolean ticking = true;
-	
+
 	@Override
 	public void run() throws BankInterruptedException {
 	    control.turn(true);
 	    ticking = false;
 	    control.die("normal death");
-	    
+
 	}
 
     }
@@ -122,7 +122,6 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	Delayer mockDelayer = mock(Delayer.class);
 
-
 	Bank[] dummyBanks = new Bank[3];
 	Bank first = new Bank() {
 	    int repeat = 0;
@@ -142,7 +141,7 @@ public class RobotTest extends AbstractTest {
 	first = spy(first);
 	dummyBanks[0] = first;
 
-	Bank second = mock(Bank.class); //empty bank after which the robot jumps to bank 0
+	Bank second = mock(Bank.class); // empty bank after which the robot jumps to bank 0
 	dummyBanks[2] = second;
 
 	Player pla = mock(Player.class);
@@ -224,8 +223,8 @@ public class RobotTest extends AbstractTest {
      */
     @Test(timeOut = 1000)
     public void testModifyRunningBank() throws InterruptedException {
-	
-	final Semaphore robotToTest = new Semaphore(0); //the robot controls flow
+
+	final Semaphore robotToTest = new Semaphore(0); // the robot controls flow
 	Bank initial = new Bank() {
 
 	    @Override
@@ -241,43 +240,41 @@ public class RobotTest extends AbstractTest {
 
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
-	
-	final Semaphore testToRobot = new Semaphore(0); //the test controls flow
+
+	final Semaphore testToRobot = new Semaphore(0); // the test controls flow
 	Delayer delayer = mock(Delayer.class);
 	doAnswer(new Answer<Void>() {
 	    @Override
 	    public Void answer(InvocationOnMock invocation) throws Throwable {
-		testToRobot.acquire(); //block until test decides
+		testToRobot.acquire(); // block until test decides
 		return null;
-	    }}).when(delayer).waitFor(anyInt(), anyInt(), anyString());
-	
+	    }
+	}).when(delayer).waitFor(anyInt(), anyInt(), anyString());
+
 	Robot TU = new Robot(mockWorld, delayer, new Bank[] { initial, initial }, "Unit test robot", mockPlayer);
 	TU.setEventDispatcher(mock(EventDispatcher.class));
 	Direction original = TU.getData().getFacing();
 	TU.getData().setActiveState(1);
-	
+
 	Thread firstThread = new Thread(TU);
 	firstThread.start();
-	
-	
+
 	testToRobot.release();
-	
+
 	ChangerBank otherBank = new ChangerBank();
 	otherBank.setTeamId(311);
-	
+
 	robotToTest.acquire();
 	TU.setBank(otherBank, 0, true);
-	
-	
+
 	testToRobot.release();
 	testToRobot.release();
 	testToRobot.release();
-	
+
 	firstThread.join();
-	
+
 	assertNotEquals(original, TU.getData().getFacing(), "Overwriten bank didn't execute");
-	
-	
+
     }
 
     /**
@@ -294,16 +291,96 @@ public class RobotTest extends AbstractTest {
 	Robot TU = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Test Robot", mockPlayer);
 	TU.setEventDispatcher(mock(EventDispatcher.class));
 
-	//clock.addListener(TU.getSerialNumber());
+	// clock.addListener(TU.getSerialNumber());
 	TU.getData().setActiveState(1);
 
 	Thread thread = new Thread(TU);
 	thread.start();
-	
+
 	while (bank.ticking) {
 	    delayer.tick();
 	}
 
 	thread.join();
+    }
+
+    /**
+     * Tests transferring a normal bank
+     */
+    @Test
+    public void testTransfer() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	ChangerBank bank = new ChangerBank();
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Test Robot", mockPlayer);
+
+	Robot target = new Robot(mockWorld, delayer, new Bank[] { null, null }, "Robot target", mockPlayer);
+
+	when(mockWorld.getNeighbour(TU)).thenReturn(target);
+
+	TU.transfer(0, 1);
+
+	assertEquals(target.getBank(1).getClass(), bank.getClass(), "Target bank not transferred");
+    }
+
+    /**
+     * Tests whether transferring a null bank succeeds
+     */
+    @Test(dependsOnMethods = { "testTransfer" })
+    public void testNullTransfer() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	ChangerBank bank = new ChangerBank();
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Test Robot", mockPlayer);
+
+	Robot target = new Robot(mockWorld, delayer, new Bank[] { null, bank }, "Robot target", mockPlayer);
+
+	when(mockWorld.getNeighbour(TU)).thenReturn(target);
+
+	TU.transfer(1, 1);
+
+	assertNull(target.getBank(1), "Target bank not transferred");
+    }
+
+    /**
+     * Tests reverse transferring a normal bank
+     */
+    @Test
+    public void testReverseTransfer() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	ChangerBank bank = new ChangerBank();
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { null, null }, "Test Robot", mockPlayer);
+
+	Robot target = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Robot target", mockPlayer);
+
+	when(mockWorld.getNeighbour(TU)).thenReturn(target);
+
+	TU.reverseTransfer(0, 1);
+
+	assertEquals(TU.getBank(1).getClass(), bank.getClass(), "Target bank not transferred");
+    }
+
+    /**
+     * Tests whether reverse transferring a null bank succeeds
+     */
+    @Test
+    public void testReverseNullTransfer() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	ChangerBank bank = new ChangerBank();
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { null, bank }, "Test Robot", mockPlayer);
+
+	Robot target = new Robot(mockWorld, delayer, new Bank[] { bank, null }, "Robot target", mockPlayer);
+
+	when(mockWorld.getNeighbour(TU)).thenReturn(target);
+
+	TU.reverseTransfer(1, 1);
+
+	assertNull(TU.getBank(1), "Target bank not transferred");
     }
 }
