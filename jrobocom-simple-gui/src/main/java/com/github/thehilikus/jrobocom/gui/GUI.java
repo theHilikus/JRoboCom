@@ -211,7 +211,7 @@ public class GUI implements ColourInfoProvider {
 		case ActionNames.RELOAD:
 		    return "Starts a new session with the same robots";
 		case ActionNames.STEP:
-		    return "Executes a single clock of the Master clock";
+		    return "Executes a single tick of the Master clock";
 		case ActionNames.START:
 		    return "Starts or stops the Master clock";
 	    }
