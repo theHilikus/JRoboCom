@@ -19,12 +19,12 @@ import com.github.thehilikus.jrobocom.timing.Delayer;
  * 
  * @author hilikus
  */
-public class MoveTests extends AbstractTest {
+public class MoveTest extends AbstractTest {
 
     /**
      * 
      */
-    public MoveTests() {
+    public MoveTest() {
 	super(Robot.class);
     }
 

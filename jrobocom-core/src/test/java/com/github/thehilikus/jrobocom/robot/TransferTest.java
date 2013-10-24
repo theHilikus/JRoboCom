@@ -28,7 +28,7 @@ import com.github.thehilikus.jrobocom.timing.Delayer;
  * 
  * @author hilikus
  */
-public class TransferTests extends AbstractTest {
+public class TransferTest extends AbstractTest {
 
     private World mockWorld;
     private Delayer mockDelayer;
@@ -53,7 +53,7 @@ public class TransferTests extends AbstractTest {
 
     /**
      */
-    public TransferTests() {
+    public TransferTest() {
 	super(Robot.class);
     }
 
@@ -168,7 +168,7 @@ public class TransferTests extends AbstractTest {
     public void transferBadInstructionSet() {
 	when(mockWorld.add(eq(TU), isA(Robot.class))).thenReturn(true);
 	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
-	Robot child = CreateRobotTests.getChild(mockWorld, TU);
+	Robot child = CreateRobotTest.getChild(mockWorld, TU);
 
 	assertEquals(child.transfer(1, 1), 0, "Invalid transfer succeeded");
 	assertFalse(child.isAlive(), "Robot should have died");
