@@ -1,5 +1,6 @@
 package com.github.thehilikus.jrobocom.robot;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -14,6 +15,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -28,10 +30,13 @@ import com.github.thehilikus.jrobocom.AbstractTest;
 import com.github.thehilikus.jrobocom.Direction;
 import com.github.thehilikus.jrobocom.Player;
 import com.github.thehilikus.jrobocom.World;
+import com.github.thehilikus.jrobocom.WorldInfo;
 import com.github.thehilikus.jrobocom.exceptions.BankInterruptedException;
 import com.github.thehilikus.jrobocom.player.Bank;
 import com.github.thehilikus.jrobocom.player.InstructionSet;
 import com.github.thehilikus.jrobocom.robot.Robot;
+import com.github.thehilikus.jrobocom.robot.api.RobotAction;
+import com.github.thehilikus.jrobocom.robot.api.RobotStatus;
 import com.github.thehilikus.jrobocom.timing.Delayer;
 
 /**
@@ -382,5 +387,36 @@ public class RobotTest extends AbstractTest {
 	TU.reverseTransfer(1, 1);
 
 	assertNull(TU.getBank(1), "Target bank not transferred");
+    }
+
+    /**
+     * Tests setting a normal bank
+     */
+    @Test
+    public void testSetBank() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { null, null }, "Test Robot", mockPlayer);
+
+	Bank testBank = mock(Bank.class);
+	TU.setBank(testBank, 0, false);
+
+	assertSame(TU.getBank(0), testBank, "Bank set was the same");
+    }
+    
+    /**
+     * Tests setting a null bank
+     */
+    @Test
+    public void testSetNullBank() {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
+	Delayer delayer = mock(Delayer.class);
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { new ChangerBank(), new ChangerBank() }, "Test Robot", mockPlayer);
+
+	TU.setBank(null, 0, false);
+
+	assertNull(TU.getBank(0), "Bank set was the same");
     }
 }
