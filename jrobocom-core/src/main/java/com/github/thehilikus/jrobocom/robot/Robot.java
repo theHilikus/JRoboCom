@@ -148,7 +148,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 		if (success) {
 		    if (remoteBank != null) {
 			return remoteBank.getCost();
-		    } 
+		    }
 		}
 
 	    }
@@ -172,7 +172,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 		    if (success) {
 			if (localBankCopy != null) {
 			    return localBankCopy.getCost();
-			} 
+			}
 		    }
 
 		} catch (IllegalArgumentException | SecurityException exc) {
@@ -337,11 +337,10 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 	    if (bank != null) {
 		bank.plugInterfaces(new RobotControlProxy(this), new RobotStatusProxy(this, world),
 			new WorldPlayerProxy(turnsControl, world));
-		if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
-		    log.debug("[setBank] Changed running bank of {}", this);
-		    interrupted = true;
-		}
-
+	    }
+	    if (localBankIndex == runningBank && alive && banks[localBankIndex] != null) {
+		log.debug("[setBank] Changed running bank of {}", this);
+		interrupted = true;
 	    }
 	    banks[localBankIndex] = bank; // it's ok if bank is null
 
@@ -407,6 +406,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 		die("Old Age");
 		throw new BankInterruptedException("Execution interrupted due to old age");
 	    } else {
+		//FIXME: we can't wait while the robot is disabled
 		delayer.waitFor(serialNumber, turns, reason);
 		turnsCounter += turns;
 		blockIfDisabled();
