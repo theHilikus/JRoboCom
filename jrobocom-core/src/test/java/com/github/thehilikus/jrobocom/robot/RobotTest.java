@@ -1,6 +1,5 @@
 package com.github.thehilikus.jrobocom.robot;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -30,13 +29,9 @@ import com.github.thehilikus.jrobocom.AbstractTest;
 import com.github.thehilikus.jrobocom.Direction;
 import com.github.thehilikus.jrobocom.Player;
 import com.github.thehilikus.jrobocom.World;
-import com.github.thehilikus.jrobocom.WorldInfo;
 import com.github.thehilikus.jrobocom.exceptions.BankInterruptedException;
 import com.github.thehilikus.jrobocom.player.Bank;
 import com.github.thehilikus.jrobocom.player.InstructionSet;
-import com.github.thehilikus.jrobocom.robot.Robot;
-import com.github.thehilikus.jrobocom.robot.api.RobotAction;
-import com.github.thehilikus.jrobocom.robot.api.RobotStatus;
 import com.github.thehilikus.jrobocom.timing.Delayer;
 
 /**
@@ -215,7 +210,7 @@ public class RobotTest extends AbstractTest {
 
 	when(mockWorld.add(eq(TU), isA(Robot.class))).thenReturn(true);
 	TU.createRobot("Unit-test", InstructionSet.BASIC, 1, false);
-	Robot child = CreateRobotTests.getChild(mockWorld, TU);
+	Robot child = CreateRobotTest.getChild(mockWorld, TU);
 
 	assertNull(child.scan(3), "Should have been null");
 	assertFalse(child.isAlive(), "Should have died due to scan");

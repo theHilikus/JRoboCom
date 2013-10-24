@@ -32,7 +32,7 @@ import com.github.thehilikus.jrobocom.timing.Delayer;
  * 
  * @author hilikus
  */
-public class CreateRobotTests extends AbstractTest {
+public class CreateRobotTest extends AbstractTest {
 
     private Robot TU;
     private World mockWorld;
@@ -43,7 +43,7 @@ public class CreateRobotTests extends AbstractTest {
     /**
      * 
      */
-    public CreateRobotTests() {
+    public CreateRobotTest() {
 	super(Robot.class);
     }
 
