@@ -32,11 +32,17 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.github.thehilikus.events</groupId>
 			<artifactId>event-manager</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.5</version>
 		</dependency>
 	</dependencies>
 	
