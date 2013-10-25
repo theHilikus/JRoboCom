@@ -91,7 +91,7 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
     }
 
     /**
-     * Creates first robot in the world. It is the responsibility of the caller to start the robot's
+     * Creates first robot of each team. It is the responsibility of the caller to start the robot's
      * thread
      * 
      * @param theWorld the environment of the robot
@@ -186,6 +186,13 @@ public class Robot implements RobotAction, Runnable, EventPublisher {
 
     private static int getNextSerialNumber() {
 	return lastSerial++;
+    }
+    
+    /**
+     * resets the serial number counter
+     */
+    public static void resetSerialNumber() {
+	lastSerial = 0;
     }
 
     /**

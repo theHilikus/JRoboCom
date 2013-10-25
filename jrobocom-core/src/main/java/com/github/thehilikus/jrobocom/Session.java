@@ -95,7 +95,7 @@ public class Session {
 	subscriptions.subscribe(tracker, new EventHandler());
 	subscriptions.subscribe(clock, theWorld); //TODO: fix this, don't assume that clock impl is event publisher
 	
-	
+	Robot.resetSerialNumber();
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, delayer, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
