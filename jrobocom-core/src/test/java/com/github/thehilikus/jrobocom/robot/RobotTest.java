@@ -1,10 +1,7 @@
 package com.github.thehilikus.jrobocom.robot;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -20,8 +17,6 @@ import static org.testng.Assert.fail;
 
 import java.util.concurrent.Semaphore;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
 
 import com.github.thehilikus.events.event_manager.api.EventDispatcher;
@@ -110,7 +105,6 @@ public class RobotTest extends AbstractTest {
 	assertEquals(TU.getData().getAge(), 0, "Age at construction is 0");
 	assertEquals(TU.getData().getInstructionSet(), InstructionSet.SUPER,
 		"First robot should have all instruction sets");
-	assertEquals(TU.getSerialNumber(), 0, "Serial number of first robot should be 0");
 	assertTrue(TU.isAlive(), "New robot is alive");
     }
 
@@ -223,54 +217,51 @@ public class RobotTest extends AbstractTest {
      */
     @Test(timeOut = 1000)
     public void testModifyRunningBank() throws InterruptedException {
+	World mockWorld = mock(World.class);
+	Player mockPlayer = mock(Player.class);
 
-	final Semaphore robotToTest = new Semaphore(0); // the robot controls flow
+	Delayer mockDelayer = mock(Delayer.class);
+
+	final Semaphore mutex = new Semaphore(0);
+
 	Bank initial = new Bank() {
 
 	    @Override
 	    public void run() throws BankInterruptedException {
-		robotToTest.release();
-		control.scan(3);
-		control.scan(3);
-		control.scan(3);
+
+		synchronized (mutex) {
+		    mutex.release();
+		    try {
+			mutex.wait(); // block to allow main thread to swap bank
+			control.scan(); // this is necessary so that the robot realizes it was
+					// interrupted
+		    } catch (InterruptedException exc) {
+			System.out.println("error");
+		    }
+		}
 		fail("Should have changed bank");
 	    }
 	};
 	initial.setTeamId(123);
 
-	World mockWorld = mock(World.class);
-	Player mockPlayer = mock(Player.class);
-
-	final Semaphore testToRobot = new Semaphore(0); // the test controls flow
-	Delayer delayer = mock(Delayer.class);
-	doAnswer(new Answer<Void>() {
-	    @Override
-	    public Void answer(InvocationOnMock invocation) throws Throwable {
-		testToRobot.acquire(); // block until test decides
-		return null;
-	    }
-	}).when(delayer).waitFor(anyInt(), anyInt(), anyString());
-
-	Robot TU = new Robot(mockWorld, delayer, new Bank[] { initial, initial }, "Unit test robot", mockPlayer);
+	Robot TU = new Robot(mockWorld, mockDelayer, new Bank[] { initial, initial }, "Unit test robot", mockPlayer);
 	TU.setEventDispatcher(mock(EventDispatcher.class));
-	Direction original = TU.getData().getFacing();
 	TU.getData().setActiveState(1);
+
+	Direction original = TU.getData().getFacing();
 
 	Thread firstThread = new Thread(TU);
 	firstThread.start();
+	mutex.acquire(); // block until bank executes
 
-	testToRobot.release();
-
-	ChangerBank otherBank = new ChangerBank();
-	otherBank.setTeamId(311);
-
-	robotToTest.acquire();
-	TU.setBank(otherBank, 0, true);
-
-	testToRobot.release();
-	testToRobot.release();
-	testToRobot.release();
-
+	synchronized (mutex) {
+	    // robot is now wait()ing
+	    ChangerBank otherBank = new ChangerBank(); // this bank changes the direction of the
+						       // robot
+	    otherBank.setTeamId(311);
+	    TU.setBank(otherBank, 0, true); // change the running bank
+	    mutex.notifyAll();
+	}
 	firstThread.join();
 
 	assertNotEquals(original, TU.getData().getFacing(), "Overwriten bank didn't execute");
@@ -399,7 +390,7 @@ public class RobotTest extends AbstractTest {
 
 	assertSame(TU.getBank(0), testBank, "Bank set was the same");
     }
-    
+
     /**
      * Tests setting a null bank
      */
@@ -408,7 +399,8 @@ public class RobotTest extends AbstractTest {
 	World mockWorld = mock(World.class);
 	Player mockPlayer = mock(Player.class);
 	Delayer delayer = mock(Delayer.class);
-	Robot TU = new Robot(mockWorld, delayer, new Bank[] { new ChangerBank(), new ChangerBank() }, "Test Robot", mockPlayer);
+	Robot TU = new Robot(mockWorld, delayer, new Bank[] { new ChangerBank(), new ChangerBank() }, "Test Robot",
+		mockPlayer);
 
 	TU.setBank(null, 0, false);
 
