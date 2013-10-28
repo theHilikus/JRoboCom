@@ -20,5 +20,6 @@
 		<module>black-jacks</module>
 		<module>bank-jumper</module>
 		<module>megamorf</module>
+		<module>metamorf</module>
 	</modules>
 </project>
