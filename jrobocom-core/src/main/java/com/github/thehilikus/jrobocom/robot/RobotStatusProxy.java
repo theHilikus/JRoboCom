@@ -255,6 +255,9 @@ public class RobotStatusProxy implements RobotStatus {
 
     @Override
     public Direction getFacing() {
+	int penalty = Timing.getInstance().LOCAL_READ;
+	log.trace("[getAge] Waiting {} cycles", penalty);
+	turnsControl.waitTurns(penalty, "Get Direction");
 	return robot.getData().getFacing();
     }
 
