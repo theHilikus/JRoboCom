@@ -4,16 +4,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -21,8 +17,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.github.thehilikus.jrobocom.exceptions.BankInterruptedException;
 import com.github.thehilikus.jrobocom.exceptions.PlayerException;
@@ -48,8 +44,19 @@ public class PlayerTest {
 
 	@Override
 	public void run() throws BankInterruptedException {
-	    // TODO Auto-generated method stub
 
+	}
+
+    }
+
+    private static class BadBank extends Bank {
+
+	@SuppressWarnings("unused")
+	public BadBank(int someArgument, String other) {
+	}
+
+	@Override
+	public void run() throws BankInterruptedException {
 	}
 
     }
@@ -77,6 +84,16 @@ public class PlayerTest {
     }
 
     /**
+     * Tests when there is no property file
+     * 
+     * @throws PlayerException
+     */
+    @Test(expectedExceptions = PlayerException.class)
+    public void constructNoPropertiesFile() throws PlayerException {
+	TU = new Player(loader, "unit/test/path");
+    }
+
+    /**
      * Tests when the property file has no "banks" entry
      * 
      * @throws PlayerException
@@ -100,10 +117,38 @@ public class PlayerTest {
      * Tests when the bank referenced does not exist
      * 
      * @throws PlayerException
+     * @throws ClassNotFoundException
+     */
+    @SuppressWarnings("unchecked")
+    @Test(expectedExceptions = PlayerException.class)
+    public void constructMissingBanks() throws PlayerException, ClassNotFoundException {
+	final String CLASS = "crazy.class.Bank";
+	when(loader.loadClass(CLASS)).thenThrow(ClassNotFoundException.class);
+	simulatePropertiesFile("Author=unit-tester\nBanks=" + CLASS);
+    }
+
+    /**
+     * Tests loading a class from the player that doesn't extend Bank
+     * 
+     * @throws ClassNotFoundException
+     * @throws PlayerException
      */
     @Test(expectedExceptions = PlayerException.class)
-    public void constructMissingBanks() throws PlayerException {
-	simulatePropertiesFile("Author=unit-tester\nBanks=crazy.class.Bank");
+    public void constructBankNotBank() throws ClassNotFoundException, PlayerException {
+	doReturn(PlayerTest.class).when(loader).loadClass("someBank"); // any non-Bank class
+	simulatePropertiesFile("Banks=someBank");
+    }
+
+    /**
+     * Tests loading a bank that doesn't have the expected constructor
+     * 
+     * @throws ClassNotFoundException
+     * @throws PlayerException
+     */
+    @Test(expectedExceptions = PlayerException.class)
+    public void constructBankNoConstructor() throws ClassNotFoundException, PlayerException {
+	doReturn(BadBank.class).when(loader).loadClass("someBank");
+	simulatePropertiesFile("Banks=someBank");
     }
 
     /**
@@ -114,11 +159,10 @@ public class PlayerTest {
      */
     @Test
     public void constructGoodBanks() throws ClassNotFoundException, PlayerException {
-	doReturn(DummyBank.class).when(loader).loadClass("com.github.thehilikus.jrobocom.PlayerTest.DummyBank");
+	doReturn(DummyBank.class).when(loader).loadClass("DummyBank");
 	final String AUTHOR = "unit-tester";
 	final String TEAM = "the_testers";
-	simulatePropertiesFile("Author=" + AUTHOR + "\nBanks=com.github.thehilikus.jrobocom.PlayerTest.DummyBank\n"
-		+ "Team=" + TEAM);
+	simulatePropertiesFile("Author=" + AUTHOR + "\nBanks=DummyBank\n" + "Team=" + TEAM);
 	assertEquals(TU.getAuthor(), AUTHOR, "Author's name was not loaded");
 	assertEquals(TU.getTeamName(), TEAM, "Team's name was not loaded");
 
@@ -149,5 +193,21 @@ public class PlayerTest {
 	when(mockRobot.getData()).thenReturn(mockData);
 	TU.startRobot(mockRobot);
 	verify(mockData).setActiveState(Player.DEFAULT_START_STATE);
+    }
+
+    /**
+     * Tests cleaning the Player
+     * 
+     * @throws IOException
+     */
+    @Test(dependsOnMethods = "constructGoodBanks")
+    public void clean() throws IOException {
+	try {
+	    simulatePropertiesFile("Author=unit-tester");
+	} catch (PlayerException exc) {
+	    // do nothing
+	}
+	TU.clean();
+	verify(loader).close();
     }
 }

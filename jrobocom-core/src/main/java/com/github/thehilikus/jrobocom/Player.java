@@ -168,9 +168,6 @@ public class Player {
 	for (int pos = 0; pos < playerBanks.length; pos++) {
 	    String className = banksClasses[pos].trim();
 	    Class<? extends Bank> bankClass = (Class<? extends Bank>) pLoader.loadClass(className);
-	    if (bankClass == null) {
-		throw new PlayerException("Bank class \"" + className + "\" was not found in jar");
-	    }
 	    try {
 		playerBanks[pos] = bankClass.getDeclaredConstructor().newInstance();
 		playerBanks[pos].setTeamId(teamId);
