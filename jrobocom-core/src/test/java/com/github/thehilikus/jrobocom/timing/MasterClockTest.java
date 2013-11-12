@@ -71,6 +71,17 @@ public class MasterClockTest extends AbstractTest {
      */
     @Test
     public void testChangePeriod() {
-	//TODO:
+	// TODO:
+    }
+
+    /**
+     * Tests cleaning a running clock
+     */
+    @Test
+    public void testClean() {
+	TU.start();
+	assertTrue(TU.isRunning(), "Start failed");
+	TU.clean();
+	assertFalse(TU.isRunning(), "Should have stopped");
     }
 }
