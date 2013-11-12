@@ -12,7 +12,7 @@ import com.github.thehilikus.jrobocom.security.GamePermission;
 
 /**
  * Confirms each operation with a SecurityManager
- *
+ * 
  * @author hilikus
  */
 public class SecureSubscriptionManager extends SubscriptionManager {
@@ -23,6 +23,9 @@ public class SecureSubscriptionManager extends SubscriptionManager {
     @Override
     public <T extends EventListener> void subscribe(EventPublisher source, T listener) {
 	checkPermission();
+	if (source == null || listener == null) {
+	    throw new IllegalArgumentException("Parameters cannot be null");
+	}
 	super.subscribe(source, listener);
     }
 
@@ -32,6 +35,9 @@ public class SecureSubscriptionManager extends SubscriptionManager {
     @Override
     public <T extends EventListener> void unsubscribe(EventPublisher source, T listener) {
 	checkPermission();
+	if (source == null || listener == null) {
+	    throw new IllegalArgumentException("Parameters cannot be null");
+	}
 	super.unsubscribe(source, listener);
     }
 
@@ -41,6 +47,9 @@ public class SecureSubscriptionManager extends SubscriptionManager {
     @Override
     public EventDispatcher getEventDispatcher(EventPublisher source) {
 	checkPermission();
+	if (source == null) {
+	    throw new IllegalArgumentException("Parameter cannot be null");
+	}
 	return super.getEventDispatcher(source);
     }
 
@@ -50,6 +59,9 @@ public class SecureSubscriptionManager extends SubscriptionManager {
     @Override
     public void unsubscribeAll(EventPublisher source) {
 	checkPermission();
+	if (source == null) {
+	    throw new IllegalArgumentException("Parameter cannot be null");
+	}
 	super.unsubscribeAll(source);
     }
 

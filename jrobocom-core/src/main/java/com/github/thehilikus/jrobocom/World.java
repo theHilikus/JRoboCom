@@ -35,7 +35,7 @@ public class World implements ClockListener, EventPublisher {
     private Map<Robot, Point> robotsPosition = new ConcurrentHashMap<>();
 
     private Clock clock;
-    
+
     private Delayer delayer;
 
     private static final Logger log = LoggerFactory.getLogger(World.class);
@@ -169,7 +169,7 @@ public class World implements ClockListener, EventPublisher {
      */
     public void clean() {
 	log.debug("[clean] Cleaning world");
-	
+
 	for (Robot bot : robotsPosition.keySet()) {
 	    bot.die("World cleanup");
 	    if (robotsPosition.containsKey(bot)) {
@@ -254,14 +254,14 @@ public class World implements ClockListener, EventPublisher {
 	return getRobotAt(neighbourPos);
 
     }
-    
+
     private Robot getRobotAt(Point position) {
 	for (Entry<Robot, Point> robotInfo : robotsPosition.entrySet()) {
 	    if (robotInfo.getValue().equals(position)) {
 		return robotInfo.getKey();
 	    }
 	}
-	//nothing found
+	// nothing found
 	return null;
     }
 
@@ -322,7 +322,6 @@ public class World implements ClockListener, EventPublisher {
 	return (int) clock.getCycles();
     }
 
-
     /**
      * @return the generator
      */
@@ -362,7 +361,7 @@ public class World implements ClockListener, EventPublisher {
     @Override
     public void setEventDispatcher(EventDispatcher dispatcher) {
 	eventDispatcher = dispatcher;
-	
+
     }
 
 }

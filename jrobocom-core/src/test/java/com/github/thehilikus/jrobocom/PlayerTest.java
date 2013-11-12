@@ -31,7 +31,14 @@ import com.github.thehilikus.jrobocom.robot.api.RobotStatusLocal;
  * 
  * @author hilikus
  */
-public class PlayerTest {
+public class PlayerTest extends AbstractTest {
+
+    /**
+     */
+    public PlayerTest() {
+	super(Player.class);
+    }
+
     private Player TU;
     private URLClassLoader loader;
     private static final Logger log = LoggerFactory.getLogger(PlayerTest.class);

@@ -1,6 +1,8 @@
 package com.github.thehilikus.jrobocom;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,32 +80,51 @@ public class Session {
      * @param controller receiver of <u>all</u> game events. Can be null
      */
     public Session(List<Player> pPlayers, GameListener controller) {
-	if (pPlayers == null) {
-	    throw new IllegalArgumentException("List of players can't be null");
-	}
+	validatePlayers(pPlayers);
+
 	clock = new MasterClock(delayer);
 	theWorld = new World(clock, delayer);
 	theWorld.setEventDispatcher(subscriptions.getEventDispatcher(theWorld));
 	tracker.setEventDispatcher(subscriptions.getEventDispatcher(tracker));
 	clock.setEventDispatcher(subscriptions.getEventDispatcher(clock));
-	
+
 	if (controller != null) {
 	    subscriptions.subscribe(theWorld, controller);
 	    subscriptions.subscribe(tracker, controller);
 	}
 	subscriptions.subscribe(theWorld, tracker.getEventsReceiver());
 	subscriptions.subscribe(tracker, new EventHandler());
-	subscriptions.subscribe(clock, theWorld); //TODO: fix this, don't assume that clock impl is event publisher
-	
+	subscriptions.subscribe(clock, theWorld); // TODO: fix this, don't assume that clock impl is
+						  // event publisher
+
 	Robot.resetSerialNumber();
 	players = pPlayers;
 	for (Player onePlayer : pPlayers) {
 	    Robot eve = new Robot(theWorld, delayer, onePlayer.getCode(), onePlayer.getTeamName() + " Alpha", onePlayer);
-	    subscriptions.subscribe(eve, controller);
+	    if (controller != null) {
+		subscriptions.subscribe(eve, controller);
+	    }
 	    eve.setEventDispatcher(subscriptions.getEventDispatcher(eve));
 	    theWorld.addFirst(eve);
 	    onePlayer.startRobot(eve);
 
+	}
+    }
+
+    private static void validatePlayers(List<Player> pPlayers) {
+	if (pPlayers == null || pPlayers.isEmpty()) {
+	    throw new IllegalArgumentException("List of players can't be null or empty");
+	}
+
+	Set<Integer> dups = new HashSet<>();
+	for (Player player : pPlayers) {
+	    if (player.isLeader()) {
+		throw new IllegalArgumentException("Player can't start as leader");
+	    }
+	    dups.add(player.getTeamId());
+	}
+	if (dups.size() != pPlayers.size()) {
+	    throw new IllegalArgumentException("Duplicate Players detected: " + pPlayers);
 	}
     }
 
@@ -192,6 +213,6 @@ public class Session {
 
 	clock.clean();
 	theWorld.clean();
-
+	subscriptions.unsubscribeAll();
     }
 }
