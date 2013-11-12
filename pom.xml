@@ -71,7 +71,7 @@
 					<instrumentation>
 						<excludes>
 							<exclude>com/github/thehilikus/jrobocom_samples/**/*.class</exclude>
-							<exclude>com/github/thehilikus/jrobocom/gui/GUI.class</exclude>
+							<exclude>com/github/thehilikus/jrobocom/gui/GUI*.class</exclude>
 							<exclude>com/github/thehilikus/jrobocom/gui/panels/**/*.class</exclude>
 						</excludes>
 					</instrumentation>
